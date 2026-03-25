@@ -1030,29 +1030,30 @@ def atualizar_tabela_viva():
             live.update(table)
             time.sleep(1)
 
-# --- EXECUÇÃO ---
+# --- EXECUÇÃO DO 2FA E ABERTURA DOS CLONES ---
 
-# 1. Cria o "fio" que atualiza a tabela no fundo
-t = threading.Thread(target=atualizar_tabela_viva)
-t.daemon = True # Faz o fio fechar se o programa principal fechar
-t.start()
-
-# 2. Pergunta se quer abrir os clones enquanto vê os códigos
-console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green]")
-
-acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para o Menu: ").strip()
+# 1. Pergunta ANTES de iniciar a tabela infinita
+console.print("\n[bold yellow]🚀 MENU DE INICIALIZAÇÃO[/bold yellow]")
+acao = input("[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ver apenas os códigos: ").strip()
 
 if acao == "1":
     clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
     for p_clone in clones_lista:
         console.print(f"[cyan]>> Abrindo: {p_clone}[/cyan]")
         os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
-        time.sleep(8)
-    
-    console.print("\n[bold green][✓] Todos os clones foram chamados![/bold green]")
-    input("\n[!] Após logar em todos, aperte [ ENTER ] para carregar o Menu...")
+        time.sleep(5)
+    console.print("[bold green]✓ Clones chamados! Carregando códigos 2FA...[/bold green]")
 
-# 3. Finaliza a tabela e segue para o resto do script
+# 2. Inicia o "fio" (Thread) que atualiza a tabela no fundo
+t = threading.Thread(target=atualizar_tabela_viva)
+t.daemon = True
+t.start()
+
+# 3. Trava aqui para você ver os códigos enquanto faz o login
+console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green] (Tabela acima)")
+input("\n>>> APÓS LOGAR EM TUDO, APERTE [ ENTER ] PARA IR AO MENU PRINCIPAL...")
+
+# 4. Finaliza a atualização e segue para o resto do bot
 parar_atualizacao = True
 time.sleep(0.5)
 

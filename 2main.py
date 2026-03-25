@@ -1951,44 +1951,10 @@ def main():
             input("\033[1;32mPress Enter to return...\033[0m")
             continue
             
-        elif setup_type == "9":
-            console = Console()
-            console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
-        
-        # Pergunta a Key específica
-            key_usuario = input("[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
-        
-        # Monta o conteúdo do arquivo com quebra de linha real
-            conteudo = f'script_key = "{key_usuario}"\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
-        
-            caminho_pasta = "/storage/emulated/0/Delta/Autoexecute"
-            arquivo_final = f"{caminho_pasta}/script.txt"
-        
-            try:
-            # 1. Cria a pasta e dá permissão total via sistema
-                os.system(f"mkdir -p {caminho_pasta} && chmod 777 {caminho_pasta}")
-            
-            # 2. Escreve o arquivo txt
-                with open(arquivo_final, "w") as f:
-                    f.write(conteudo)
-            
-            # 3. Garante que o arquivo também tenha permissão para o Delta ler
-                    os.system(f"chmod 777 {arquivo_final}")
-                
-                    console.print(f"\n[bold green][✓][/bold green] Arquivo [white]script.txt[/white] configurado!")
-                    console.print(f"[bold green][✓][/bold green] Local: [cyan]{arquivo_final}[/cyan]")
-                    console.print("[yellow]DICA: Agora é só abrir os Clones e o farm iniciará sozinho.[/yellow]")
-            except Exception as e:
-                console.print(f"\n[bold red][!] Erro ao criar arquivo: {e}[/bold red]")
-            
-                input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
-            continue
-
         elif setup_type == "10":
             console = Console()
-            console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO SEGURO)...[/bold yellow]")
+            console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO AUTOMÁTICO)...[/bold yellow]")
         
-        # Seus pacotes reais identificados
             clones = [
                 "ywcw.lnu.exhl",
                 "ub.wnjb.bzz",
@@ -1998,15 +1964,16 @@ def main():
         
             for pacote in clones:
                 console.print(f"[cyan]>> Abrindo clone: {pacote}...[/cyan]")
-            
-            # O comando 'monkey' abre a atividade principal de qualquer pacote
-                comando = f"su -c 'monkey -p {pacote} -c android.intent.category.LAUNCHER 1'"
+            # O comando 'monkey' abre o app sem travar o script
+                comando = f"su -c 'monkey -p {pacote} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'"
                 os.system(comando)
-            
-            # Delay de 5 segundos para o Cloud Phone processar a abertura sem travar
+          
+            # Espera 5 segundos e já pula para o próximo clone automaticamente
                 time.sleep(5)
             
-                console.print("\n[bold green][✓] Comandos enviados com sucesso![/bold green]")
+                console.print("\n[bold green][✓] Todos os 4 clones foram chamados![/bold green]")
+                console.print("[yellow]DICA: Agora volte para a opção [ 0 ] para ver os códigos 2FA.[/yellow]")
+        # O input fica APENAS aqui no final, depois que todos abriram
                 input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
             continue
 

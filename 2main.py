@@ -1770,47 +1770,40 @@ def main():
                     input("\033[1;32mPress Enter to return...\033[0m")
                     continue
 
-                # --- BLINDAGEM TOTAL VMOS (NUNCA MAIS DÁ NONETYPE) ---
+                # --- BLINDAGEM TOTAL VMOS (RESOLVE O NONETYPE) ---
                 print("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): \033[0m", end="")
                 ans = input()
             
-                # Se o VMOS falhar e mandar None ou vazio, forçamos "30" imediatamente
+                # Se vier vazio, assume 30 minutos
                 if not ans:
                     force_rejoin_input = "30"
                 else:
-                    # Só rodamos funções de texto se tivermos certeza que existe texto
                     force_rejoin_input = str(ans).strip().lower()
 
-                # Lógica de decisão (Convertendo para segundos como no original)
+                # Lógica de decisão e conversão para segundos
                 if force_rejoin_input == 'q' or force_rejoin_input == '':
                     force_rejoin_interval = float('inf')
                 else:
                     try:
-                        # int() * 60 transforma minutos em segundos
+                        # int(float()) converte minutos para segundos (como no seu original)
                         force_rejoin_interval = int(float(force_rejoin_input)) * 60
                     except (ValueError, TypeError):
-                        # Se vier algo errado do VMOS, assume 30 min (1800s)
-                        force_rejoin_interval = 1800
-            # --- FIM DA BLINDAGEM ---
-                    
-            # --- FIM DA CORREÇÃO ---
+                        force_rejoin_interval = 1800 # 30 min padrão
 
-                codex_bypass_active = True
-                
-                if force_rejoin_interval <= 0:
+                if force_rejoin_interval != float('inf') and force_rejoin_interval <= 0:
                     print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")
                     input("\033[1;32mPress Enter to return...\033[0m")
                     continue
 
                 codex_bypass_active = True
-
-                if codex_bypass_active and codex_bypass_enabled:
+                if codex_bypass_enabled:
                     print("\033[1;32m[ Shouko.dev ] - Codex bypass enabled.\033[0m")
 
                 RobloxManager.kill_roblox_processes()
                 time.sleep(5)
                 Runner.launch_package_sequentially(server_links)
                 globals()["is_runner_ez"] = True
+                # --- FIM DA LIMPEZA ---
 
                 for task in [
                     (Runner.monitor_presence, (server_links, stop_main_event)),

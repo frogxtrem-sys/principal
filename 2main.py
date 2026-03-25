@@ -1756,38 +1756,37 @@ def main():
         codex_bypass_active = False
 
         if setup_type == "1":
-            try:
-                server_links = FileManager.load_server_links()
-                globals()["accounts"] = FileManager.load_accounts()
-                globals()["_uid_"] = {}
+        try:
+            server_links = FileManager.load_server_links()
+            globals()["accounts"] = FileManager.load_accounts()
+            globals()["_uid_"] = {}
 
-                if not globals()["accounts"]:
-                    print("\033[1;31m[ Shouko.dev ] - No user IDs set up.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
-                    continue
-                if not server_links:
-                    print("\033[1;31m[ Shouko.dev ] - No game ID or server link set up.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
-                    continue
+            if not globals()["accounts"]:
+                print("\033[1;31m[ Shouko.dev ] - No user IDs set up.\033[0m")
+                input("\033[1;32mPress Enter to return...\033[0m")
+                continue
+            if not server_links:
+                print("\033[1;31m[ Shouko.dev ] - No game ID or server link set up.\033[0m")
+                input("\033[1;32mPress Enter to return...\033[0m")
+                continue
 
-                # Pede o intervalo
-        
-                temp_input = input("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): ")
-        
-                # Se vier vazio ou None, define como '30' por padrão
-                if not temp_input:
-                    force_rejoin_input = "30"
-                else:
-                    force_rejoin_input = str(temp_input).lower()
+            # --- CORREÇÃO DO INPUT (BLINDAGEM VMOS) ---
+            ans = input("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): ")
+            
+            # Se for None ou vazio (Enter direto), assume "30"
+            force_rejoin_input = str(ans or "30").lower().strip()
 
-                # Define o intervalo numérico
-                if force_rejoin_input == 'q':
-                    force_rejoin_interval = float('inf')
-                else:
-                    try:
-                        force_rejoin_interval = float(force_rejoin_input)
-                    except ValueError:
-                        force_rejoin_interval = 30.0 # Se digitar letra errada, assume 30
+            if force_rejoin_input == 'q':
+                force_rejoin_interval = float('inf')
+            else:
+                try:
+                    force_rejoin_interval = float(force_rejoin_input)
+                except ValueError:
+                    force_rejoin_interval = 30.0
+            # --- FIM DA CORREÇÃO ---
+
+            codex_bypass_active = True
+                
                 if force_rejoin_interval <= 0:
                     print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")
                     input("\033[1;32mPress Enter to return...\033[0m")

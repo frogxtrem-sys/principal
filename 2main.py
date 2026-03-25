@@ -1986,9 +1986,9 @@ def main():
 
         elif setup_type == "10":
             console = Console()
-            console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES...[/bold yellow]")
+            console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO SEGURO)...[/bold yellow]")
         
-        # Lista dos seus pacotes (Ajuste se os nomes dos seus clones forem diferentes!)
+        # Seus pacotes reais identificados
             clones = [
                 "ywcw.lnu.exhl",
                 "ub.wnjb.bzz",
@@ -1997,16 +1997,16 @@ def main():
             ]
         
             for pacote in clones:
-                console.print(f"[cyan]>> Abrindo {pacote}...[/cyan]")
-            # O comando 'am start' abre o app. O '-n' indica a atividade principal.
-            # O nome da Activity do Roblox geralmente é o .Activity ou .RobloxActivity
-                comando = f"su -c 'am start -n {pacote}/com.roblox.client.Activity'"
+                console.print(f"[cyan]>> Abrindo clone: {pacote}...[/cyan]")
+            
+            # O comando 'monkey' abre a atividade principal de qualquer pacote
+                comando = f"su -c 'monkey -p {pacote} -c android.intent.category.LAUNCHER 1'"
                 os.system(comando)
             
-            # Um pequeno delay de 3 segundos entre um e outro para o Cloud Phone não travar
-                time.sleep(3)
+            # Delay de 5 segundos para o Cloud Phone processar a abertura sem travar
+                time.sleep(5)
             
-                console.print("\n[bold green][✓] Todos os clones foram chamados![/bold green]")
+                console.print("\n[bold green][✓] Comandos enviados com sucesso![/bold green]")
                 input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
             continue
 

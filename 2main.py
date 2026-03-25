@@ -1951,26 +1951,37 @@ def main():
             continue
             
         elif setup_type == "9":
-            console = Console()
-            console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
+        console = Console()
+        console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
         
-        # Pergunta a Key específica desse Cloud
-            key_usuario = input("[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
+        # Pergunta a Key específica
+        key_usuario = input("[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
         
-        # Monta o texto (o \\n serve para o Python não quebrar a linha antes da hora)
-            conteudo = f'script_key = "{key_usuario}"\\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
+        # Monta o conteúdo do arquivo com quebra de linha real
+        conteudo = f'script_key = "{key_usuario}"\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
         
-        # Pasta única que você mencionou
-            path = "/data/data/com.roblox.client/files/delta/autoexec"
+        caminho_pasta = "/storage/emulated/0/Delta/Autoexecute"
+        arquivo_final = f"{caminho_pasta}/script.txt"
         
-        # O comando que cria o arquivo .txt via ROOT (usando echo -e para o \n funcionar)
-            comando = f"su -c 'mkdir -p {path} && echo -e \"{conteudo}\" > {path}/script.txt && chmod 777 {path}/script.txt'"
-        
-            os.system(comando)
-        
-            console.print(f"\n[bold green][✓][/bold green] Arquivo [white]script.txt[/white] criado com sucesso!")
-            input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
-            continue
+        try:
+            # 1. Cria a pasta e dá permissão total via sistema
+            os.system(f"mkdir -p {caminho_pasta} && chmod 777 {caminho_pasta}")
+            
+            # 2. Escreve o arquivo txt
+            with open(arquivo_final, "w") as f:
+                f.write(conteudo)
+            
+            # 3. Garante que o arquivo também tenha permissão para o Delta ler
+            os.system(f"chmod 777 {arquivo_final}")
+                
+            console.print(f"\n[bold green][✓][/bold green] Arquivo [white]script.txt[/white] configurado!")
+            console.print(f"[bold green][✓][/bold green] Local: [cyan]{arquivo_final}[/cyan]")
+            console.print("[yellow]DICA: Agora é só abrir os Clones e o farm iniciará sozinho.[/yellow]")
+        except Exception as e:
+            console.print(f"\n[bold red][!] Erro ao criar arquivo: {e}[/bold red]")
+            
+        input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
+        continue
 
 if __name__ == "__main__":
     try:

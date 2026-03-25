@@ -1,4 +1,5 @@
 import threading
+import pyotp
 import time
 import json
 import requests
@@ -993,7 +994,43 @@ class WebhookManager:
         except Exception as e:
             print(f"\033[1;31m[ Shouko.dev ] - Error during webhook setup: {e}\033[0m")
             Utilities.log_error(f"Error during webhook setup: {e}")
+            
+console = Console()
 
+# --- COLOQUE AS SUAS 4 CHAVES AQUI ---
+contas_roblox = {
+    "CONTA 01": "WDVIZJ7HSPZUVP7UWVESIB6YC4",
+    "CONTA 02": "WFTXXSZIGPAUXGHQSREGYHLB6Y",
+    "CONTA 03": "MJ5LFHYBDGIUZJKUA3UUGZJSOQ",
+    "CONTA 04": "5DS46QIDSXOUPKV4PUCQBRGURQ"
+}
+
+def gerar_tabela():
+    os.system('clear') # Limpa a tela para ficar organizado
+    table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA")
+    table.add_column("Conta", style="cyan")
+    table.add_column("Código de 6 Dígitos", style="bold yellow", justify="center")
+    table.add_column("Expira em", style="red")
+
+    for nome, secret in contas_roblox.items():
+        try:
+            totp = pyotp.TOTP(secret.replace(" ", "")) # Remove espaços se houver
+            codigo = totp.now()
+            tempo_restante = 30 - (int(time.time()) % 30)
+            table.add_row(nome, f"{codigo[0:3]} {codigo[3:6]}", f"{tempo_restante}s")
+        except:
+            table.add_row(nome, "ERRO NA CHAVE", "--")
+
+    console.print(table)
+    console.print("\n[bold green]DICA:[/bold green] Use esses códigos no login do Roblox!")
+    console.print("[white]O código muda a cada 30 segundos.[/white]")
+
+# Mostra a tabela
+gerar_tabela()
+
+# --- O RESTO DO SEU CÓDIGO DO BOT COMEÇA AQUI ---
+print("\nIniciando o bot...")
+# Exemplo: import seu_modulo_do_bot
 class UIManager:
     @staticmethod
     def print_header(version):

@@ -1758,52 +1758,34 @@ def main():
         if setup_type == "1":
             try:
                 server_links = FileManager.load_server_links()
-                globals()["accounts"] = FileManager.load_accounts()
-                globals()["_uid_"] = {}
-
-                if not globals()["accounts"]:
-                    print("\033[1;31m[ Shouko.dev ] - No user IDs set up.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
-                    continue
-                if not server_links:
-                    print("\033[1;31m[ Shouko.dev ] - No game ID or server link set up.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
+                accounts = FileManager.load_accounts()
+                if not accounts or not server_links:
+                    print("\033[1;31m[ Shouko.dev ] - Missing Accounts or Server Links.\033[0m")
+                    time.sleep(2)
                     continue
 
-                # --- BLINDAGEM TOTAL VMOS (RESOLVE O NONETYPE) ---
+                # Pergunta simples sem firula para o VMOS não travar
                 print("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): \033[0m", end="")
                 ans = input()
             
-                # Se vier vazio, assume 30 minutos
-                if not ans:
-                    force_rejoin_input = "30"
-                else:
-                    force_rejoin_input = str(ans).strip().lower()
+                # Se o usuário não digitar nada, assume 30
+                val = str(ans or "30").strip().lower()
 
-                # Lógica de decisão e conversão para segundos
-                if force_rejoin_input == 'q' or force_rejoin_input == '':
+                if val == 'q':
                     force_rejoin_interval = float('inf')
                 else:
                     try:
-                        # int(float()) converte minutos para segundos (como no seu original)
-                        force_rejoin_interval = int(float(force_rejoin_input)) * 60
-                    except (ValueError, TypeError):
-                        force_rejoin_interval = 1800 # 30 min padrão
-
-                if force_rejoin_interval != float('inf') and force_rejoin_interval <= 0:
-                    print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
-                    continue
+                        # Converte para segundos (minutos * 60)
+                        force_rejoin_interval = int(float(val)) * 60
+                    except:
+                        force_rejoin_interval = 1800
 
                 codex_bypass_active = True
-                if codex_bypass_enabled:
-                    print("\033[1;32m[ Shouko.dev ] - Codex bypass enabled.\033[0m")
-
                 RobloxManager.kill_roblox_processes()
                 time.sleep(5)
                 Runner.launch_package_sequentially(server_links)
                 globals()["is_runner_ez"] = True
-                # --- FIM DA LIMPEZA ---
+                    # --- FIM DA LIMPEZA ---
 
                 for task in [
                     (Runner.monitor_presence, (server_links, stop_main_event)),

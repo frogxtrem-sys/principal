@@ -1638,8 +1638,19 @@ class Runner:
     @staticmethod
     def force_rejoin(server_links, interval, stop_event):
         start_time = time.time()
-        force_rejoin_interval = float(interval) if interval and isinstance(interval, (int, float)) else float('inf')
+        
+        # Correção aqui: Garante que 'interval' seja uma string válida antes de converter
+        try:
+            if interval is None or str(interval).strip() == "":
+                force_rejoin_interval = 1800.0 # Padrão de 30 minutos se vier vazio
+            else:
+                force_rejoin_interval = float(interval) * 60 # Converte minutos para segundos
+        except (ValueError, TypeError):
+            force_rejoin_interval = 1800.0
+            
         while not stop_event.is_set():
+            # ... resto do seu código ...
+            
             if force_rejoin_interval != float('inf') and (time.time() - start_time >= force_rejoin_interval):
                 print("\033[1;31m[ Shouko.dev ] - Force killing Roblox processes due to time limit.\033[0m")
                 RobloxManager.kill_roblox_processes()

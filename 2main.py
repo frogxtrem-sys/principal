@@ -1038,10 +1038,10 @@ t.daemon = True # Faz o fio fechar se o programa principal fechar
 t.start()
 
 # 2. Pergunta se quer abrir os clones enquanto vê os códigos
-        console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green]")
+console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green]")
         
         # Cria um mini-menu ali mesmo na tela do 2FA
-        acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ir ao Menu: ").strip()
+acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ir ao Menu: ").strip()
 
         if acao == "1":
             clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]

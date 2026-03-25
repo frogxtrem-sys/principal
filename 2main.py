@@ -1781,14 +1781,16 @@ def main():
                     # Só rodamos funções de texto se tivermos certeza que existe texto
                     force_rejoin_input = str(ans).strip().lower()
 
-                # Lógica de decisão
+                # Lógica de decisão (Convertendo para segundos como no original)
                 if force_rejoin_input == 'q' or force_rejoin_input == '':
                     force_rejoin_interval = float('inf')
                 else:
                     try:
-                        force_rejoin_interval = float(force_rejoin_input)
-                    except ValueError:
-                        force_rejoin_interval = 30.0
+                        # int() * 60 transforma minutos em segundos
+                        force_rejoin_interval = int(float(force_rejoin_input)) * 60
+                    except (ValueError, TypeError):
+                        # Se vier algo errado do VMOS, assume 30 min (1800s)
+                        force_rejoin_interval = 1800
             # --- FIM DA BLINDAGEM ---
                     
             # --- FIM DA CORREÇÃO ---

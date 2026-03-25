@@ -1010,22 +1010,36 @@ contas_roblox = {
 parar_atualizacao = False
 
 def atualizar_tabela_viva():
+    # Dicionário com as senhas para facilitar a visualização
+    senhas_roblox = {
+        "saitama0000432": "saitama32",
+        "saitama0000436": "saitama36",
+        "saitama0000437": "saitama37",
+        "saitama0000447": "saitama47"
+    }
+
     with Live(refresh_per_second=1, screen=False) as live:
         while not parar_atualizacao:
-            table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA (ROBLOX)")
-            table.add_column("Conta", style="cyan")
-            table.add_column("Código Atual", style="bold yellow", justify="center")
+            table = Table(title="🔐 GERADOR DE ACESSO RÁPIDO (ROBLOX)")
+            table.add_column("Conta/User", style="cyan", no_wrap=True)
+            table.add_column("Senha", style="magenta")
+            table.add_column("Código 2FA", style="bold yellow", justify="center")
             table.add_column("Expira em", style="red")
 
             for nome, secret in contas_roblox.items():
                 try:
+                    # Gera o código 2FA
                     totp = pyotp.TOTP(secret.replace(" ", ""))
                     codigo = totp.now()
                     tempo_restante = 30 - (int(time.time()) % 30)
                     codigo_formatado = f"{codigo[0:3]} {codigo[3:6]}"
-                    table.add_row(nome, codigo_formatado, f"{tempo_restante}s")
+                    
+                    # Pega a senha do dicionário acima
+                    senha = senhas_roblox.get(nome, "N/A")
+                    
+                    table.add_row(nome, senha, codigo_formatado, f"{tempo_restante}s")
                 except:
-                    table.add_row(nome, "ERRO NA CHAVE", "--")
+                    table.add_row(nome, "???", "ERRO NA CHAVE", "--")
 
             live.update(table)
             time.sleep(1)

@@ -1056,8 +1056,8 @@ acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER
                       input("\n[!] Após logar em todos, aperte [ ENTER ] para carregar o Menu Principal...")
 
         # 3. Finaliza a tabela e segue para o resto do script (Menu Azul)
-        parar_atualizacao = True
-        time.sleep(0.5)
+                  parar_atualizacao = True
+                  time.sleep(0.5)
 
 # --- O RESTO DO SEU CÓDIGO DO BOT COMEÇA AQUI ---
 print("\nIniciando o bot...")

@@ -1009,23 +1009,23 @@ contas_roblox = {
 # Variável para controlar quando parar a atualização
 parar_atualizacao = False
 
-def atualizar_tabela_viva():
-    with Live(refresh_per_second=1, screen=False) as live:
-        while not parar_atualizacao:
-            table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA (ROBLOX)")
-            table.add_column("Conta", style="cyan")
-            table.add_column("Código Atual", style="bold yellow", justify="center")
-            table.add_column("Expira em", style="red")
+    def atualizar_tabela_viva():
+        with Live(refresh_per_second=1, screen=False) as live:
+            while not parar_atualizacao:
+                table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA (ROBLOX)")
+                table.add_column("Conta", style="cyan")
+                table.add_column("Código Atual", style="bold yellow", justify="center")
+                table.add_column("Expira em", style="red")
 
-            for nome, secret in contas_roblox.items():
-                try:
-                    totp = pyotp.TOTP(secret.replace(" ", ""))
-                    codigo = totp.now()
-                    tempo_restante = 30 - (int(time.time()) % 30)
-                    codigo_formatado = f"{codigo[0:3]} {codigo[3:6]}"
-                    table.add_row(nome, codigo_formatado, f"{tempo_restante}s")
-                except:
-                    table.add_row(nome, "ERRO NA CHAVE", "--")
+                for nome, secret in contas_roblox.items():
+                    try:
+                        totp = pyotp.TOTP(secret.replace(" ", ""))
+                        codigo = totp.now()
+                        tempo_restante = 30 - (int(time.time()) % 30)
+                        codigo_formatado = f"{codigo[0:3]} {codigo[3:6]}"
+                        table.add_row(nome, codigo_formatado, f"{tempo_restante}s")
+                    except:
+                        table.add_row(nome, "ERRO NA CHAVE", "--")
 
             live.update(table)
             time.sleep(1)
@@ -1043,9 +1043,9 @@ console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green]")
         # Cria um mini-menu ali mesmo na tela do 2FA
 acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ir ao Menu: ").strip()
 
-        if acao == "1":
-            clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-            for p_clone in clones_lista:
+                  if acao == "1":
+                      clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+             for p_clone in clones_lista:
                 console.print(f"[cyan]>> Abrindo: {p_clone}[/cyan]")
                 # Comando para abrir direto pelo Termux
                 os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")

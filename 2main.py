@@ -1051,28 +1051,7 @@ console.print("\n[bold yellow]🚀 MENU DE INICIALIZAÇÃO[/bold yellow]")
 acao = input("[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ver apenas os códigos: ").strip()
 
 if acao == "1":
-    console.print("[yellow]⚙️  Limpando o sistema e otimizando (DPI 800 + English)...[/yellow]")
-            
-    # 1. Força a mudança de idioma de 3 formas diferentes
-    os.system("su -c 'settings put system system_locales en-US'")
-    os.system("su -c 'setprop persist.sys.locale en-US'")
-    os.system("su -c 'setprop persist.sys.language en'")
-    os.system("su -c 'setprop persist.sys.country US'")
-            
-    # Esse comando 'am broadcast' avisa os apps que o idioma mudou
-    os.system("su -c 'am broadcast -a android.intent.action.LOCALE_CHANGED'")
-            
-    # 2. Ajusta o DPI para 800 (Smallest Width)
-    # No Android, 'wm density' controla isso. 160 é um valor que costuma deixar em ~800dp.
-    os.system("su -c 'wm density 160'") 
-
-    # 3. Desativa Animações (Tira o lag de transição)
-    os.system("su -c 'settings put global window_animation_scale 0.0'")
-    os.system("su -c 'settings put global transition_animation_scale 0.0'")
-    os.system("su -c 'settings put global animator_duration_scale 0.0'")
-
-    time.sleep(1)
-
+    
     # --- ABERTURA DOS CLONES ---
     clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
     for p_clone in clones_lista:
@@ -1082,9 +1061,6 @@ if acao == "1":
         time.sleep(0.5)
         os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
         time.sleep(5)
-            
-    console.print("\n[bold green][✓] Tudo pronto! DPI em 800 e Idioma em Inglês.[/bold green]")
-    input("\n[!] Após logar em tudo, aperte [ ENTER ] para carregar o Menu...")
     
 # 2. Inicia o "fio" (Thread) que atualiza a tabela no fundo
 t = threading.Thread(target=atualizar_tabela_viva)

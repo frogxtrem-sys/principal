@@ -1054,13 +1054,13 @@ if acao == "1":
     console.print("[yellow]⚙️  Limpando o sistema e otimizando (DPI 800 + English)...[/yellow]")
             
     # 1. Força a mudança de idioma de 3 formas diferentes
-            os.system("su -c 'settings put system system_locales en-US'")
-            os.system("su -c 'setprop persist.sys.locale en-US'")
-            os.system("su -c 'setprop persist.sys.language en'")
-            os.system("su -c 'setprop persist.sys.country US'")
+    os.system("su -c 'settings put system system_locales en-US'")
+    os.system("su -c 'setprop persist.sys.locale en-US'")
+    os.system("su -c 'setprop persist.sys.language en'")
+    os.system("su -c 'setprop persist.sys.country US'")
             
-            # Esse comando 'am broadcast' avisa os apps que o idioma mudou
-            os.system("su -c 'am broadcast -a android.intent.action.LOCALE_CHANGED'")
+    # Esse comando 'am broadcast' avisa os apps que o idioma mudou
+    os.system("su -c 'am broadcast -a android.intent.action.LOCALE_CHANGED'")
             
     # 2. Ajusta o DPI para 800 (Smallest Width)
     # No Android, 'wm density' controla isso. 160 é um valor que costuma deixar em ~800dp.

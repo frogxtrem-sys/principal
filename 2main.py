@@ -1050,23 +1050,23 @@ def atualizar_tabela_viva():
 console.print("\n[bold yellow]🚀 MENU DE INICIALIZAÇÃO[/bold yellow]")
 acao = input("[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ver apenas os códigos: ").strip()
 
-if acao == "1":
-    console.print("[yellow]⚙️  Limpando o sistema e otimizando (DPI 800 + English)...[/yellow]")
+        if acao == "1":
+            console.print("[yellow]⚙️  Limpando o sistema e otimizando (DPI 800 + English)...[/yellow]")
             
-    # 1. Muda o idioma para Inglês (EUA) sem reiniciar o sistema inteiro
-    os.system("su -c 'settings put system system_locales en-US'")
-    os.system("su -c 'setprop persist.sys.locale en-US'")
+            # 1. Muda o idioma para Inglês (EUA) sem reiniciar o sistema inteiro
+            os.system("su -c 'settings put system system_locales en-US'")
+            os.system("su -c 'setprop persist.sys.locale en-US'")
             
-    # 2. Ajusta o DPI para 800 (Smallest Width)
-    # No Android, 'wm density' controla isso. 160 é um valor que costuma deixar em ~800dp.
-    os.system("su -c 'wm density 160'") 
+            # 2. Ajusta o DPI para 800 (Smallest Width)
+            # No Android, 'wm density' controla isso. 160 é um valor que costuma deixar em ~800dp.
+            os.system("su -c 'wm density 160'") 
 
-    # 3. Desativa Animações (Tira o lag de transição)
-    os.system("su -c 'settings put global window_animation_scale 0.0'")
-    os.system("su -c 'settings put global transition_animation_scale 0.0'")
-    os.system("su -c 'settings put global animator_duration_scale 0.0'")
+            # 3. Desativa Animações (Tira o lag de transição)
+            os.system("su -c 'settings put global window_animation_scale 0.0'")
+            os.system("su -c 'settings put global transition_animation_scale 0.0'")
+            os.system("su -c 'settings put global animator_duration_scale 0.0'")
 
-    time.sleep(1)
+            time.sleep(1)
 
             # --- ABERTURA DOS CLONES ---
             clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]

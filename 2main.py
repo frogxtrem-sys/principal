@@ -1066,7 +1066,7 @@ if acao == "1":
     os.system("su -c 'settings put global transition_animation_scale 0.0'")
     os.system("su -c 'settings put global animator_duration_scale 0.0'")
 
-            time.sleep(1)
+    time.sleep(1)
 
             # --- ABERTURA DOS CLONES ---
             clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]

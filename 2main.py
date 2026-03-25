@@ -1778,7 +1778,7 @@ def main():
                 if force_rejoin_input.lower() == 'q':
                     force_rejoin_interval = float('inf')
                 else:
-                force_rejoin_interval = int(force_rejoin_input) * 60
+                    force_rejoin_interval = int(force_rejoin_input) * 60
                 if force_rejoin_interval <= 0:
                     print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")
                     input("\033[1;32mPress Enter to return...\033[0m")

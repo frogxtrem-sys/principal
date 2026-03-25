@@ -1951,37 +1951,37 @@ def main():
             continue
             
         elif setup_type == "9":
-        console = Console()
-        console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
+            console = Console()
+            console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
         
         # Pergunta a Key específica
-        key_usuario = input("[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
+            key_usuario = input("[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
         
         # Monta o conteúdo do arquivo com quebra de linha real
-        conteudo = f'script_key = "{key_usuario}"\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
+            conteudo = f'script_key = "{key_usuario}"\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
         
-        caminho_pasta = "/storage/emulated/0/Delta/Autoexecute"
-        arquivo_final = f"{caminho_pasta}/script.txt"
+            caminho_pasta = "/storage/emulated/0/Delta/Autoexecute"
+            arquivo_final = f"{caminho_pasta}/script.txt"
         
-        try:
+            try:
             # 1. Cria a pasta e dá permissão total via sistema
-            os.system(f"mkdir -p {caminho_pasta} && chmod 777 {caminho_pasta}")
+                os.system(f"mkdir -p {caminho_pasta} && chmod 777 {caminho_pasta}")
             
             # 2. Escreve o arquivo txt
-            with open(arquivo_final, "w") as f:
-                f.write(conteudo)
+                with open(arquivo_final, "w") as f:
+                    f.write(conteudo)
             
             # 3. Garante que o arquivo também tenha permissão para o Delta ler
-            os.system(f"chmod 777 {arquivo_final}")
+                    os.system(f"chmod 777 {arquivo_final}")
                 
-            console.print(f"\n[bold green][✓][/bold green] Arquivo [white]script.txt[/white] configurado!")
-            console.print(f"[bold green][✓][/bold green] Local: [cyan]{arquivo_final}[/cyan]")
-            console.print("[yellow]DICA: Agora é só abrir os Clones e o farm iniciará sozinho.[/yellow]")
-        except Exception as e:
-            console.print(f"\n[bold red][!] Erro ao criar arquivo: {e}[/bold red]")
+                    console.print(f"\n[bold green][✓][/bold green] Arquivo [white]script.txt[/white] configurado!")
+                    console.print(f"[bold green][✓][/bold green] Local: [cyan]{arquivo_final}[/cyan]")
+                    console.print("[yellow]DICA: Agora é só abrir os Clones e o farm iniciará sozinho.[/yellow]")
+            except Exception as e:
+                console.print(f"\n[bold red][!] Erro ao criar arquivo: {e}[/bold red]")
             
-        input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
-        continue
+                input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
+            continue
 
 if __name__ == "__main__":
     try:

@@ -1785,7 +1785,7 @@ def main():
                         force_rejoin_interval = 30.0
             # --- FIM DA CORREÇÃO ---
 
-            codex_bypass_active = True
+                codex_bypass_active = True
                 
                 if force_rejoin_interval <= 0:
                     print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")

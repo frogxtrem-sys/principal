@@ -1770,8 +1770,23 @@ def main():
                     input("\033[1;32mPress Enter to return...\033[0m")
                     continue
 
-                force_rejoin_input = input("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): \033[0m")
-                force_rejoin_interval = float('inf') if force_rejoin_input.lower() == 'q' else int(force_rejoin_input) * 60
+                # Pede o intervalo
+        temp_input = input("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): ")
+        
+        # Se vier vazio ou None, define como '30' por padrão
+        if not temp_input:
+            force_rejoin_input = "30"
+        else:
+            force_rejoin_input = str(temp_input).lower()
+
+        # Define o intervalo numérico
+        if force_rejoin_input == 'q':
+            force_rejoin_interval = float('inf')
+        else:
+            try:
+                force_rejoin_interval = float(force_rejoin_input)
+            except ValueError:
+                force_rejoin_interval = 30.0 # Se digitar letra errada, assume 30
                 if force_rejoin_interval <= 0:
                     print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")
                     input("\033[1;32mPress Enter to return...\033[0m")

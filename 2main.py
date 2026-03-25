@@ -1770,22 +1770,27 @@ def main():
                     input("\033[1;32mPress Enter to return...\033[0m")
                     continue
 
-                # --- CORREÇÃO DO INPUT (BLINDAGEM VMOS) ---
-                ans = input("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): ")
+                # --- BLINDAGEM TOTAL VMOS (NUNCA MAIS DÁ NONETYPE) ---
+                print("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): \033[0m", end="")
+                ans = input()
             
-                # Primeiro garantimos que 'ans' não seja None, depois tratamos o texto
-                if ans is None or str(ans).strip() == "":
+                # Se o VMOS falhar e mandar None ou vazio, forçamos "30" imediatamente
+                if not ans:
                     force_rejoin_input = "30"
                 else:
-                    force_rejoin_input = str(ans).lower().strip()
+                    # Só rodamos funções de texto se tivermos certeza que existe texto
+                    force_rejoin_input = str(ans).strip().lower()
 
-                if force_rejoin_input == 'q':
+                # Lógica de decisão
+                if force_rejoin_input == 'q' or force_rejoin_input == '':
                     force_rejoin_interval = float('inf')
                 else:
                     try:
                         force_rejoin_interval = float(force_rejoin_input)
                     except ValueError:
                         force_rejoin_interval = 30.0
+            # --- FIM DA BLINDAGEM ---
+                    
             # --- FIM DA CORREÇÃO ---
 
                 codex_bypass_active = True

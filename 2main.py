@@ -47,9 +47,9 @@ codex_bypass_enabled = False
 codex_bypass_thread = None
 try:
     boot_time = psutil.boot_time()
-except Exception:
+except:
     import time
-    boot_time = time.time() # Usa o tempo atual se não puder ler o sistema
+    boot_time = time.time() # Ignora o erro de permissão do VMOS
 
 auto_android_id_enabled = False
 auto_android_id_thread = None
@@ -1773,8 +1773,11 @@ def main():
                 # --- CORREÇÃO DO INPUT (BLINDAGEM VMOS) ---
                 ans = input("\033[1;93m[ Shouko.dev ] - Force rejoin interval (minutes, 'q' to skip): ")
             
-                # Se for None ou vazio (Enter direto), assume "30"
-                force_rejoin_input = str(ans or "30").lower().strip()
+                # Primeiro garantimos que 'ans' não seja None, depois tratamos o texto
+                if ans is None or str(ans).strip() == "":
+                    force_rejoin_input = "30"
+                else:
+                    force_rejoin_input = str(ans).lower().strip()
 
                 if force_rejoin_input == 'q':
                     force_rejoin_interval = float('inf')

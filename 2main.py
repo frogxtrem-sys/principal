@@ -1011,11 +1011,11 @@ parar_atualizacao = False
 
 def atualizar_tabela_viva():
     with Live(refresh_per_second=1, screen=False) as live:
-    while not parar_atualizacao:
-        table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA (ROBLOX)")
-        table.add_column("Conta", style="cyan")
-        table.add_column("Código Atual", style="bold yellow", justify="center")
-        table.add_column("Expira em", style="red")
+        while not parar_atualizacao:
+            table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA (ROBLOX)")
+            table.add_column("Conta", style="cyan")
+            table.add_column("Código Atual", style="bold yellow", justify="center")
+            table.add_column("Expira em", style="red")
 
             for nome, secret in contas_roblox.items():
                 try:

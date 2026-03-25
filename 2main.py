@@ -1038,26 +1038,26 @@ t.daemon = True # Faz o fio fechar se o programa principal fechar
 t.start()
 
 # 2. Pergunta se quer abrir os clones enquanto vê os códigos
-console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green]")
+        console.print("\n[bold green]✅ CÓDIGOS ATIVOS![/bold green]")
         
         # Cria um mini-menu ali mesmo na tela do 2FA
-acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ir ao Menu: ").strip()
+        acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER ] para ir ao Menu: ").strip()
 
-                  if acao == "1":
-                      clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-                      for p_clone in clones_lista:
-                          console.print(f"[cyan]>> Abrindo: {p_clone}[/cyan]")
+        if acao == "1":
+            clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+            for p_clone in clones_lista:
+                console.print(f"[cyan]>> Abrindo: {p_clone}[/cyan]")
                 # Comando para abrir direto pelo Termux
-                          os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
-                          time.sleep(8) # Espera 8 segundos para o próximo
+                os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
+                time.sleep(8) # Espera 8 segundos para o próximo
             
-                      console.print("\n[bold green][✓] Todos os clones foram chamados![/bold green]")
-                      console.print("[yellow]Continue olhando os códigos acima para fazer o login.[/yellow]")
-                      input("\n[!] Após logar em todos, aperte [ ENTER ] para carregar o Menu Principal...")
+            console.print("\n[bold green][✓] Todos os clones foram chamados![/bold green]")
+            console.print("[yellow]Continue olhando os códigos acima para fazer o login.[/yellow]")
+            input("\n[!] Após logar em todos, aperte [ ENTER ] para carregar o Menu Principal...")
 
         # 3. Finaliza a tabela e segue para o resto do script (Menu Azul)
-                  parar_atualizacao = True
-                  time.sleep(0.5)
+        parar_atualizacao = True
+        time.sleep(0.5)
 
 # --- O RESTO DO SEU CÓDIGO DO BOT COMEÇA AQUI ---
 print("\nIniciando o bot...")

@@ -45,7 +45,11 @@ reset_tab_interval = None
 close_and_rejoin_delay = None
 codex_bypass_enabled = False
 codex_bypass_thread = None
-boot_time = boot_time()
+try:
+    boot_time = psutil.boot_time()
+except Exception:
+    import time
+    boot_time = time.time() # Usa o tempo atual se não puder ler o sistema
 
 auto_android_id_enabled = False
 auto_android_id_thread = None

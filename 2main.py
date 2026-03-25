@@ -1045,15 +1045,15 @@ acao = input("\n[ Shouko.dev ] -> Digite [ 1 ] para abrir os 4 Clones ou [ ENTER
 
                   if acao == "1":
                       clones_lista = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-                  for p_clone in clones_lista:
-                      console.print(f"[cyan]>> Abrindo: {p_clone}[/cyan]")
+                      for p_clone in clones_lista:
+                          console.print(f"[cyan]>> Abrindo: {p_clone}[/cyan]")
                 # Comando para abrir direto pelo Termux
-                      os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
-                      time.sleep(8) # Espera 8 segundos para o próximo
+                          os.system(f"su -c 'monkey -p {p_clone} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
+                          time.sleep(8) # Espera 8 segundos para o próximo
             
-            console.print("\n[bold green][✓] Todos os clones foram chamados![/bold green]")
-            console.print("[yellow]Continue olhando os códigos acima para fazer o login.[/yellow]")
-            input("\n[!] Após logar em todos, aperte [ ENTER ] para carregar o Menu Principal...")
+                      console.print("\n[bold green][✓] Todos os clones foram chamados![/bold green]")
+                      console.print("[yellow]Continue olhando os códigos acima para fazer o login.[/yellow]")
+                      input("\n[!] Após logar em todos, aperte [ ENTER ] para carregar o Menu Principal...")
 
         # 3. Finaliza a tabela e segue para o resto do script (Menu Azul)
         parar_atualizacao = True

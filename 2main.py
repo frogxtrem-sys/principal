@@ -1006,7 +1006,7 @@ contas_roblox = {
 }
 
 def gerar_tabela():
-    os.system('clear') # Limpa a tela para ficar organizado
+     # Limpa a tela para ficar organizado
     table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA")
     table.add_column("Conta", style="cyan")
     table.add_column("Código de 6 Dígitos", style="bold yellow", justify="center")
@@ -1024,6 +1024,7 @@ def gerar_tabela():
     console.print(table)
     console.print("\n[bold green]DICA:[/bold green] Use esses códigos no login do Roblox!")
     console.print("[white]O código muda a cada 30 segundos.[/white]")
+    input("\n--- Códigos gerados! Aperte ENTER para abrir o Menu ---")
 
 # Mostra a tabela
 gerar_tabela()

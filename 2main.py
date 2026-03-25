@@ -1741,12 +1741,7 @@ def main():
         menu_options = [
             "Start Auto Rejoin",
             "Auto Setup User IDs",
-            "Auto Login with Cookie",
-            "Enable Discord Webhook",
             "Auto Check User Setup",
-            "Toggle Codex Bypass - OLD",
-            "Configure Package Prefix - NEW",
-            "Auto Change Android ID - NEW",
             "Configure AutoExecute",
             "Start All Clones"
         ]
@@ -1884,16 +1879,6 @@ def main():
             continue
 
         elif setup_type == "3":
-            RobloxManager.inject_cookies_and_appstorage()
-            input("\033[1;32m\nPress Enter to exit...\033[0m")
-            continue
-
-        elif setup_type == "4":
-            WebhookManager.setup_webhook()
-            input("\033[1;32m\nPress Enter to exit...\033[0m")
-            continue
-
-        elif setup_type == "5":
             try:
                 print("\033[1;35m[1]\033[1;32m Executor Check\033[0m \033[1;35m[2]\033[1;36m Online Check\033[0m")
                 config_choice = input("\033[1;93m[ Shouko.dev ] - Select check method (1-2, 'q' to keep default): \033[0m").strip()
@@ -1946,43 +1931,7 @@ def main():
             input("\033[1;32mPress Enter to return...\033[0m")
             continue
 
-        elif setup_type == "6":
-            if codex_bypass_enabled:
-                codex_bypass_enabled = False
-                print("\033[1;31m[ Shouko.dev ] - Codex bypass disabled.\033[0m")
-            else:
-                codex_bypass_enabled = True
-                if codex_bypass_thread is None or not codex_bypass_thread.is_alive():
-                    codex_bypass_thread = threading.Thread(target=CodexBypass.bypass_thread, daemon=True)
-                    codex_bypass_thread.start()
-                    print("\033[1;32m[ Shouko.dev ] - Codex bypass enabled and thread started.\033[0m")
-                else:
-                    print("\033[1;32m[ Shouko.dev ] - Codex bypass already running.\033[0m")
-            FileManager.save_config()
-            input("\033[1;32m\nPress Enter to return to menu...\033[0m")
-            continue
-
-        elif setup_type == "7":
-            try:
-                current_prefix = globals().get("package_prefix", "com.roblox")
-                print(f"\033[1;32m[ Shouko.dev ] - Current package prefix: {current_prefix}\033[0m")
-                new_prefix = input("\033[1;93m[ Shouko.dev ] - Enter new package prefix (or press Enter to keep current): \033[0m").strip()
-                
-                if new_prefix:
-                    globals()["package_prefix"] = new_prefix
-                    FileManager.save_config()
-                    print(f"\033[1;32m[ Shouko.dev ] - Package prefix updated to: {new_prefix}\033[0m")
-                else:
-                    print(f"\033[1;33m[ Shouko.dev ] - Package prefix unchanged: {current_prefix}\033[0m")
-            except Exception as e:
-                print(f"\033[1;31m[ Shouko.dev ] - Error setting package prefix: {e}\033[0m")
-                Utilities.log_error(f"Error setting package prefix: {e}")
-                input("\033[1;32mPress Enter to return...\033[0m")
-                continue
-            input("\033[1;32mPress Enter to return...\033[0m")
-            continue
-            
-        elif setup_type == "9":
+        elif setup_type == "4":
             console = Console()
             console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
         
@@ -2015,7 +1964,7 @@ def main():
             input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
             continue
         
-        elif setup_type == "8":
+        elif setup_type == "5":
             global auto_android_id_enabled, auto_android_id_thread, auto_android_id_value
             if not auto_android_id_enabled:
                 android_id = input("\033[1;93m[ Shouko.dev ] - Enter Android ID to spam set: \033[0m").strip()
@@ -2036,7 +1985,7 @@ def main():
             continue
             
             
-        elif setup_type == "10":
+        elif setup_type == "7":
             console = Console()
             console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO FORÇADO)...[/bold yellow]")
         

@@ -1953,7 +1953,7 @@ def main():
             
         elif setup_type == "10":
             console = Console()
-            console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO AUTOMÁTICO)...[/bold yellow]")
+            console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO FORÇADO)...[/bold yellow]")
         
             clones = [
                 "ywcw.lnu.exhl",
@@ -1963,18 +1963,22 @@ def main():
             ]
         
             for pacote in clones:
-                console.print(f"[cyan]>> Abrindo clone: {pacote}...[/cyan]")
-            # O comando 'monkey' abre o app sem travar o script
+                console.print(f"[cyan]>> Acordando clone: {pacote}...[/cyan]")
+            
+            # Primeiro, limpamos qualquer processo travado
+                os.system(f"su -c 'am force-stop {pacote}'")
+                time.sleep(1)
+            
+            # Agora tentamos abrir usando o monkey (método mais estável)
                 comando = f"su -c 'monkey -p {pacote} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'"
                 os.system(comando)
-          
-            # Espera 5 segundos e já pula para o próximo clone automaticamente
-                time.sleep(5)
             
-                console.print("\n[bold green][✓] Todos os 4 clones foram chamados![/bold green]")
-                console.print("[yellow]DICA: Agora volte para a opção [ 0 ] para ver os códigos 2FA.[/yellow]")
-        # O input fica APENAS aqui no final, depois que todos abriram
-                input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
+            # Espera 10 segundos para o Cloud Phone não travar
+                time.sleep(10)
+            
+                console.print("\n[bold green][✓] Tentativa de abertura concluída![/bold green]")
+                console.print("[yellow]DICA: Se algum não abriu, clique nele manualmente uma vez para 'ativar'.[/yellow]")
+            input("\n[bold cyan]Pressione ENTER para voltar...[/bold cyan]")
             continue
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ import psutil
 import sys
 import gc
 import os
+from rich.live import Live
 from datetime import datetime, timezone
 from rich.table import Table #type: ignore
 from rich.panel import Panel #type: ignore
@@ -1005,33 +1006,50 @@ contas_roblox = {
     "CONTA 04": "5DS46QIDSXOUPKV4PUCQBRGURQ"
 }
 
-def gerar_tabela():
-     # Limpa a tela para ficar organizado
-    table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA")
-    table.add_column("Conta", style="cyan")
-    table.add_column("Código de 6 Dígitos", style="bold yellow", justify="center")
-    table.add_column("Expira em", style="red")
+# Variável para controlar quando parar a atualização
+parar_atualizacao = False
 
-    for nome, secret in contas_roblox.items():
-        try:
-            totp = pyotp.TOTP(secret.replace(" ", "")) # Remove espaços se houver
-            codigo = totp.now()
-            tempo_restante = 30 - (int(time.time()) % 30)
-            table.add_row(nome, f"{codigo[0:3]} {codigo[3:6]}", f"{tempo_restante}s")
-        except:
-            table.add_row(nome, "ERRO NA CHAVE", "--")
+def atualizar_tabela_viva():
+    with Live(refresh_per_second=1, screen=False) as live:
+        while not parar_atualizacao:
+            table = Table(title="🔐 GERADOR DE CÓDIGOS 2FA (ROBLOX)")
+            table.add_column("Conta", style="cyan")
+            table.add_column("Código Atual", style="bold yellow", justify="center")
+            table.add_column("Expira em", style="red")
 
-    console.print(table)
-    console.print("\n[bold green]DICA:[/bold green] Use esses códigos no login do Roblox!")
-    console.print("[white]O código muda a cada 30 segundos.[/white]")
-    input("\n--- Códigos gerados! Aperte ENTER para abrir o Menu ---")
+            for nome, secret in contas_roblox.items():
+                try:
+                    totp = pyotp.TOTP(secret.replace(" ", ""))
+                    codigo = totp.now()
+                    tempo_restante = 30 - (int(time.time()) % 30)
+                    codigo_formatado = f"{codigo[0:3]} {codigo[3:6]}"
+                    table.add_row(nome, codigo_formatado, f"{tempo_restante}s")
+                except:
+                    table.add_row(nome, "ERRO NA CHAVE", "--")
 
-# Mostra a tabela
-gerar_tabela()
+            live.update(table)
+            time.sleep(1)
+
+# --- EXECUÇÃO ---
+
+# 1. Cria o "fio" que atualiza a tabela no fundo
+t = threading.Thread(target=atualizar_tabela_viva)
+t.daemon = True # Faz o fio fechar se o programa principal fechar
+t.start()
+
+# 2. Mostra a instrução e trava o script aqui
+print("\n[bold green]CÓDIGOS ATIVOS![/bold green] Eles estão atualizando sozinhos acima.")
+input("\n>>> FAÇA O LOGIN NOS CLONES E DEPOIS APERTE [ENTER] PARA ABRIR O MENU DO BOT <<<\n")
+
+# 3. Quando você aperta Enter, ele para a atualização e segue
+parar_atualizacao = True
+time.sleep(0.5) # Pequena pausa para limpar o buffer
+print("\nIniciando o sistema principal...")
 
 # --- O RESTO DO SEU CÓDIGO DO BOT COMEÇA AQUI ---
 print("\nIniciando o bot...")
 # Exemplo: import seu_modulo_do_bot
+
 class UIManager:
     @staticmethod
     def print_header(version):

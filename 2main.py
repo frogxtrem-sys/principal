@@ -276,6 +276,25 @@ class FileManager:
         return server_links
 
     @staticmethod
+    def auto_setup_completo():
+        print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup com Injeção de Login...\033[0m")
+    
+        # 1. Tenta baixar o backup se ele não existir (OPCIONAL - coloque seu link aqui)
+        if not os.path.exists("/sdcard/RobloxBackup"):
+            print("[ ! ] Backup não achado. Baixando do Discord...")
+            # Exemplo: os.system("wget LINK_DO_SEU_ZIP_AQUI -O /sdcard/logins.zip")
+            # os.system("unzip /sdcard/logins.zip -d /sdcard/")
+    
+        # 2. Chama a função de injeção que você já tem
+        auto_inject_logins()
+    
+        # 3. Verifica dependências (psutil, etc)
+        print("[ OK ] Verificando bibliotecas...")
+        os.system("pip install psutil requests rich")
+    
+        print("\n\033[1;32m[ SETUP FINALIZADO ] - Agora é só usar a Opção 1!\033[0m")
+
+    
     def save_accounts(accounts):
         with open(FileManager.ACCOUNTS_FILE, "w") as file:
             for package, user_id in accounts:

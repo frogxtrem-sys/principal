@@ -211,63 +211,6 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def auto_inject_logins():
-    """Injeta os logins salvos nos clones ignorando pastas duplicadas no ZIP"""
-    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-    
-    # Caminhos base
-    base_path = "/data/data/com.termux/files/home/RobloxBackup"
-    
-    # Verifica se a pasta existe. Se o ZIP tiver pasta interna, ele ajusta sozinho:
-    if os.path.exists(f"{base_path}/RobloxBackup"):
-        backup_base = f"{base_path}/RobloxBackup"
-    else:
-        backup_base = base_path
-    if not os.path.exists(backup_base) or not os.listdir(backup_base):
-        print("\033[1;33m[ ! ] Backup não encontrado ou pasta vazia. Pulando...\033[0m")
-        return
-
-    print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
-    
-    # Mapeia qual clone vai para qual pacote
-    mapping = {
-        "ywcw.lnu.exhl": "clone1",
-        "ub.wnjb.bzz": "clone2",
-        "ixq.vf.jlr": "clone3",
-        "srl.mvn.gv": "clone4"
-    }
-
-    for pkg, clone_folder in mapping.items():
-        dest = f"/data/data/{pkg}/shared_prefs"
-        origem = f"{backup_base}/{clone_folder}"
-        
-        if os.path.exists(origem):
-            # 1. Mata o processo do Roblox com força
-            os.system(f"su -c 'killall -9 {pkg} 2>/dev/null'")
-            os.system(f"su -c 'am force-stop {pkg}'")
-            
-            # 2. DELETA a pasta shared_prefs completamente (Limpeza Radical)
-            os.system(f"su -c 'rm -rf /data/data/{pkg}/shared_prefs'")
-            os.system(f"su -c 'mkdir -p /data/data/{pkg}/shared_prefs'")
-            
-            # 3. Copia os arquivos do backup
-            os.system(f"su -c 'cp -Rf {origem}/* /data/data/{pkg}/shared_prefs/'")
-            
-            # 4. Renomeia e remove IDs de rastreio
-            os.system(f"su -c 'mv /data/data/{pkg}/shared_prefs/{pkg}_preferences.xml /data/data/{pkg}/shared_prefs/com.roblox.client.xml 2>/dev/null'")
-            os.system(f"su -c 'rm -f /data/data/{pkg}/shared_prefs/InstallationId.xml'")
-
-            # 5. O SEGREDO DO UGPHONE: Dar permissão na pasta PAI também
-            app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
-            if app_uid:
-                os.system(f"su -c 'chown -R {app_uid}:{app_uid} /data/data/{pkg}'")
-                os.system(f"su -c 'chmod -R 777 /data/data/{pkg}/shared_prefs'")
-                os.system(f"su -c 'restorecon -R /data/data/{pkg}'")
-                print(f"      -> Injeção Forçada Concluída: {pkg}")
-        else:
-            print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
-
-
 class Utilities:
     @staticmethod
     def collect_garbage():
@@ -309,31 +252,6 @@ class FileManager:
     SERVER_LINKS_FILE = "Shouko.dev/server-link.txt"
     ACCOUNTS_FILE = "Shouko.dev/account.txt"
     CONFIG_FILE = "Shouko.dev/config-wh.json"
-
-    @staticmethod
-    def auto_setup_completo():
-        print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
-        
-        # Limpa lixo e garante que a pasta base exista (Na pasta interna do Termux para evitar erros)
-        zip_path = "/data/data/com.termux/files/home/logins.zip"
-        extract_path = "/data/data/com.termux/files/home/RobloxBackup"
-
-        os.system(f"rm -rf {extract_path} {zip_path}")
-        os.system(f"mkdir -p {extract_path}")
-    
-        # Configuração do Token e URL (Mantenha suas linhas 301-305 como estão)
-    
-        print("[ > ] Baixando backup privado...")
-        os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O {zip_path}")
-    
-        if os.path.exists(zip_path):
-            print("[ OK ] Extraindo arquivos...")
-            os.system(f"unzip -o {zip_path} -d {extract_path}/")
-                # CHAMA A INJEÇÃO (Corrigido para usar FileManager.)
-            auto_inject_logins()
-            print("\n\033[1;32m[ PRONTO ] - Setup finalizado. Pode iniciar!\033[0m")
-        else:
-            print("\033[1;31m[ ERRO ] - Falha no download. Verifique o Token.\033[0m")
 
     @staticmethod
     def save_server_links(server_links):

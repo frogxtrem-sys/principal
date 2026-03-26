@@ -215,7 +215,7 @@ def auto_inject_logins():
         """Injeta os logins salvos nos clones se o backup existir"""
         # Seus pacotes identificados nas prints anteriores
         packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-        backup_base = "/sdcard/RobloxBackup"
+        backup_base = "/storage/emulated/0/RobloxBackup"
 
         if not os.path.exists(backup_base) or not os.listdir(backup_base):
             print("\033[1;33m[ ! ] Backup não encontrado ou pasta vazia. Pulando...\033[0m")
@@ -282,8 +282,8 @@ class FileManager:
         print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
         
         # Limpa lixo e garante que a pasta base exista
-        os.system("rm -rf /sdcard/RobloxBackup /sdcard/logins.zip")
-        os.system("mkdir -p /sdcard/RobloxBackup")
+        os.system("rm -rf /storage/emulated/0/RobloxBackup /storage/emulated/0/logins.zip")
+        os.system("mkdir -p /storage/emulated/0/RobloxBackup")
         
         # Configuração do Token e URL
         P1 = "ghp_pLd3ixDQuR7slsPrlXG" 
@@ -292,10 +292,10 @@ class FileManager:
         URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
         
         print("[ > ] Baixando backup privado...")
-        os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
+        os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /storage/emulated/0/logins.zip")
         
         if os.path.exists("/sdcard/logins.zip"):
-            os.system("unzip -o /sdcard/logins.zip -d /sdcard/RobloxBackup/")
+            os.system("unzip -o /storage/emulated/0/logins.zip -d /storage/emulated/0/RobloxBackup/")
             # CHAMA A INJEÇÃO (Corrigido para usar FileManager.)
             auto_inject_logins()
             print("\n\033[1;32m[ PRONTO ] - Setup finalizado. Pode iniciar!\033[0m")

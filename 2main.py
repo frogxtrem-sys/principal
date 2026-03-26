@@ -49,7 +49,6 @@ try:
     # Tenta ler o tempo real, se falhar (Permission Denied), usa o tempo atual
     BOOT_TIME = psutil.boot_time()
 except Exception:
-    import time
     BOOT_TIME = time.time()
 
 auto_android_id_enabled = False

@@ -307,7 +307,7 @@ class FileManager:
             TOKEN = PARTE1 + PARTE2
             URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
             os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
-            os.system("unzip -o /sdcard/logins.zip -d /sdcard/")
+            os.system("unzip -o /sdcard/logins.zip -d /sdcard/RobloxBackup/")
         
         # 2. Chama a injeção (Agora funciona porque estão no mesmo 'apartamento')
         # Como as duas são staticmethod na mesma classe, usamos o nome da classe ou chamamos direto se estiver no mesmo nível

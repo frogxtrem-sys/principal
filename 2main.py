@@ -235,28 +235,25 @@ def login_sem_minimizacao():
             print(f"      -> Injetando texto em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 3. Injeção de dados (MÉTODO CLIQUE-A-CLIQUE)
+        # 3. Injeção de dados (MÉTODO TECLADO SEGURO)
         print(f"\n   -> Injetando dados no {conta['pkg']}...")
         
-        # PASSO 1: Clica e escreve o Usuário
-        # Coordenada X=530, Y=630 (Caixa de cima)
-        os.system(f"su -c 'input tap 530 630'")
-        time.sleep(1.0)
+        # PASSO 1: Garante que o foco está no primeiro campo (Username)
+        # Se você já clicou nele, o script só começa a escrever.
         os.system(f"su -c 'input text {conta['user']}'")
-        print("      * Usuário preenchido...")
-        time.sleep(2.5) 
+        time.sleep(2.0)
         
-        # PASSO 2: CLIQUE FÍSICO na caixa de Senha
-        # Coordenada X=530, Y=750 (Geralmente a senha fica uns 120 pixels abaixo)
-        # Se o clique for muito baixo ou alto, ajuste o 750 abaixo:
-        print("      * Clicando na caixa de senha...")
-        os.system(f"su -c 'input tap 530 750'") 
-        time.sleep(1.5) 
+        # PASSO 2: O PULO DO GATO
+        # Em vez de um TAB, mandamos DOIS seguidos com um pequeno intervalo.
+        # Isso serve para pular o botão de 'Limpar' ou o 'Olhinho' da senha.
+        print("      * Pulando para o campo de senha...")
+        os.system(f"su -c 'input keyevent 61 && sleep 0.5 && input keyevent 61'")
+        time.sleep(2.0) # Tempo para o Android processar a mudança de foco
         
         # PASSO 3: Escreve a Senha
         print(f"      * Escrevendo senha...")
         os.system(f"su -c 'input text {conta['pass']}'")
-        time.sleep(2.0)
+        time.sleep(1.5)
         
         # PASSO 4: ENTER para logar
         os.system(f"su -c 'input keyevent 66'")

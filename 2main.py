@@ -687,9 +687,6 @@ class WebhookManager:
     
     @staticmethod
 
-            
-console = Console()
-
 # --- COLOQUE AS SUAS 4 CHAVES AQUI ---
 contas_roblox = {
     "saitama0000432": "WDVIZJ7HSPZUVP7UWVESIB6YC4",

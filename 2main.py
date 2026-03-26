@@ -235,20 +235,25 @@ def login_sem_minimizacao():
             print(f"      -> Injetando texto em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 3. Injeção de dados (MÉTODO ANTI-ATROPELAMENTO)
+        # 3. Injeção de dados (MÉTODO CLIQUE-A-CLIQUE)
         print(f"\n   -> Injetando dados no {conta['pkg']}...")
         
-        # PASSO 1: Escreve o Usuário
+        # PASSO 1: Clica e escreve o Usuário
+        # Coordenada X=530, Y=630 (Caixa de cima)
+        os.system(f"su -c 'input tap 530 630'")
+        time.sleep(1.0)
         os.system(f"su -c 'input text {conta['user']}'")
-        time.sleep(3.0) # Tempo de sobra para o Android 'aceitar' o texto
+        print("      * Usuário preenchido...")
+        time.sleep(2.5) 
         
-        # PASSO 2: Pula para o campo de senha (TAB)
-        print("      * Pulando para o próximo campo...")
-        os.system(f"su -c 'input keyevent 61'") 
-        time.sleep(2.5) # Pausa obrigatória para o cursor MUDAR de caixa
+        # PASSO 2: CLIQUE FÍSICO na caixa de Senha
+        # Coordenada X=530, Y=750 (Geralmente a senha fica uns 120 pixels abaixo)
+        # Se o clique for muito baixo ou alto, ajuste o 750 abaixo:
+        print("      * Clicando na caixa de senha...")
+        os.system(f"su -c 'input tap 530 750'") 
+        time.sleep(1.5) 
         
         # PASSO 3: Escreve a Senha
-        # Se a senha aparecer no usuário, o tempo acima precisa ser maior
         print(f"      * Escrevendo senha...")
         os.system(f"su -c 'input text {conta['pass']}'")
         time.sleep(2.0)

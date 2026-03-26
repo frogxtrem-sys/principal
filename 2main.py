@@ -242,25 +242,26 @@ def auto_inject_logins():
         origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
-            # 1. Limpa caches e pastas antigas
+            # 1. FECHA O ROBLOX E LIMPA TUDO (Caches e Bancos de Dados de sessão)
+            os.system(f"su -c 'am force-stop {pkg}'")
             os.system(f"su -c 'rm -rf /data/data/{pkg}/cache/*'")
+            os.system(f"su -c 'rm -rf /data/data/{pkg}/databases/*'") # Remove registros de sessões antigas
+            
+            # 2. Prepara a pasta shared_prefs
             os.system(f"su -c 'mkdir -p {dest}'")
             os.system(f"su -c 'rm -f {dest}/*'") 
             
-            # 2. Copia os arquivos do backup para o sistema
+            # 3. Copia e Renomeia
             os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
-            
-            # 3. RENOMEIA O ARQUIVO (O passo que estava faltando!)
-            # Transforma o nome do backup no nome que o Roblox exige
             os.system(f"su -c 'mv {dest}/{pkg}_preferences.xml {dest}/com.roblox.client.xml 2>/dev/null'")
 
-            # 4. Ajusta permissões para o Roblox aceitar o arquivo
+            # 4. APLICA PERMISSÕES TOTAIS
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
             if app_uid:
-                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                os.system(f"su -c 'chmod -R 777 {dest}'")
-                os.system(f"su -c 'restorecon -R {dest}'")
-                print(f"      -> Login Ativado: {pkg}")
+                os.system(f"su -c 'chown -R {app_uid}:{app_uid} /data/data/{pkg}/shared_prefs'")
+                os.system(f"su -c 'chmod -R 777 /data/data/{pkg}/shared_prefs'")
+                os.system(f"su -c 'restorecon -R /data/data/{pkg}'")
+                print(f"      -> Login Resetado e Ativado: {pkg}")
         else:
             print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
 

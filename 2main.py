@@ -228,10 +228,19 @@ def auto_inject_logins():
         return
 
     print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
-    for pkg in packages:
+    
+    # Mapeia qual clone vai para qual pacote
+    mapping = {
+        "ywcw.lnu.exhl": "clone1",
+        "ub.wnjb.bzz": "clone2",
+        "ixq.vf.jlr": "clone3",
+        "srl.mvn.gv": "clone4"
+    }
+
+    for pkg, clone_folder in mapping.items():
         dest = f"/data/data/{pkg}/shared_prefs"
-        # O segredo: usamos o nome do pacote para achar a pasta certa dentro do backup
-        origem = f"{backup_base}/{pkg}"
+        # O segredo: agora ele busca pela pasta 'cloneX'
+        origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
             os.system(f"su -c 'mkdir -p {dest}'")

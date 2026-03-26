@@ -587,13 +587,15 @@ class RobloxManager:
     @staticmethod
     def kill_roblox_processes():
         packages = RobloxManager.get_roblox_packages()
-        running = []
-        if not running:
-            print("\033[1;32m[ Shouko.dev ] - No Roblox processes to kill.\033[0m")
-            return
+    
         for package_name in packages:
-            if any(package_name in proc for proc in running):
+            try:
+                # Tenta fechar. Se der erro 255 ou Permissão negada, o script ignora e segue.
                 os.system(f"nohup /system/bin/am force-stop {package_name} > /dev/null 2>&1 &")
+            except Exception:
+                pass 
+    
+        print("\033[1;32m[ Shouko.dev ] - Tentativa de fechar processos concluída.\033[0m")
         time.sleep(2)
 
     @staticmethod

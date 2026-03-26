@@ -219,44 +219,38 @@ def login_100_automatico():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # Coordenadas (Baseadas na sua print horizontal)
-    X_BTN_ENTRAR_INICIAL = 380 
-    Y_BTN_ENTRAR_INICIAL = 630
-    X_CAMPO_USUARIO = 530
-    Y_CAMPO_USUARIO = 630
+    # Coordenadas (Ajuste fino baseado na sua tela deitada)
+    X_BTN_ENTRAR = 380 
+    Y_BTN_ENTRAR = 630
 
     for i, conta in enumerate(contas, 1):
-        print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
+        print(f"\n[ {i}/4 ] Resetando e abrindo: {conta['pkg']}")
         
-        # Passo 1: Abre o app
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
+        # FECHA O APP CASO ESTEJA ABERTO (Limpa a bolinha)
+        os.system(f"su -c 'am force-stop {conta['pkg']}'")
+        time.sleep(2)
+        
+        # ABRE O APP DO ZERO
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
+        
+        print("   -> Aguardando 15s de carregamento...")
         time.sleep(15)
 
-        # Passo 2: FORÇA O FOCO (Traz pra frente antes de clicar)
-        os.system(f"su -c 'monkey -p {conta['pkg']} 1 > /dev/null 2>&1'")
-        time.sleep(1)
-
-        # Passo 3: CLIQUE NO SIGN IN
-        print("   -> Clicando no Sign In inicial...")
-        os.system(f"su -c 'input tap {X_BTN_ENTRAR_INICIAL} {Y_BTN_ENTRAR_INICIAL}'")
-        time.sleep(3) 
-
-        # Passo 4: FORÇA O FOCO DE NOVO (Garante que a tela de login abriu e não minimizou)
-        os.system(f"su -c 'monkey -p {conta['pkg']} 1 > /dev/null 2>&1'")
-        time.sleep(1)
-
-        # Passo 5: CLIQUE NO CAMPO USUÁRIO
-        print("   -> Focando campo e digitando...")
-        os.system(f"su -c 'input tap {X_CAMPO_USUARIO} {Y_CAMPO_USUARIO}'")
-        time.sleep(1)
-
-        # Passo 6: INJEÇÃO DE DADOS
-        os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
+        # TENTA CLICAR NO BOTÃO INICIAL 3 VEZES (Garante o clique)
+        print("   -> Tentando clicar no Entrar...")
+        for _ in range(3):
+            os.system(f"su -c 'input tap {X_BTN_ENTRAR} {Y_BTN_ENTRAR}'")
+            time.sleep(0.5)
         
-        print(f"   -> [ OK ] Finalizado! Próxima em 5s...")
-        time.sleep(5)
+        time.sleep(3)
 
-    print("\n\033[1;32m[ SUCESSO ] Ciclo completo!\033[0m")
+        # EM VEZ DE CLICAR NO CAMPO, VAMOS USAR O TAB PARA CHEGAR NELE
+        # 1 TAB geralmente pula pro primeiro campo de texto
+        print("   -> Navegando via TAB e injetando dados...")
+        os.system(f"su -c 'input keyevent 61 && input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
+        
+        print(f"   -> [ OK ] Processo enviado. Verifique a tela.")
+        time.sleep(5)
 class Utilities:
     @staticmethod
     def collect_garbage():

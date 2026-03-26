@@ -1513,7 +1513,7 @@ def main():
     while True:
         Utilities.clear_screen()
         UIManager.print_header(version)
-        FileManager.check_and_create_cookie_file()
+        
 
         menu_options = [
             "Start Auto Rejoin",

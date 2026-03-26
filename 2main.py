@@ -235,26 +235,27 @@ def login_gboard_estavel():
             print(f"      -> Injetando em: {t}s   ", end="\r")
             time.sleep(1)
 
-        print(f"\n   -> Injetando dados via Gboard...")
         
-        # PASSO A: Escreve o Usuário
+        # 3. Injeção de dados (MÉTODO DA SETA - GBOARD)
+        print(f"\n   -> Injetando dados no {conta['pkg']}...")
+        
+        # PASSO 1: Escreve o Usuário
         os.system(f"su -c 'input text {conta['user']}'")
-        time.sleep(1.5) 
+        time.sleep(2.0) 
         
-        # PASSO B: TAB (Pula para Senha - O Gboard aceita muito bem o 61)
-        os.system(f"su -c 'input keyevent 61'")
-        print("      * Pulando para Senha...")
-        time.sleep(2.0) # Tempo para o cursor mudar de caixa
+        # PASSO 2: Simula o clique na 'Seta' (Próximo)
+        print("      * Clicando na Seta para pular...")
+        os.system(f"su -c 'input keyevent 66'") 
+        time.sleep(2.5) # Pausa para o cursor sair de uma caixa e entrar na outra
         
-        # PASSO C: Escreve a Senha
+        # PASSO 3: Escreve a Senha
+        # Se ele logar direto sem escrever a senha, avise aqui!
+        print(f"      * Escrevendo senha...")
         os.system(f"su -c 'input text {conta['pass']}'")
         time.sleep(1.5)
         
-        # PASSO D: ENTER (Logar)
+        # PASSO 4: Enter Final para Logar
         os.system(f"su -c 'input keyevent 66'")
-        
-        print(f"\033[1;32m   -> [ OK ] Conta {i} enviada. Próxima em 5s...\033[0m")
-        time.sleep(5)
 
     print("\n\033[1;32m[ SUCESSO ] Todas as contas foram processadas!\033[0m")
 class Utilities:

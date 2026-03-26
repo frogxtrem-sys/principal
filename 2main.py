@@ -275,6 +275,38 @@ class FileManager:
                     server_links.append((package, link))
         return server_links
 
+    def auto_inject_logins():
+        """Injeta os logins salvos nos clones se o backup existir na /sdcard/"""
+        packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+        backup_base = "/sdcard/RobloxBackup"
+
+        if not os.path.exists(backup_base):
+            print("\033[1;33m[ Shouko.dev ] - Backup não encontrado na /sdcard. Pulando injeção...\033[0m")
+            return
+
+        print("\033[1;32m[ Shouko.dev ] - Backup detectado! Injetando sessões...\033[0m")
+    
+        for i, pkg in enumerate(packages):
+            clone_num = i + 1
+            src = f"{backup_base}/clone{clone_num}/"
+            dest = f"/data/data/{pkg}/shared_prefs"
+
+            # Comandos de Root para restaurar e dar permissão
+            os.system(f"su -c 'mkdir -p {dest}'")
+            os.system(f"su -c 'cp -R {src}* {dest}/'")
+        
+            # Ajusta o UID para o Roblox não deslogar
+            try:
+                uid_cmd = f"su -c 'stat -c %u /data/data/{pkg}'"
+                app_uid = os.popen(uid_cmd).read().strip()
+                if app_uid:
+                    os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
+                    os.system(f"su -c 'chmod -R 777 {dest}'")
+            except:
+                pass
+
+        print("\033[1;32m[ Shouko.dev ] - Logins injetados com sucesso!\033[0m")
+
     @staticmethod
     def auto_setup_completo():
         print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup com Injeção de Login...\033[0m")

@@ -311,7 +311,7 @@ class FileManager:
         
         # 2. Chama a injeção (Agora funciona porque estão no mesmo 'apartamento')
         # Como as duas são staticmethod na mesma classe, usamos o nome da classe ou chamamos direto se estiver no mesmo nível
-        auto_inject_logins() 
+        self.auto_inject_logins() 
         
         print("\n\033[1;32m[ SETUP FINALIZADO ] - Pode dar START!\033[0m")
     

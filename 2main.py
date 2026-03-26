@@ -410,7 +410,7 @@ class RobloxManager:
             print(f"\n\033[1;36m[ {i}/4 ] Preparando: {conta['pkg']}\033[0m")
             
             # Abre o app específico
-            os.system(f"su -c 'am start -n {conta['pkg']}/com.roblox.client.ActivityMain'")
+            os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
             
             print(f"      -> Aguarde o Roblox carregar...")
             input("      -> Quando o teclado abrir no campo USUÁRIO, aperte ENTER aqui...")

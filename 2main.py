@@ -242,12 +242,11 @@ def auto_inject_logins():
         origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
-            # 1. FECHA O ROBLOX E LIMPA TUDO (Caches e Bancos de Dados de sessão)
+            # 1. Fecha o app e limpa o lixo
             os.system(f"su -c 'am force-stop {pkg}'")
             os.system(f"su -c 'rm -rf /data/data/{pkg}/cache/*'")
-            os.system(f"su -c 'rm -rf /data/data/{pkg}/databases/*'") # Remove registros de sessões antigas
             
-            # 2. Prepara a pasta shared_prefs
+            # 2. Prepara a pasta
             os.system(f"su -c 'mkdir -p {dest}'")
             os.system(f"su -c 'rm -f {dest}/*'") 
             
@@ -255,13 +254,18 @@ def auto_inject_logins():
             os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
             os.system(f"su -c 'mv {dest}/{pkg}_preferences.xml {dest}/com.roblox.client.xml 2>/dev/null'")
 
-            # 4. APLICA PERMISSÕES TOTAIS
+            # 4. O SEGREDO: Remove o ID de instalação antigo para o Roblox gerar um novo
+            # Isso força o app a aceitar o arquivo de login como se fosse desse aparelho
+            os.system(f"su -c 'rm -f /data/data/{pkg}/shared_prefs/InstallationId.xml'")
+            os.system(f"su -c 'rm -f /data/data/{pkg}/shared_prefs/WebViewChromiumPrefs.xml'")
+
+            # 5. Permissões e Dono
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
             if app_uid:
-                os.system(f"su -c 'chown -R {app_uid}:{app_uid} /data/data/{pkg}/shared_prefs'")
-                os.system(f"su -c 'chmod -R 777 /data/data/{pkg}/shared_prefs'")
+                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
+                os.system(f"su -c 'chmod -R 777 {dest}'")
                 os.system(f"su -c 'restorecon -R /data/data/{pkg}'")
-                print(f"      -> Login Resetado e Ativado: {pkg}")
+                print(f"      -> Login Resetado: {pkg}")
         else:
             print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
 

@@ -235,23 +235,28 @@ def login_sem_minimizacao():
             print(f"      -> Injetando texto em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 3. Injeção de dados via Root com pausas
+        # 3. Injeção de dados via Root com pausas manuais
         print(f"\n   -> Injetando dados no {conta['pkg']}...")
         
         # Digita o Usuário
         os.system(f"su -c 'input text {conta['user']}'")
-        time.sleep(1.5) # Pausa para o sistema processar o texto
+        time.sleep(1.5) # Espera o Android processar o texto
         
-        # Aperta TAB para pular para a Senha
-        os.system(f"su -c 'input keyevent 61'")
-        time.sleep(1.5) # Pausa crucial para o foco mudar
+        # Aperta TAB para pular para o campo de Senha
+        # DICA: Se ele parar no 'olhinho', podemos dobrar esse comando
+        os.system(f"su -c 'input keyevent 61'") 
+        print("      * Pulando para o campo de senha...")
+        time.sleep(2.0) # Pausa crucial para o foco mudar de caixa
         
         # Digita a Senha
         os.system(f"su -c 'input text {conta['pass']}'")
         time.sleep(1.5)
         
-        # Aperta ENTER para logar
+        # Aperta ENTER para confirmar o login
         os.system(f"su -c 'input keyevent 66'")
+        
+        print(f"\033[1;32m   -> [ OK ] Conta {i} processada. Próxima em 5s...\033[0m")
+        time.sleep(5)
 class Utilities:
     @staticmethod
     def collect_garbage():

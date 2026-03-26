@@ -275,57 +275,45 @@ class FileManager:
                     server_links.append((package, link))
         return server_links
 
+    @staticmethod
     def auto_inject_logins():
-        """Injeta os logins salvos nos clones se o backup existir na /sdcard/"""
+        """Injeta os logins salvos nos clones se o backup existir"""
         packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
         backup_base = "/sdcard/RobloxBackup"
 
         if not os.path.exists(backup_base):
-            print("\033[1;33m[ Shouko.dev ] - Backup não encontrado na /sdcard. Pulando injeção...\033[0m")
+            print("\033[1;33m[ Shouko.dev ] - Backup não encontrado. Pulando...\033[0m")
             return
 
-        print("\033[1;32m[ Shouko.dev ] - Backup detectado! Injetando sessões...\033[0m")
-    
+        print("\033[1;32m[ Shouko.dev ] - Injetando sessões...\033[0m")
         for i, pkg in enumerate(packages):
-            clone_num = i + 1
-            src = f"{backup_base}/clone{clone_num}/"
             dest = f"/data/data/{pkg}/shared_prefs"
-
-            # Comandos de Root para restaurar e dar permissão
             os.system(f"su -c 'mkdir -p {dest}'")
-            os.system(f"su -c 'cp -R {src}* {dest}/'")
-        
+            os.system(f"su -c 'cp -R {backup_base}/clone{i+1}/* {dest}/'")
+            
             # Ajusta o UID para o Roblox não deslogar
-            try:
-                uid_cmd = f"su -c 'stat -c %u /data/data/{pkg}'"
-                app_uid = os.popen(uid_cmd).read().strip()
-                if app_uid:
-                    os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                    os.system(f"su -c 'chmod -R 777 {dest}'")
-            except:
-                pass
-
-        print("\033[1;32m[ Shouko.dev ] - Logins injetados com sucesso!\033[0m")
+            app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
+            if app_uid:
+                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
+                os.system(f"su -c 'chmod -R 777 {dest}'")
 
     @staticmethod
     def auto_setup_completo():
-        print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup com Injeção de Login...\033[0m")
-    
-        # 1. Tenta baixar o backup se ele não existir (OPCIONAL - coloque seu link aqui)
+        print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
+        
+        # 1. Baixa o backup do GitHub se não existir
         if not os.path.exists("/sdcard/RobloxBackup"):
-            print("[ ! ] Backup não achado. Baixando do Discord...")
-            # Exemplo: os.system("wget LINK_DO_SEU_ZIP_AQUI -O /sdcard/logins.zip")
-            # os.system("unzip /sdcard/logins.zip -d /sdcard/")
-    
-        # 2. Chama a função de injeção que você já tem
-        auto_inject_logins()
-    
-        # 3. Verifica dependências (psutil, etc)
-        print("[ OK ] Verificando bibliotecas...")
-        os.system("pip install psutil requests rich")
-    
-        print("\n\033[1;32m[ SETUP FINALIZADO ] - Agora é só usar a Opção 1!\033[0m")
-
+            print("[ ! ] Baixando backup do GitHub Privado...")
+            TOKEN = "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"
+            URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
+            os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
+            os.system("unzip -o /sdcard/logins.zip -d /sdcard/")
+        
+        # 2. Chama a injeção (Agora funciona porque estão no mesmo 'apartamento')
+        # Como as duas são staticmethod na mesma classe, usamos o nome da classe ou chamamos direto se estiver no mesmo nível
+        FileManager.auto_inject_logins() # <-- AJUSTE O NOME 'FileManager' para o nome da sua classe!
+        
+        print("\n\033[1;32m[ SETUP FINALIZADO ] - Pode dar START!\033[0m")
     
     def save_accounts(accounts):
         with open(FileManager.ACCOUNTS_FILE, "w") as file:

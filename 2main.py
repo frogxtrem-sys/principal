@@ -244,7 +244,7 @@ def login_sem_minimizacao():
         
         # Aperta TAB para pular para o campo de Senha
         # DICA: Se ele parar no 'olhinho', podemos dobrar esse comando
-        os.system(f"su -c 'input keyevent 61'") 
+        os.system(f"su -c 'input keyevent 61 && sleep 0.5 && input keyevent 61'") 
         print("      * Pulando para o campo de senha...")
         time.sleep(2.0) # Pausa crucial para o foco mudar de caixa
         

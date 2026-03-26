@@ -211,6 +211,29 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
+def login_assistido():
+    print("\n\033[1;34m[ ! ] Assistente de Login Iniciado\033[0m")
+    contas = [
+        {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
+        {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
+        {"user": "saitama0000437", "pass": "saitama37", "pkg": "ixq.vf.jlr"},
+        {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
+    ]
+
+    for i, conta in enumerate(contas, 1):
+        print(f"\n\033[1;36m[ {i}/4 ] Abrindo: {conta['pkg']}\033[0m")
+        # Abre o app usando o monkey (mais seguro que o am start)
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
+        
+        input("      -> Clique no campo USUÁRIO e aperte ENTER aqui...")
+        os.system(f"su -c 'input text {conta['user']}'")
+        
+        input("      -> Clique no campo SENHA e aperte ENTER aqui...")
+        os.system(f"su -c 'input text {conta['pass']}'")
+        print(f"      -> Login enviado para {conta['pkg']}")
+
+    print("\n\033[1;32m[ OK ] Todas as contas foram processadas!\033[0m")
+
 class Utilities:
     @staticmethod
     def collect_garbage():
@@ -395,26 +418,6 @@ class FileManager:
         except: return False
     
 class RobloxManager:
-    def login_assistido(self):
-        contas = [
-            {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
-            {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
-            {"user": "saitama0000437", "pass": "saitama37", "pkg": "ixq.vf.jlr"},
-            {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
-        ]
-        for i, conta in enumerate(contas, 1):
-            print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
-            # Abre o app de forma garantida
-            os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
-            
-            print("Aguarde o Roblox carregar totalmente...")
-            input("Clique no campo USUÁRIO e aperte ENTER no Termux...")
-            os.system(f"su -c 'input text {conta['user']}'")
-            
-            input("Clique no campo SENHA e aperte ENTER no Termux...")
-            os.system(f"su -c 'input text {conta['pass']}'")
-            print("Dados inseridos! Faça o login e volte para cá.")
-
     @staticmethod
     def check_user_online(user_id, cookie=None):
         max_retries = 2
@@ -1367,7 +1370,7 @@ def main():
 
         elif setup_type == "2":
             try:
-                RobloxManager.login_assistido(RobloxManager)
+                login_assistido(RobloxManager)
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

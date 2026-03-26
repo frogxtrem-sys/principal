@@ -223,7 +223,7 @@ def login_sem_minimizacao():
         print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
         
         # 1. Abre o app
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHer 1'")
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
         
         # 2. ESPERA DE SEGURANÇA (25 segundos)
         # Nesse tempo, VOCÊ clica no botão 'Entrar' e clica na caixa de 'Usuário'

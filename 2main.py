@@ -297,7 +297,7 @@ class FileManager:
         if os.path.exists("/sdcard/logins.zip"):
             os.system("unzip -o /sdcard/logins.zip -d /sdcard/RobloxBackup/")
             # CHAMA A INJEÇÃO (Corrigido para usar FileManager.)
-            FileManager.auto_inject_logins()
+            auto_inject_logins()
             print("\n\033[1;32m[ PRONTO ] - Setup finalizado. Pode iniciar!\033[0m")
         else:
             print("\033[1;31m[ ERRO ] - Falha no download. Verifique o Token.\033[0m")

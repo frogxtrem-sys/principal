@@ -210,7 +210,8 @@ ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
 CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
-def auto_inject_logins():
+@staticmethod
+    def auto_inject_logins():
         """Injeta os logins salvos nos clones se o backup existir"""
         packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
         backup_base = "/sdcard/RobloxBackup"
@@ -223,8 +224,9 @@ def auto_inject_logins():
         for i, pkg in enumerate(packages):
             dest = f"/data/data/{pkg}/shared_prefs"
             os.system(f"su -c 'mkdir -p {dest}'")
-            os.system(f"su -c 'cp -R {backup_base}/clone{i+1}/* {dest}/'")
-            
+            # Agora ele pega tudo que está na pasta extraída e joga no clone
+            os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
+
             # Ajusta o UID para o Roblox não deslogar
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
             if app_uid:
@@ -311,7 +313,7 @@ class FileManager:
         
         # 2. Chama a injeção (Agora funciona porque estão no mesmo 'apartamento')
         # Como as duas são staticmethod na mesma classe, usamos o nome da classe ou chamamos direto se estiver no mesmo nível
-        self.auto_inject_logins() 
+        FileManager.auto_inject_logins() 
         
         print("\n\033[1;32m[ SETUP FINALIZADO ] - Pode dar START!\033[0m")
     

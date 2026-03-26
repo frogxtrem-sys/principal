@@ -1347,8 +1347,7 @@ def main():
                 continue
 
         elif setup_type == "2":
-            try:
-                auto_inject_logins() 
+            try: 
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

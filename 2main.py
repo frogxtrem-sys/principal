@@ -585,7 +585,7 @@ class RobloxManager:
     @staticmethod
     def kill_roblox_processes():
         packages = RobloxManager.get_roblox_packages()
-        running = SystemMonitor.roblox_processes()
+        running = []
         if not running:
             print("\033[1;32m[ Shouko.dev ] - No Roblox processes to kill.\033[0m")
             return

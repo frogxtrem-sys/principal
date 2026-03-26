@@ -242,23 +242,24 @@ def auto_inject_logins():
         origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
-            # 1. Cria a pasta e limpa o que tinha antes
+            # 1. Limpa o destino e garante que a pasta existe
             os.system(f"su -c 'mkdir -p {dest}'")
             os.system(f"su -c 'rm -f {dest}/*'") 
             
-            # 2. Copia os arquivos
+            # 2. Copia os arquivos do backup
             os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
             
-            # 3. Pega o ID real do aplicativo (O SEGREDO)
+            # 3. O PULO DO GATO: Renomeia o arquivo de preferência para o padrão do Roblox
+            # Isso resolve o problema de o arquivo estar com o nome do pacote
+            os.system(f"su -c 'mv {dest}/{pkg}_preferences.xml {dest}/com.roblox.client.xml 2>/dev/null'")
+
+            # 4. Pega o ID do app e dá permissão total
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
-            
             if app_uid:
-                # 4. Força o Roblox a ser o dono de tudo
                 os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                os.system(f"su -c 'chmod -R 777 {dest}'") 
-                # Avisa o sistema sobre a mudança
-                os.system(f"su -c 'restorecon -R {dest}'")
-                print(f"      -> Injetado e Autorizado: {pkg}")
+                os.system(f"su -c 'chmod -R 777 {dest}'")
+                os.system(f"su -c 'restorecon -V -R {dest}'")
+                print(f"      -> Login Ativado: {pkg}")
         else:
             print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
 

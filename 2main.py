@@ -210,28 +210,6 @@ ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
 CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
-@staticmethod
-def auto_inject_logins():
-    """Injeta os logins salvos nos clones se o backup existir"""
-    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-    backup_base = "/sdcard/RobloxBackup"
-
-    if not os.path.exists(backup_base):
-        print("\033[1;33m[ Shouko.dev ] - Backup não encontrado. Pulando...\033[0m")
-        return
-
-    print("\033[1;32m[ Shouko.dev ] - Injetando sessões...\033[0m")
-    for i, pkg in enumerate(packages):
-        dest = f"/data/data/{pkg}/shared_prefs"
-        os.system(f"su -c 'mkdir -p {dest}'")
-        # Força a cópia de tudo que está na pasta de backup para o destino do clone
-        os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
-
-        # Ajusta permissões para o Roblox aceitar o arquivo
-        app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
-        if app_uid:
-            os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-            os.system(f"su -c 'chmod -R 777 {dest}'")
 
 class Utilities:
     @staticmethod
@@ -298,26 +276,50 @@ class FileManager:
         return server_links
 
     @staticmethod
+    def auto_inject_logins():
+        """Injeta os logins salvos nos clones se o backup existir"""
+        # Nomes dos pacotes que vimos na sua pasta /data/data/
+        packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+        backup_base = "/sdcard/RobloxBackup"
+
+        if not os.path.exists(backup_base) or not os.listdir(backup_base):
+            print("\033[1;33m[ ! ] Pasta de backup vazia ou inexistente.\033[0m")
+            return
+
+        print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
+        for pkg in packages:
+            dest = f"/data/data/{pkg}/shared_prefs"
+            # Cria a pasta de destino no clone e copia o conteúdo
+            os.system(f"su -c 'mkdir -p {dest}'")
+            os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
+
+            # Ajusta permissões (importante para o Roblox não resetar)
+            app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
+            if app_uid:
+                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
+                os.system(f"su -c 'chmod -R 777 {dest}'")
+
+    @staticmethod
     def auto_setup_completo():
         print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
         
-        # 1. Limpa lixo antigo e baixa o backup novo
-        os.system("rm -rf /sdcard/RobloxBackup /sdcard/logins.zip")
-        os.system("mkdir -p /sdcard/RobloxBackup")
+        # Garante que a pasta base exista
+        os.system("su -c 'mkdir -p /sdcard/RobloxBackup'")
         
-        PARTE1 = "ghp_pLd3ixDQuR7slsPrlXG" # Seu token novo
-        PARTE2 = "fTR1n0jZTC73XVUc1"
-        TOKEN = PARTE1 + PARTE2
+        # Configuração do Token e URL
+        P1 = "ghp_pLd3ixDQuR7slsPrlXG" 
+        P2 = "fTR1n0jZTC73XVUc1"
+        TOKEN = P1 + P2
         URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
         
-        print("[ ! ] Baixando backup do GitHub...")
+        print("[ > ] Baixando backup privado...")
+        # Baixa e extrai direto na pasta que a injeção vai ler
         os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
         os.system("unzip -o /sdcard/logins.zip -d /sdcard/RobloxBackup/")
 
-        # 2. Chama a injeção
+        # Chama a função de injeção que acabamos de ajustar
         FileManager.auto_inject_logins()
-
-        print("\n\033[1;32m[ SETUP FINALIZADO ] - Pode dar START!\033[0m")
+        print("\n\033[1;32m[ PRONTO ] - Setup finalizado. Pode iniciar o farm!\033[0m")
     
     def save_accounts(accounts):
         with open(FileManager.ACCOUNTS_FILE, "w") as file:

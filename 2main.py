@@ -242,30 +242,28 @@ def auto_inject_logins():
         origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
-            # 1. Fecha o app e limpa o lixo
+            # 1. Mata o processo do Roblox com força
+            os.system(f"su -c 'killall -9 {pkg} 2>/dev/null'")
             os.system(f"su -c 'am force-stop {pkg}'")
-            os.system(f"su -c 'rm -rf /data/data/{pkg}/cache/*'")
             
-            # 2. Prepara a pasta
-            os.system(f"su -c 'mkdir -p {dest}'")
-            os.system(f"su -c 'rm -f {dest}/*'") 
+            # 2. DELETA a pasta shared_prefs completamente (Limpeza Radical)
+            os.system(f"su -c 'rm -rf /data/data/{pkg}/shared_prefs'")
+            os.system(f"su -c 'mkdir -p /data/data/{pkg}/shared_prefs'")
             
-            # 3. Copia e Renomeia
-            os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
-            os.system(f"su -c 'mv {dest}/{pkg}_preferences.xml {dest}/com.roblox.client.xml 2>/dev/null'")
-
-            # 4. O SEGREDO: Remove o ID de instalação antigo para o Roblox gerar um novo
-            # Isso força o app a aceitar o arquivo de login como se fosse desse aparelho
+            # 3. Copia os arquivos do backup
+            os.system(f"su -c 'cp -Rf {origem}/* /data/data/{pkg}/shared_prefs/'")
+            
+            # 4. Renomeia e remove IDs de rastreio
+            os.system(f"su -c 'mv /data/data/{pkg}/shared_prefs/{pkg}_preferences.xml /data/data/{pkg}/shared_prefs/com.roblox.client.xml 2>/dev/null'")
             os.system(f"su -c 'rm -f /data/data/{pkg}/shared_prefs/InstallationId.xml'")
-            os.system(f"su -c 'rm -f /data/data/{pkg}/shared_prefs/WebViewChromiumPrefs.xml'")
 
-            # 5. Permissões e Dono
+            # 5. O SEGREDO DO UGPHONE: Dar permissão na pasta PAI também
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
             if app_uid:
-                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                os.system(f"su -c 'chmod -R 777 {dest}'")
+                os.system(f"su -c 'chown -R {app_uid}:{app_uid} /data/data/{pkg}'")
+                os.system(f"su -c 'chmod -R 777 /data/data/{pkg}/shared_prefs'")
                 os.system(f"su -c 'restorecon -R /data/data/{pkg}'")
-                print(f"      -> Login Resetado: {pkg}")
+                print(f"      -> Injeção Forçada Concluída: {pkg}")
         else:
             print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
 

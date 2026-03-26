@@ -215,8 +215,7 @@ def auto_inject_logins():
         """Injeta os logins salvos nos clones se o backup existir"""
         # Seus pacotes identificados nas prints anteriores
         packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-        backup_base = "/storage/emulated/0/RobloxBackup"
-
+        backup_base = "/sdcard/RobloxBackup/RobloxBackup"
         if not os.path.exists(backup_base) or not os.listdir(backup_base):
             print("\033[1;33m[ ! ] Backup não encontrado ou pasta vazia. Pulando...\033[0m")
             return

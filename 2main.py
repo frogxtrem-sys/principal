@@ -838,10 +838,13 @@ class UIManager:
         if current_time - UIManager.last_update_time < UIManager.update_interval:
             return
         
-        cpu_usage = psutil.cpu_percent(interval=2)
-        memory_info = psutil.virtual_memory()
-        ram = round(memory_info.used / memory_info.total * 100, 2)
-        title = f"CPU: {cpu_usage}% | RAM: {ram}%"
+        try:
+            cpu_usage = psutil.cpu_percent(interval=None)
+            memory_info = psutil.virtual_memory()
+            ram = round(memory_info.used / memory_info.total * 100, 2)
+            title = f"CPU: {cpu_usage}% | RAM: {ram}%"
+        except Exception:
+            title = "CPU: N/A | RAM: N/A (Cloud Mode)"
 
         table_packages = PrettyTable(
             field_names=["Package", "Username", "Package Status"],

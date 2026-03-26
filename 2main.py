@@ -211,7 +211,7 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def login_100_automatico():
+def login_final_sem_erro():
     contas = [
         {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
         {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
@@ -219,43 +219,36 @@ def login_100_automatico():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # Coordenadas baseadas nas suas prints horizontais
-    X_BTN_ENTRAR = 380 
-    Y_BTN_ENTRAR = 630
-    X_CAMPO_USER = 530
-    Y_CAMPO_USER = 630
+    # Coordenadas que a gente confirmou nas suas prints
+    X_SIGN, Y_SIGN = 380, 630
+    X_USER, Y_USER = 530, 630
 
     for i, conta in enumerate(contas, 1):
-        print(f"\n[ {i}/4 ] Preparando: {conta['pkg']}")
+        print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
         
-        # 1. Mata o processo anterior para garantir abertura em tela cheia
-        os.system(f"su -c 'am force-stop {conta['pkg']}'")
-        time.sleep(1)
-        
-        # 2. Abre o app usando monkey (o melhor para clones)
-        print(f"   -> Abrindo o jogo...")
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
-        
-        # 3. Espera 15s para carregar
-        for t in range(15, 0, -1):
-            print(f"      -> Carregando em: {t}s   ", end="\r")
-            time.sleep(1)
+        # 1. Abre o app
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
+        time.sleep(15)
 
-        # 4. Clica no Sign In inicial
-        print("\n   -> Clicando no Log In inicial...")
-        os.system(f"su -c 'input tap {X_BTN_ENTRAR} {Y_BTN_ENTRAR}'")
-        time.sleep(4)
+        # 2. O TRUQUE: Traz o app pra frente e clica IMEDIATAMENTE
+        # A gente manda o comando de abrir de novo (pra tirar da bolinha) e o clique na mesma linha
+        print("   -> Forçando foco e clicando no Sign In...")
+        os.system(f"su -c 'monkey -p {conta['pkg']} 1 && sleep 1 && input tap {X_SIGN} {Y_SIGN}'")
+        time.sleep(3)
 
-        # 5. Clica no campo de usuário (para garantir o foco)
-        os.system(f"su -c 'input tap {X_CAMPO_USER} {Y_CAMPO_USER}'")
+        # 3. Faz o mesmo para o campo de usuário
+        print("   -> Focando campo de texto...")
+        os.system(f"su -c 'monkey -p {conta['pkg']} 1 && sleep 1 && input tap {X_USER} {Y_USER}'")
         time.sleep(1)
 
-        # 6. Injeta os dados: USER -> TAB -> PASS -> ENTER
-        print("   -> Injetando credenciais...")
+        # 4. Injeta os dados
+        print("   -> Injetando senha e logando...")
         os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
         
-        print(f"   -> [ OK ] Conta {i} enviada.")
-        time.sleep(3)
+        print(f"   -> [ OK ] Conta {i} pronta. Próxima...")
+        time.sleep(4)
+
+    print("\n[!] Pronto! Agora é só conferir os jogos.")
 
     print("\n\033[1;32m[ SUCESSO ] Ciclo completo!\033[0m")
 class Utilities:
@@ -1394,7 +1387,7 @@ def main():
 
         elif setup_type == "2":
             try:
-                login_100_automatico()
+                login_final_sem_erro()
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

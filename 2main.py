@@ -216,11 +216,11 @@ def auto_inject_logins():
     packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
     
     # Caminhos base
-    base_path = "/sdcard/RobloxBackup"
+    base_path = "/data/data/com.termux/files/home/RobloxBackup"
     
     # Verifica se a pasta existe. Se o ZIP tiver pasta interna, ele ajusta sozinho:
     if os.path.exists(f"{base_path}/RobloxBackup"):
-        backup_base = "/sdcard/RobloxBackup/RobloxBackup"
+        backup_base = f"{base_path}/RobloxBackup"
     else:
         backup_base = base_path
 
@@ -294,22 +294,22 @@ class FileManager:
     def auto_setup_completo():
         print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
         
-        # Limpa lixo e garante que a pasta base exista
-        os.system("rm -rf /storage/emulated/0/RobloxBackup /storage/emulated/0/logins.zip")
-        os.system("mkdir -p /storage/emulated/0/RobloxBackup")
-        
-        # Configuração do Token e URL
-        P1 = "ghp_pLd3ixDQuR7slsPrlXG" 
-        P2 = "fTR1n0jZTC73XVUc1"
-        TOKEN = P1 + P2
-        URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
-        
+        # Limpa lixo e garante que a pasta base exista (Na pasta interna do Termux para evitar erros)
+        zip_path = "/data/data/com.termux/files/home/logins.zip"
+        extract_path = "/data/data/com.termux/files/home/RobloxBackup"
+
+        os.system(f"rm -rf {extract_path} {zip_path}")
+        os.system(f"mkdir -p {extract_path}")
+    
+        # Configuração do Token e URL (Mantenha suas linhas 301-305 como estão)
+    
         print("[ > ] Baixando backup privado...")
-        os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /storage/emulated/0/logins.zip")
-        
-        if os.path.exists("/sdcard/logins.zip"):
-            os.system("unzip -o /storage/emulated/0/logins.zip -d /storage/emulated/0/RobloxBackup/")
-            # CHAMA A INJEÇÃO (Corrigido para usar FileManager.)
+        os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O {zip_path}")
+    
+        if os.path.exists(zip_path):
+            print("[ OK ] Extraindo arquivos...")
+            os.system(f"unzip -o {zip_path} -d {extract_path}/")
+                # CHAMA A INJEÇÃO (Corrigido para usar FileManager.)
             auto_inject_logins()
             print("\n\033[1;32m[ PRONTO ] - Setup finalizado. Pode iniciar!\033[0m")
         else:

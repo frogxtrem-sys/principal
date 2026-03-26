@@ -242,22 +242,23 @@ def auto_inject_logins():
         origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
-            # 1. Limpa o destino e garante que a pasta existe
+            # 1. Limpa caches e pastas antigas
+            os.system(f"su -c 'rm -rf /data/data/{pkg}/cache/*'")
             os.system(f"su -c 'mkdir -p {dest}'")
             os.system(f"su -c 'rm -f {dest}/*'") 
             
-            # 2. Copia os arquivos do backup
+            # 2. Copia os arquivos do backup para o sistema
             os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
             
-            # 3. RENOMEIA PARA O PADRÃO DO ROBLOX (O mais importante)
+            # 3. RENOMEIA O ARQUIVO (O passo que estava faltando!)
+            # Transforma o nome do backup no nome que o Roblox exige
             os.system(f"su -c 'mv {dest}/{pkg}_preferences.xml {dest}/com.roblox.client.xml 2>/dev/null'")
 
-            # 4. Pega o ID do app e dá permissão total
+            # 4. Ajusta permissões para o Roblox aceitar o arquivo
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
             if app_uid:
                 os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
                 os.system(f"su -c 'chmod -R 777 {dest}'")
-                # Comando sem o -V para não dar erro no UGPhone
                 os.system(f"su -c 'restorecon -R {dest}'")
                 print(f"      -> Login Ativado: {pkg}")
         else:

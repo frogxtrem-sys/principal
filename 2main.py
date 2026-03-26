@@ -211,8 +211,8 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def login_assistido():
-    print("\n\033[1;34m[ ! ] Assistente de Login Iniciado\033[0m")
+def login_combo():
+    print("\n\033[1;34m[ ! ] Login Combo (Sem Minimizar) Iniciado\033[0m")
     contas = [
         {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
         {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
@@ -222,17 +222,22 @@ def login_assistido():
 
     for i, conta in enumerate(contas, 1):
         print(f"\n\033[1;36m[ {i}/4 ] Abrindo: {conta['pkg']}\033[0m")
-        # Abre o app usando o monkey (mais seguro que o am start)
+        # Abre o Roblox
         os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
         
-        input("      -> Clique no campo USUÁRIO e aperte ENTER aqui...")
-        os.system(f"su -c 'input text {conta['user']}'")
+        print("      -> Você tem 15 segundos para clicar no campo 'USUÁRIO'...")
+        for t in range(15, 0, -1):
+            print(f"      -> Digitando em: {t}s  ", end="\r")
+            time.sleep(1)
         
-        input("      -> Clique no campo SENHA e aperte ENTER aqui...")
-        os.system(f"su -c 'input text {conta['pass']}'")
-        print(f"      -> Login enviado para {conta['pkg']}")
+        # O PULO DO GATO: Digita User -> Aperta TAB -> Digita Senha -> Aperta ENTER
+        print(f"\n      -> Injetando dados no {conta['pkg']}...")
+        os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
+        
+        print(f"\033[1;32m      -> Pronto! Verifique se logou. Próximo em 5s...\033[0m")
+        time.sleep(5)
 
-    print("\n\033[1;32m[ OK ] Todas as contas foram processadas!\033[0m")
+    print("\n\033[1;32m[ OK ] Todas as contas processadas!\033[0m")
 
 class Utilities:
     @staticmethod
@@ -1370,7 +1375,7 @@ def main():
 
         elif setup_type == "2":
             try:
-                login_assistido()
+                login_combo()
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

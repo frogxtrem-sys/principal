@@ -239,19 +239,26 @@ def auto_inject_logins():
 
     for pkg, clone_folder in mapping.items():
         dest = f"/data/data/{pkg}/shared_prefs"
-        # O segredo: agora ele busca pela pasta 'cloneX'
         origem = f"{backup_base}/{clone_folder}"
         
         if os.path.exists(origem):
+            # 1. Cria a pasta e limpa o que tinha antes
             os.system(f"su -c 'mkdir -p {dest}'")
+            os.system(f"su -c 'rm -f {dest}/*'") 
+            
+            # 2. Copia os arquivos
             os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
             
-            # Ajusta permissões
+            # 3. Pega o ID real do aplicativo (O SEGREDO)
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
+            
             if app_uid:
+                # 4. Força o Roblox a ser o dono de tudo
                 os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                os.system(f"su -c 'chmod -R 777 {dest}'")
-                print(f"      -> Sucesso no clone: {pkg}")
+                os.system(f"su -c 'chmod -R 777 {dest}'") 
+                # Avisa o sistema sobre a mudança
+                os.system(f"su -c 'restorecon -R {dest}'")
+                print(f"      -> Injetado e Autorizado: {pkg}")
         else:
             print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
 

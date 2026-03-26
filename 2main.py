@@ -526,8 +526,8 @@ class FileManager:
                 "memory_total": round(memory_info.total / (1024 ** 3), 2),
                 "memory_used": round(memory_info.used / (1024 ** 3), 2),
                 "memory_percent": memory_info.percent,
-                "uptime": SystemMonitor.get_uptime(),
-                "roblox_packages": SystemMonitor.roblox_processes()
+                "uptime": "N/A",
+                "roblox_packages": []
             }
             return system_info
         except Exception as e:

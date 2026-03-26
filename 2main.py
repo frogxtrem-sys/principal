@@ -211,28 +211,28 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-    def auto_inject_logins():
-        """Injeta os logins salvos nos clones se o backup existir"""
-        # Nomes dos pacotes que vimos na sua pasta /data/data/
-        packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-        backup_base = "/sdcard/RobloxBackup"
+def auto_inject_logins():
+    """Injeta os logins salvos nos clones se o backup existir"""
+    # Nomes dos pacotes que vimos na sua pasta /data/data/
+    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+    backup_base = "/sdcard/RobloxBackup"
 
-        if not os.path.exists(backup_base) or not os.listdir(backup_base):
-            print("\033[1;33m[ ! ] Pasta de backup vazia ou inexistente.\033[0m")
-            return
+    if not os.path.exists(backup_base) or not os.listdir(backup_base):
+        print("\033[1;33m[ ! ] Pasta de backup vazia ou inexistente.\033[0m")
+        return
 
-        print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
-        for pkg in packages:
-            dest = f"/data/data/{pkg}/shared_prefs"
-            # Cria a pasta de destino no clone e copia o conteúdo
-            os.system(f"su -c 'mkdir -p {dest}'")
-            os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
+    print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
+    for pkg in packages:
+        dest = f"/data/data/{pkg}/shared_prefs"
+        # Cria a pasta de destino no clone e copia o conteúdo
+        os.system(f"su -c 'mkdir -p {dest}'")
+        os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
 
-            # Ajusta permissões (importante para o Roblox não resetar)
-            app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
-            if app_uid:
-                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                os.system(f"su -c 'chmod -R 777 {dest}'")
+        # Ajusta permissões (importante para o Roblox não resetar)
+        app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
+        if app_uid:
+            os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
+            os.system(f"su -c 'chmod -R 777 {dest}'")
 
 class Utilities:
     @staticmethod

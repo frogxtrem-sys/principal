@@ -46,10 +46,12 @@ close_and_rejoin_delay = None
 codex_bypass_enabled = False
 codex_bypass_thread = None
 try:
-    boot_time = psutil.boot_time()
-except:
+    import psutil
+    # Tenta ler o tempo real, se falhar (Permission Denied), usa o tempo atual
+    BOOT_TIME = psutil.boot_time()
+except Exception:
     import time
-    boot_time = time.time() # Ignora o erro de permissão do VMOS
+    BOOT_TIME = time.time()
 
 auto_android_id_enabled = False
 auto_android_id_thread = None

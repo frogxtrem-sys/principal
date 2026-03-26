@@ -282,8 +282,8 @@ class FileManager:
         print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
         
         # Limpa lixo e garante que a pasta base exista
-        os.system("su -c 'rm -rf /sdcard/RobloxBackup /sdcard/logins.zip'")
-        os.system("su -c 'mkdir -p /sdcard/RobloxBackup'")
+        os.system("rm -rf /sdcard/RobloxBackup /sdcard/logins.zip")
+        os.system("mkdir -p /sdcard/RobloxBackup")
         
         # Configuração do Token e URL
         P1 = "ghp_pLd3ixDQuR7slsPrlXG" 

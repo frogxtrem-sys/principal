@@ -211,7 +211,7 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def login_final_sem_erro():
+def login_sem_minimizacao():
     contas = [
         {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
         {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
@@ -219,38 +219,29 @@ def login_final_sem_erro():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # Coordenadas que a gente confirmou nas suas prints
-    X_SIGN, Y_SIGN = 380, 630
-    X_USER, Y_USER = 530, 630
-
     for i, conta in enumerate(contas, 1):
         print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
         
         # 1. Abre o app
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
-        time.sleep(15)
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHer 1'")
+        
+        # 2. ESPERA DE SEGURANÇA (25 segundos)
+        # Nesse tempo, VOCÊ clica no botão 'Entrar' e clica na caixa de 'Usuário'
+        print("   -> VOCÊ TEM 25 SEGUNDOS PARA:")
+        print("      1. Clicar em Log In")
+        print("      2. Clicar na caixa de Usuário (deixe o cursor piscando!)")
+        
+        for t in range(25, 0, -1):
+            print(f"      -> Injetando texto em: {t}s   ", end="\r")
+            time.sleep(1)
 
-        # 2. O TRUQUE: Traz o app pra frente e clica IMEDIATAMENTE
-        # A gente manda o comando de abrir de novo (pra tirar da bolinha) e o clique na mesma linha
-        print("   -> Forçando foco e clicando no Sign In...")
-        os.system(f"su -c 'monkey -p {conta['pkg']} 1 && sleep 1 && input tap {X_SIGN} {Y_SIGN}'")
-        time.sleep(3)
-
-        # 3. Faz o mesmo para o campo de usuário
-        print("   -> Focando campo de texto...")
-        os.system(f"su -c 'monkey -p {conta['pkg']} 1 && sleep 1 && input tap {X_USER} {Y_USER}'")
-        time.sleep(1)
-
-        # 4. Injeta os dados
-        print("   -> Injetando senha e logando...")
+        # 3. Injeta o texto direto no campo que você já deixou focado
+        print("\n   -> Injetando agora...")
+        # Digita User -> TAB -> Digita Senha -> ENTER
         os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
         
-        print(f"   -> [ OK ] Conta {i} pronta. Próxima...")
-        time.sleep(4)
-
-    print("\n[!] Pronto! Agora é só conferir os jogos.")
-
-    print("\n\033[1;32m[ SUCESSO ] Ciclo completo!\033[0m")
+        print(f"   -> [ OK ] Conta {i} enviada. Feche o Roblox para a próxima.")
+        time.sleep(5)
 class Utilities:
     @staticmethod
     def collect_garbage():
@@ -1387,7 +1378,7 @@ def main():
 
         elif setup_type == "2":
             try:
-                login_final_sem_erro()
+                login_sem_minimizacao()
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

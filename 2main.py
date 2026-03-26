@@ -1395,6 +1395,7 @@ def main():
         elif setup_type == "2":
             try:
                 login_gboard_estavel()
+                time.sleep(9.0)
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

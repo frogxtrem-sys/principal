@@ -212,26 +212,40 @@ CONFIG_FILE = "Shouko.dev/config.json"
 version = "2.2.5 | Customized by Shouko.dev"
 
 def auto_inject_logins():
-        """Injeta os logins salvos nos clones se o backup existir"""
-        # Seus pacotes identificados nas prints anteriores
-        packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-        backup_base = "/sdcard/RobloxBackup/RobloxBackup"
-        if not os.path.exists(backup_base) or not os.listdir(backup_base):
-            print("\033[1;33m[ ! ] Backup não encontrado ou pasta vazia. Pulando...\033[0m")
-            return
+    """Injeta os logins salvos nos clones ignorando pastas duplicadas no ZIP"""
+    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+    
+    # Caminhos base
+    base_path = "/sdcard/RobloxBackup"
+    
+    # Verifica se a pasta existe. Se o ZIP tiver pasta interna, ele ajusta sozinho:
+    if os.path.exists(f"{base_path}/RobloxBackup"):
+        backup_base = f"{base_path}/RobloxBackup"
+    else:
+        backup_base = base_path
 
-        print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
-        for pkg in packages:
-            dest = f"/data/data/{pkg}/shared_prefs"
-            # Cria a pasta de destino no clone e copia o conteúdo
+    if not os.path.exists(backup_base) or not os.listdir(backup_base):
+        print("\033[1;33m[ ! ] Backup não encontrado ou pasta vazia. Pulando...\033[0m")
+        return
+
+    print("\033[1;32m[ OK ] Injetando sessões nos clones...\033[0m")
+    for pkg in packages:
+        dest = f"/data/data/{pkg}/shared_prefs"
+        # O segredo: usamos o nome do pacote para achar a pasta certa dentro do backup
+        origem = f"{backup_base}/{pkg}"
+        
+        if os.path.exists(origem):
             os.system(f"su -c 'mkdir -p {dest}'")
-            os.system(f"su -c 'cp -Rf {backup_base}/* {dest}/'")
-
-            # Ajusta permissões (importante para o Roblox não resetar a conta)
+            os.system(f"su -c 'cp -Rf {origem}/* {dest}/'")
+            
+            # Ajusta permissões
             app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
             if app_uid:
                 os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
                 os.system(f"su -c 'chmod -R 777 {dest}'")
+                print(f"      -> Sucesso no clone: {pkg}")
+        else:
+            print(f"\033[1;31m      -> Pasta {pkg} não achada no backup!\033[0m")
 
 
 class Utilities:

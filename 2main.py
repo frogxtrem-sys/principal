@@ -211,7 +211,8 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def login_sem_minimizacao():
+def login_gboard_estavel():
+    print("\n\033[1;34m[ ! ] Iniciando Login (Modo Gboard)\033[0m")
     contas = [
         {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
         {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
@@ -220,39 +221,42 @@ def login_sem_minimizacao():
     ]
 
     for i, conta in enumerate(contas, 1):
-        print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
+        print(f"\n\033[1;36m[ {i}/4 ] Abrindo: {conta['pkg']}\033[0m")
         
-        # 1. Abre o app
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
+        # 1. Abre o app (Com o nome da categoria corrigido)
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
         
-        # 2. ESPERA DE SEGURANÇA (25 segundos)
-        # Nesse tempo, VOCÊ clica no botão 'Entrar' e clica na caixa de 'Usuário'
-        print("   -> VOCÊ TEM 20 SEGUNDOS PARA:")
-        print("      1. Clicar em Log In")
-        print("      2. Clicar na caixa de Usuário (deixe o cursor piscando!)")
+        # 2. Tempo para você preparar a tela
+        print("   -> PREPARAÇÃO MANUAL:")
+        print("      1. Clique em 'Log In'")
+        print("      2. Clique no campo de 'Username' (Teclado deve subir)")
         
         for t in range(20, 0, -1):
-            print(f"      -> Injetando texto em: {t}s   ", end="\r")
+            print(f"      -> Injetando em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 3. Injeção de dados OTIMIZADA para Gboard
-        print(f"\n   -> Injetando via Gboard no {conta['pkg']}...")
+        print(f"\n   -> Injetando dados via Gboard...")
         
-        # Digita o Usuário
+        # PASSO A: Escreve o Usuário
         os.system(f"su -c 'input text {conta['user']}'")
-        time.sleep(1.0) # Gboard é mais rápido, 1s já basta
+        time.sleep(1.5) 
         
-        # TAB para pular (O Gboard aceita o 61 perfeitamente)
-        print("      * Pulando campo...")
+        # PASSO B: TAB (Pula para Senha - O Gboard aceita muito bem o 61)
         os.system(f"su -c 'input keyevent 61'")
-        time.sleep(1.0) 
+        print("      * Pulando para Senha...")
+        time.sleep(2.0) # Tempo para o cursor mudar de caixa
         
-        # Digita a Senha
+        # PASSO C: Escreve a Senha
         os.system(f"su -c 'input text {conta['pass']}'")
-        time.sleep(1.0)
+        time.sleep(1.5)
         
-        # Enter Final (Gboard converte o 66 no botão 'Avançar' do teclado)
+        # PASSO D: ENTER (Logar)
         os.system(f"su -c 'input keyevent 66'")
+        
+        print(f"\033[1;32m   -> [ OK ] Conta {i} enviada. Próxima em 5s...\033[0m")
+        time.sleep(5)
+
+    print("\n\033[1;32m[ SUCESSO ] Todas as contas foram processadas!\033[0m")
 class Utilities:
     @staticmethod
     def collect_garbage():
@@ -1389,7 +1393,7 @@ def main():
 
         elif setup_type == "2":
             try:
-                login_sem_minimizacao()
+                login_gboard_estavel()
             # --------------------------------------------------------------
                 print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
                 packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]

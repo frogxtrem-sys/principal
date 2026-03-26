@@ -684,98 +684,9 @@ class WebhookManager:
             webhook_thread.start()
 
     @staticmethod
-    def send_webhook():
-        global stop_webhook_thread
-        while not stop_webhook_thread:
-            try:
-                screenshot_path = SystemMonitor.capture_screenshot()
-                if not screenshot_path:
-                    continue
-
-                info = SystemMonitor.get_system_info()
-                if not info:
-                    continue
-
-                cpu = f"{info['cpu_usage']:.1f}%"
-                mem_used = f"{info['memory_used']:.2f} GB"
-                mem_total = f"{info['memory_total']:.2f} GB"
-                mem_percent = f"{info['memory_percent']:.1f}%"
-                uptime = info['uptime']
-                roblox_count = len(info['roblox_packages'])
-                roblox_status = f"Running: {roblox_count} instance{'s' if roblox_count != 1 else ''}"
-                roblox_details = "\n".join(info['roblox_packages']) if info['roblox_packages'] else "None"
-
-                tool_mem_usage = SystemMonitor.get_memory_usage()
-                tool_mem_display = f"{tool_mem_usage} MB" if tool_mem_usage is not None else "Unavailable"
-
-                if roblox_count > 0:
-                    status_text = f"🟢 Online"
-                else:
-                    status_text = "🔴 Offline"
-
-                random_color = random.randint(0, 16777215)
-
-                embed = {
-                    "color": random_color,
-                    "title": "📈 System Status Monitor",
-                    "description": f"Real-time report for **{device_name}**",
-                    "fields": [
-                        {"name": "🏷️ Device", "value": f"```{device_name}```", "inline": True},
-                        {"name": "💾 Total Memory", "value": f"```{mem_total}```", "inline": True},
-                        {"name": "⏰ Uptime", "value": f"```{uptime}```", "inline": True},
-                        {"name": "⚡ CPU Usage", "value": f"```{cpu}```", "inline": True},
-                        {"name": "📊 Memory Usage", "value": f"```{mem_used} ({mem_percent})```", "inline": True},
-                        {"name": "🛠️ Tool Memory Usage", "value": f"```{tool_mem_display}```", "inline": True},
-                        {"name": "🎮 Total Roblox Processes", "value": f"```{roblox_status}```", "inline": True},
-                        {"name": "🔍 Roblox Details", "value": f"```{roblox_details}```", "inline": False},
-                        {"name": "✅ Status", "value": f"```{status_text}```", "inline": True}
-                    ],
-                    "thumbnail": {"url": "https://i.imgur.com/5yXNxU4.png"},
-                    "image": {"url": "attachment://screenshot.png"},
-                    "footer": {"text": f"Made with 💖 by Shouko.dev | Join us at discord.gg/rokidmanager",
-                            "icon_url": "https://i.imgur.com/5yXNxU4.png"},
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "author": {"name": "Shouko.dev",
-                            "url": "https://discord.gg/rokidmanager",
-                            "icon_url": "https://i.imgur.com/5yXNxU4.png"}
-                }
-
-                with open(screenshot_path, "rb") as file:
-                    response = requests.post(
-                        webhook_url,
-                        data={"payload_json": json.dumps({"embeds": [embed], "username": "Shouko.dev", "avatar_url": "https://i.imgur.com/5yXNxU4.png"})},
-                        files={"file": ("screenshot.png", file)}
-                    )
-
-                if response.status_code not in (200, 204):
-                    print(f"\033[1;31m[ Shouko.dev ] - Error sending device info: {response.status_code}\033[0m")
-                    Utilities.log_error(f"Error sending webhook: Status code {response.status_code}")
-
-            except Exception as e:
-                print(f"\033[1;31m[ Shouko.dev ] - Webhook error: {e}\033[0m")
-                Utilities.log_error(f"Error in webhook thread: {e}")
-
-            time.sleep(webhook_interval * 60)
-
+    
     @staticmethod
-    def stop_webhook():
-        global stop_webhook_thread
-        stop_webhook_thread = True
 
-    @staticmethod
-    def setup_webhook():
-        global webhook_url, device_name, webhook_interval, stop_webhook_thread
-        try:
-            stop_webhook_thread = True
-            webhook_url = input("\033[1;35m[ Shouko.dev ] - Enter your Webhook URL: \033[0m")
-            device_name = input("\033[1;35m[ Shouko.dev ] - Enter your device name: \033[0m")
-            webhook_interval = int(input("\033[1;35m[ Shouko.dev ] - Enter the interval to send Webhook (minutes): \033[0m"))
-            FileManager.save_config()
-            stop_webhook_thread = False
-            threading.Thread(target=WebhookManager.send_webhook).start()
-        except Exception as e:
-            print(f"\033[1;31m[ Shouko.dev ] - Error during webhook setup: {e}\033[0m")
-            Utilities.log_error(f"Error during webhook setup: {e}")
             
 console = Console()
 

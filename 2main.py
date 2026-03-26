@@ -219,38 +219,41 @@ def login_100_automatico():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # Coordenadas (Ajuste fino baseado na sua tela deitada)
+    # Coordenadas que você viu nas fotos
     X_BTN_ENTRAR = 380 
     Y_BTN_ENTRAR = 630
 
     for i, conta in enumerate(contas, 1):
-        print(f"\n[ {i}/4 ] Resetando e abrindo: {conta['pkg']}")
+        print(f"\n[ {i}/4 ] Preparando: {conta['pkg']}")
         
-        # FECHA O APP CASO ESTEJA ABERTO (Limpa a bolinha)
+        # 1. Garante que o app esteja fechado antes de começar
         os.system(f"su -c 'am force-stop {conta['pkg']}'")
-        time.sleep(2)
+        time.sleep(1)
         
-        # ABRE O APP DO ZERO
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
+        # 2. Abre o app de forma "natural" (am start)
+        print(f"   -> Abrindo o jogo...")
+        os.system(f"su -c 'am start -n {conta['pkg']}/com.roblox.client.MainActivity'")
         
-        print("   -> Aguardando 15s de carregamento...")
-        time.sleep(15)
+        # 3. Espera 15s (Durante esse tempo, o script 'mexe' na tela pra não deixar virar bolinha)
+        for t in range(15, 0, -1):
+            if t == 5: # No meio do caminho, dá um toque bobo só pra manter o foco
+                os.system("su -c 'input keyevent 3'") # Botão Home (ajuda a não bugar)
+                os.system(f"su -c 'am start -n {conta['pkg']}/com.roblox.client.MainActivity'") # Traz de volta
+            print(f"      -> Carregando em: {t}s   ", end="\r")
+            time.sleep(1)
 
-        # TENTA CLICAR NO BOTÃO INICIAL 3 VEZES (Garante o clique)
-        print("   -> Tentando clicar no Entrar...")
-        for _ in range(3):
-            os.system(f"su -c 'input tap {X_BTN_ENTRAR} {Y_BTN_ENTRAR}'")
-            time.sleep(0.5)
-        
-        time.sleep(3)
+        # 4. Tenta o clique de login
+        print("\n   -> Clicando no Log In inicial...")
+        os.system(f"su -c 'input tap {X_BTN_ENTRAR} {Y_BTN_ENTRAR}'")
+        time.sleep(4)
 
-        # EM VEZ DE CLICAR NO CAMPO, VAMOS USAR O TAB PARA CHEGAR NELE
-        # 1 TAB geralmente pula pro primeiro campo de texto
-        print("   -> Navegando via TAB e injetando dados...")
+        # 5. Digitação cega (Mesmo se virar bolinha, o texto é injetado no buffer)
+        print("   -> Injetando credenciais...")
+        # TAB -> USER -> TAB -> PASS -> ENTER
         os.system(f"su -c 'input keyevent 61 && input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
         
-        print(f"   -> [ OK ] Processo enviado. Verifique a tela.")
-        time.sleep(5)
+        print(f"   -> [ OK ] Conta {i} enviada.")
+        time.sleep(3)
 class Utilities:
     @staticmethod
     def collect_garbage():

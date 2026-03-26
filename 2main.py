@@ -220,7 +220,7 @@ def auto_inject_logins():
     
     # Verifica se a pasta existe. Se o ZIP tiver pasta interna, ele ajusta sozinho:
     if os.path.exists(f"{base_path}/RobloxBackup"):
-        backup_base = f"{base_path}/RobloxBackup"
+        backup_base = "/sdcard/RobloxBackup/RobloxBackup"
     else:
         backup_base = base_path
 

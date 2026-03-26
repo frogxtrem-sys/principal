@@ -219,41 +219,45 @@ def login_100_automatico():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # Coordenadas que você viu nas fotos
+    # Coordenadas baseadas nas suas prints horizontais
     X_BTN_ENTRAR = 380 
     Y_BTN_ENTRAR = 630
+    X_CAMPO_USER = 530
+    Y_CAMPO_USER = 630
 
     for i, conta in enumerate(contas, 1):
         print(f"\n[ {i}/4 ] Preparando: {conta['pkg']}")
         
-        # 1. Garante que o app esteja fechado antes de começar
+        # 1. Mata o processo anterior para garantir abertura em tela cheia
         os.system(f"su -c 'am force-stop {conta['pkg']}'")
         time.sleep(1)
         
-        # 2. Abre o app de forma "natural" (am start)
+        # 2. Abre o app usando monkey (o melhor para clones)
         print(f"   -> Abrindo o jogo...")
-        os.system(f"su -c 'am start -n {conta['pkg']}/com.roblox.client.MainActivity'")
+        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
         
-        # 3. Espera 15s (Durante esse tempo, o script 'mexe' na tela pra não deixar virar bolinha)
+        # 3. Espera 15s para carregar
         for t in range(15, 0, -1):
-            if t == 5: # No meio do caminho, dá um toque bobo só pra manter o foco
-                os.system("su -c 'input keyevent 3'") # Botão Home (ajuda a não bugar)
-                os.system(f"su -c 'am start -n {conta['pkg']}/com.roblox.client.MainActivity'") # Traz de volta
             print(f"      -> Carregando em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 4. Tenta o clique de login
+        # 4. Clica no Sign In inicial
         print("\n   -> Clicando no Log In inicial...")
         os.system(f"su -c 'input tap {X_BTN_ENTRAR} {Y_BTN_ENTRAR}'")
         time.sleep(4)
 
-        # 5. Digitação cega (Mesmo se virar bolinha, o texto é injetado no buffer)
+        # 5. Clica no campo de usuário (para garantir o foco)
+        os.system(f"su -c 'input tap {X_CAMPO_USER} {Y_CAMPO_USER}'")
+        time.sleep(1)
+
+        # 6. Injeta os dados: USER -> TAB -> PASS -> ENTER
         print("   -> Injetando credenciais...")
-        # TAB -> USER -> TAB -> PASS -> ENTER
-        os.system(f"su -c 'input keyevent 61 && input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
+        os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
         
         print(f"   -> [ OK ] Conta {i} enviada.")
         time.sleep(3)
+
+    print("\n\033[1;32m[ SUCESSO ] Ciclo completo!\033[0m")
 class Utilities:
     @staticmethod
     def collect_garbage():

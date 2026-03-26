@@ -46,7 +46,6 @@ close_and_rejoin_delay = None
 codex_bypass_enabled = False
 codex_bypass_thread = None
 try:
-    import psutil
     # Tenta ler o tempo real, se falhar (Permission Denied), usa o tempo atual
     BOOT_TIME = psutil.boot_time()
 except Exception:

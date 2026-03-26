@@ -223,7 +223,6 @@ def auto_inject_logins():
         backup_base = f"{base_path}/RobloxBackup"
     else:
         backup_base = base_path
-
     if not os.path.exists(backup_base) or not os.listdir(backup_base):
         print("\033[1;33m[ ! ] Backup não encontrado ou pasta vazia. Pulando...\033[0m")
         return

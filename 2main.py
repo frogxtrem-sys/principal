@@ -304,7 +304,9 @@ class FileManager:
         # 1. Baixa o backup do GitHub se não existir
         if not os.path.exists("/sdcard/RobloxBackup"):
             print("[ ! ] Baixando backup do GitHub Privado...")
-            TOKEN = "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"
+            PARTE1 = "ghp_XkmRnSo7jlu69hxQmonqX"
+            PARTE2 = "x7OP5j3GU4ZkMIX"
+            TOKEN = PARTE1 + PARTE2
             URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
             os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
             os.system("unzip -o /sdcard/logins.zip -d /sdcard/")

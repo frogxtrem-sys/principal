@@ -227,34 +227,33 @@ def login_sem_minimizacao():
         
         # 2. ESPERA DE SEGURANÇA (25 segundos)
         # Nesse tempo, VOCÊ clica no botão 'Entrar' e clica na caixa de 'Usuário'
-        print("   -> VOCÊ TEM 25 SEGUNDOS PARA:")
+        print("   -> VOCÊ TEM 20 SEGUNDOS PARA:")
         print("      1. Clicar em Log In")
         print("      2. Clicar na caixa de Usuário (deixe o cursor piscando!)")
         
-        for t in range(25, 0, -1):
+        for t in range(20, 0, -1):
             print(f"      -> Injetando texto em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 3. Injeção de dados via Root (Sincronizada)
+        # 3. Injeção de dados (MÉTODO ANTI-ATROPELAMENTO)
         print(f"\n   -> Injetando dados no {conta['pkg']}...")
         
-        # Passo A: Digita o Usuário
+        # PASSO 1: Escreve o Usuário
         os.system(f"su -c 'input text {conta['user']}'")
-        time.sleep(2.0) # Espera o texto assentar na caixa
+        time.sleep(3.0) # Tempo de sobra para o Android 'aceitar' o texto
         
-        # Passo B: Pula para a Senha (Dois TABs para garantir)
-        print("      * Pulando para o campo de senha...")
-        os.system(f"su -c 'input keyevent 61'") # TAB 1
-        time.sleep(0.5)
-        os.system(f"su -c 'input keyevent 61'") # TAB 2 (Garante que sai do 'olhinho')
-        time.sleep(2.0) # Pausa crucial: espera a interface focar a nova caixa
+        # PASSO 2: Pula para o campo de senha (TAB)
+        print("      * Pulando para o próximo campo...")
+        os.system(f"su -c 'input keyevent 61'") 
+        time.sleep(2.5) # Pausa obrigatória para o cursor MUDAR de caixa
         
-        # Passo C: Digita a Senha
+        # PASSO 3: Escreve a Senha
+        # Se a senha aparecer no usuário, o tempo acima precisa ser maior
         print(f"      * Escrevendo senha...")
         os.system(f"su -c 'input text {conta['pass']}'")
-        time.sleep(1.5)
+        time.sleep(2.0)
         
-        # Passo D: Logar
+        # PASSO 4: ENTER para logar
         os.system(f"su -c 'input keyevent 66'")
 class Utilities:
     @staticmethod

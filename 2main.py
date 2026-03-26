@@ -235,13 +235,23 @@ def login_sem_minimizacao():
             print(f"      -> Injetando texto em: {t}s   ", end="\r")
             time.sleep(1)
 
-        # 3. Injeta o texto direto no campo que você já deixou focado
-        print("\n   -> Injetando agora...")
-        # Digita User -> TAB -> Digita Senha -> ENTER
-        os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
+        # 3. Injeção de dados via Root com pausas
+        print(f"\n   -> Injetando dados no {conta['pkg']}...")
         
-        print(f"   -> [ OK ] Conta {i} enviada. Feche o Roblox para a próxima.")
-        time.sleep(5)
+        # Digita o Usuário
+        os.system(f"su -c 'input text {conta['user']}'")
+        time.sleep(1.5) # Pausa para o sistema processar o texto
+        
+        # Aperta TAB para pular para a Senha
+        os.system(f"su -c 'input keyevent 61'")
+        time.sleep(1.5) # Pausa crucial para o foco mudar
+        
+        # Digita a Senha
+        os.system(f"su -c 'input text {conta['pass']}'")
+        time.sleep(1.5)
+        
+        # Aperta ENTER para logar
+        os.system(f"su -c 'input keyevent 66'")
 class Utilities:
     @staticmethod
     def collect_garbage():

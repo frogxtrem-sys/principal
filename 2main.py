@@ -224,9 +224,10 @@ def auto_inject_logins():
     for i, pkg in enumerate(packages):
         dest = f"/data/data/{pkg}/shared_prefs"
         os.system(f"su -c 'mkdir -p {dest}'")
-        os.system(f"su -c 'cp -R {backup_base}/clone{i+1}/* {dest}/'")
-            
-        # Ajusta o UID para o Roblox não deslogar
+        # Força a cópia de tudo que está na pasta de backup para o destino do clone
+        os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
+
+        # Ajusta permissões para o Roblox aceitar o arquivo
         app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
         if app_uid:
             os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
@@ -300,20 +301,22 @@ class FileManager:
     def auto_setup_completo():
         print("\033[1;36m[ Shouko.dev ] - Iniciando Auto Setup...\033[0m")
         
-        # 1. Baixa o backup do GitHub se não existir
-        if not os.path.exists("/sdcard/RobloxBackup"):
-            print("[ ! ] Baixando backup do GitHub Privado...")
-            PARTE1 = "ghp_XkmRnSo7jlu69hxQmonqX"
-            PARTE2 = "x7OP5j3GU4ZkMIX"
-            TOKEN = PARTE1 + PARTE2
-            URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
-            os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
-            os.system("unzip -o /sdcard/logins.zip -d /sdcard/RobloxBackup/")
+        # 1. Limpa lixo antigo e baixa o backup novo
+        os.system("rm -rf /sdcard/RobloxBackup /sdcard/logins.zip")
+        os.system("mkdir -p /sdcard/RobloxBackup")
         
-        # 2. Chama a injeção (Agora funciona porque estão no mesmo 'apartamento')
-        # Como as duas são staticmethod na mesma classe, usamos o nome da classe ou chamamos direto se estiver no mesmo nível
-        FileManager.auto_inject_logins() 
+        PARTE1 = "ghp_pLd3ixDQuR7slsPrlXG" # Seu token novo
+        PARTE2 = "fTR1n0jZTC73XVUc1"
+        TOKEN = PARTE1 + PARTE2
+        URL = "https://raw.githubusercontent.com/frogxtrem-sys/roblox-backups/main/meus_logins.zip"
         
+        print("[ ! ] Baixando backup do GitHub...")
+        os.system(f"wget --header='Authorization: token {TOKEN}' {URL} -O /sdcard/logins.zip")
+        os.system("unzip -o /sdcard/logins.zip -d /sdcard/RobloxBackup/")
+
+        # 2. Chama a injeção
+        FileManager.auto_inject_logins()
+
         print("\n\033[1;32m[ SETUP FINALIZADO ] - Pode dar START!\033[0m")
     
     def save_accounts(accounts):

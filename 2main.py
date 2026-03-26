@@ -219,44 +219,44 @@ def login_100_automatico():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # Coordenadas baseadas nas suas fotos do UGPhone (Modo Paisagem)
+    # Coordenadas (Baseadas na sua print horizontal)
     X_BTN_ENTRAR_INICIAL = 380 
     Y_BTN_ENTRAR_INICIAL = 630
-    
     X_CAMPO_USUARIO = 530
     Y_CAMPO_USUARIO = 630
 
-    print("\n\033[1;34m[ ! ] Iniciando Ciclo de Login Automático (15s delay)\033[0m")
-
     for i, conta in enumerate(contas, 1):
-        print(f"\n\033[1;36m[ {i}/4 ] Abrindo: {conta['pkg']}\033[0m")
+        print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
         
-        # 1. Abre o clone usando monkey (ignora erros de activity)
+        # Passo 1: Abre o app
         os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
-        
-        # 2. Espera carregar a tela inicial (15 segundos)
-        for t in range(15, 0, -1):
-            print(f"      -> Carregando em: {t}s   ", end="\r")
-            time.sleep(1)
+        time.sleep(15)
 
-        # 3. Clica no primeiro botão de 'Log In' ou 'Sign In'
-        print(f"\n      -> Clicando no botão inicial...")
+        # Passo 2: FORÇA O FOCO (Traz pra frente antes de clicar)
+        os.system(f"su -c 'monkey -p {conta['pkg']} 1 > /dev/null 2>&1'")
+        time.sleep(1)
+
+        # Passo 3: CLIQUE NO SIGN IN
+        print("   -> Clicando no Sign In inicial...")
         os.system(f"su -c 'input tap {X_BTN_ENTRAR_INICIAL} {Y_BTN_ENTRAR_INICIAL}'")
-        time.sleep(3) # Tempo para abrir os campos de texto
+        time.sleep(3) 
 
-        # 4. Clica no campo de Usuário para dar foco
-        print("      -> Focando campo e injetando dados...")
+        # Passo 4: FORÇA O FOCO DE NOVO (Garante que a tela de login abriu e não minimizou)
+        os.system(f"su -c 'monkey -p {conta['pkg']} 1 > /dev/null 2>&1'")
+        time.sleep(1)
+
+        # Passo 5: CLIQUE NO CAMPO USUÁRIO
+        print("   -> Focando campo e digitando...")
         os.system(f"su -c 'input tap {X_CAMPO_USUARIO} {Y_CAMPO_USUARIO}'")
         time.sleep(1)
 
-        # 5. Combo Root: Digita User -> TAB (pula pra senha) -> Digita Senha -> ENTER (loga)
+        # Passo 6: INJEÇÃO DE DADOS
         os.system(f"su -c 'input text {conta['user']} && input keyevent 61 && input text {conta['pass']} && input keyevent 66'")
         
-        print(f"\033[1;32m      -> [ OK ] Conta {i} enviada! Próxima em 5s...\033[0m")
+        print(f"   -> [ OK ] Finalizado! Próxima em 5s...")
         time.sleep(5)
 
-    print("\n\033[1;32m[ SUCESSO ] Todas as contas foram logadas automaticamente!\033[0m")
-
+    print("\n\033[1;32m[ SUCESSO ] Ciclo completo!\033[0m")
 class Utilities:
     @staticmethod
     def collect_garbage():

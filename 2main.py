@@ -674,18 +674,6 @@ class RobloxManager:
             print("\033[1;31m[ Shouko.dev ] - Invalid input! Please enter a valid game ID or private server link.\033[0m")
             return None
 
-class WebhookManager:
-    @staticmethod
-    def start_webhook_thread():
-        global webhook_thread, stop_webhook_thread
-        if (webhook_thread is None or not webhook_thread.is_alive()) and not stop_webhook_thread:
-            stop_webhook_thread = False
-            webhook_thread = threading.Thread(target=WebhookManager.send_webhook)
-            webhook_thread.start()
-
-    @staticmethod
-    
-    @staticmethod
     
 console = Console()
 # --- COLOQUE AS SUAS 4 CHAVES AQUI ---

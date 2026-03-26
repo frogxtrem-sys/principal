@@ -225,8 +225,8 @@ def login_combo():
         # Abre o Roblox
         os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
         
-        print("      -> Você tem 15 segundos para clicar no campo 'USUÁRIO'...")
-        for t in range(15, 0, -1):
+        print("      -> Você tem 20 segundos para clicar no campo 'USUÁRIO'...")
+        for t in range(20, 0, -1):
             print(f"      -> Digitando em: {t}s  ", end="\r")
             time.sleep(1)
         

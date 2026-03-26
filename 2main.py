@@ -211,27 +211,26 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 @staticmethod
-    def auto_inject_logins():
-        """Injeta os logins salvos nos clones se o backup existir"""
-        packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-        backup_base = "/sdcard/RobloxBackup"
+def auto_inject_logins():
+    """Injeta os logins salvos nos clones se o backup existir"""
+    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+    backup_base = "/sdcard/RobloxBackup"
 
-        if not os.path.exists(backup_base):
-            print("\033[1;33m[ Shouko.dev ] - Backup não encontrado. Pulando...\033[0m")
-            return
+    if not os.path.exists(backup_base):
+        print("\033[1;33m[ Shouko.dev ] - Backup não encontrado. Pulando...\033[0m")
+        return
 
-        print("\033[1;32m[ Shouko.dev ] - Injetando sessões...\033[0m")
-        for i, pkg in enumerate(packages):
-            dest = f"/data/data/{pkg}/shared_prefs"
-            os.system(f"su -c 'mkdir -p {dest}'")
-            # Agora ele pega tudo que está na pasta extraída e joga no clone
-            os.system(f"su -c 'cp -R {backup_base}/* {dest}/'")
-
-            # Ajusta o UID para o Roblox não deslogar
-            app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
-            if app_uid:
-                os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
-                os.system(f"su -c 'chmod -R 777 {dest}'")
+    print("\033[1;32m[ Shouko.dev ] - Injetando sessões...\033[0m")
+    for i, pkg in enumerate(packages):
+        dest = f"/data/data/{pkg}/shared_prefs"
+        os.system(f"su -c 'mkdir -p {dest}'")
+        os.system(f"su -c 'cp -R {backup_base}/clone{i+1}/* {dest}/'")
+            
+        # Ajusta o UID para o Roblox não deslogar
+        app_uid = os.popen(f"su -c 'stat -c %u /data/data/{pkg}'").read().strip()
+        if app_uid:
+            os.system(f"su -c 'chown -R {app_uid}:{app_uid} {dest}'")
+            os.system(f"su -c 'chmod -R 777 {dest}'")
 
 class Utilities:
     @staticmethod

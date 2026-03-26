@@ -396,33 +396,24 @@ class FileManager:
     
 class RobloxManager:
     def login_assistido(self):
-        print("\n\033[1;34m[ ! ] Assistente de Login Iniciado\033[0m")
-        
-        # Configure suas contas aqui
         contas = [
             {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
             {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
             {"user": "saitama0000437", "pass": "saitama37", "pkg": "ixq.vf.jlr"},
             {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
         ]
-
         for i, conta in enumerate(contas, 1):
-            print(f"\n\033[1;36m[ {i}/4 ] Preparando: {conta['pkg']}\033[0m")
-            
-            # Abre o app específico
+            print(f"\n[ {i}/4 ] Abrindo: {conta['pkg']}")
+            # Abre o app de forma garantida
             os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1'")
             
-            print(f"      -> Aguarde o Roblox carregar...")
-            input("      -> Quando o teclado abrir no campo USUÁRIO, aperte ENTER aqui...")
+            print("Aguarde o Roblox carregar totalmente...")
+            input("Clique no campo USUÁRIO e aperte ENTER no Termux...")
             os.system(f"su -c 'input text {conta['user']}'")
             
-            input("      -> Quando o teclado abrir no campo SENHA, aperte ENTER aqui...")
+            input("Clique no campo SENHA e aperte ENTER no Termux...")
             os.system(f"su -c 'input text {conta['pass']}'")
-            
-            print(f"\033[1;32m      -> Dados inseridos! Logue e prepare o próximo.\033[0m")
-            time.sleep(1)
-
-        print("\n\033[1;32m[ OK ] Processo finalizado para as 4 contas!\033[0m")
+            print("Dados inseridos! Faça o login e volte para cá.")
 
     @staticmethod
     def check_user_online(user_id, cookie=None):

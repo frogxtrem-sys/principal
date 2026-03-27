@@ -890,12 +890,22 @@ class ExecutorManager:
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
         retry_timeout = time.time() + max_wait_time
+        # Pega o ID com segurança
+        user_id = globals().get("_user_", {}).get(package_name)
+        
+        if not user_id:
+            print(f"[ ! ] Erro: ID não encontrado para o pacote {package_name}")
+            return False
+
         while True:
-            for workspace in globals()["workspace_paths"]:
-                id = globals()["_user_"][package_name]
-                file_path = os.path.join(workspace, f"{id}.main")
+            # Tenta verificar em TODOS os workspaces possíveis dos clones
+            for workspace in globals().get("workspace_paths", []):
+                # O caminho real dentro do seu clone no UGPhone
+                file_path = os.path.join(workspace, f"{user_id}.main")
+                
                 if os.path.exists(file_path):
                     return True
+            
             if continuous and time.time() > retry_timeout:
                 return False
             time.sleep(20)

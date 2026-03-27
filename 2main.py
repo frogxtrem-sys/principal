@@ -948,27 +948,27 @@ class ExecutorManager:
                         time.sleep(3)
 
         # 🔥 ESSA LINHA MUDA TUDO
-             if executor_loaded:
-            return
+                        if executor_loaded:
+                        return
 
-                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExecutor didn't load. Rejoining...\033[0m"
-                UIManager.update_status_table()
-                time.sleep(15)
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExecutor didn't load. Rejoining...\033[0m"
+                            UIManager.update_status_table()
+                            time.sleep(15)
 
-                ExecutorManager.reset_executor_file(package_name)
-                time.sleep(0.5)
-                RobloxManager.kill_roblox_process(package_name)
-                RobloxManager.delete_cache_for_package(package_name)
-                time.sleep(15)
+                            ExecutorManager.reset_executor_file(package_name)
+                            time.sleep(0.5)
+                            RobloxManager.kill_roblox_process(package_name)
+                            RobloxManager.delete_cache_for_package(package_name)
+                            time.sleep(15)
 
-                print(f"\033[1;33m[ Shouko.dev ] - Rejoining {package_name}...\033[0m")
-                globals()["package_statuses"][package_name]["Status"] = "\033[1;36mRejoining\033[0m"
-                UIManager.update_status_table()
+                            print(f"\033[1;33m[ Shouko.dev ] - Rejoining {package_name}...\033[0m")
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;36mRejoining\033[0m"
+                            UIManager.update_status_table()
  
-                RobloxManager.launch_roblox(package_name, server_link)
+                            RobloxManager.launch_roblox(package_name, server_link)
 
-                globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
-                UIManager.update_status_table()
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
+                            UIManager.update_status_table()
 
         except Exception as e:
             globals()["package_statuses"][package_name]["Status"] = f"\033[1;31mError checking executor for {package_name}: {e}\033[0m"

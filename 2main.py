@@ -933,7 +933,7 @@ class ExecutorManager:
             globals()["package_statuses"][package_name]["Status"] = "\033[1;33mChecking executor...\033[0m"
             UIManager.update_status_table()
             while True:
-                # ExecutorManager.reset_executor_file(package_name)
+                ExecutorManager.reset_executor_file(package_name)
                 try:
                     start_time = time.time()
                     executor_loaded = False
@@ -952,7 +952,7 @@ class ExecutorManager:
                         UIManager.update_status_table()
                         time.sleep(15)
 
-                        # ExecutorManager.reset_executor_file(package_name)
+                        ExecutorManager.reset_executor_file(package_name)
                         time.sleep(0.5)
                         RobloxManager.kill_roblox_process(package_name)
                         RobloxManager.delete_cache_for_package(package_name)
@@ -969,7 +969,7 @@ class ExecutorManager:
                     UIManager.update_status_table()
                     time.sleep(10)
 
-                    # ExecutorManager.reset_executor_file(package_name)
+                    ExecutorManager.reset_executor_file(package_name)
                     time.sleep(2)
                     RobloxManager.kill_roblox_process(package_name)
                     RobloxManager.delete_cache_for_package(package_name)
@@ -989,11 +989,14 @@ class ExecutorManager:
     @staticmethod
     def reset_executor_file(package_name):
         try:
-            for workspace in globals()["workspace_paths"]:
-                id = globals()["_user_"][package_name]
-                file_path = os.path.join(workspace, f"{id}.main")
+            # Pegamos o ID específico desta conta
+            user_id = globals().get("_user_", {}).get(package_name)
+            if not user_id: return
+
+            for workspace in globals().get("workspace_paths", []):
+                file_path = os.path.join(workspace, f"{user_id}.main")
                 if os.path.exists(file_path):
-                    os.remove(file_path)
+                    os.remove(file_path) # Apaga SÓ o sinal desta conta
         except:
             pass
 

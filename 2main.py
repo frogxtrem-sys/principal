@@ -934,18 +934,18 @@ class ExecutorManager:
             UIManager.update_status_table()
             while True:
                 # ExecutorManager.reset_executor_file(package_name)
-            try:
-                start_time = time.time()
-                executor_loaded = False
+                try:
+                    start_time = time.time()
+                    executor_loaded = False
 
-                while time.time() - start_time < 180:
-                    if ExecutorManager.check_executor_status(package_name):
-                        globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor has loaded successfully\033[0m"
-                        UIManager.update_status_table()
-                        executor_loaded = True
-                        next_package_event.set()
-                        break
-                    time.sleep(20)  
+                    while time.time() - start_time < 180:
+                        if ExecutorManager.check_executor_status(package_name):
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor has loaded successfully\033[0m"
+                            UIManager.update_status_table()
+                            executor_loaded = True
+                            next_package_event.set()
+                            break
+                        time.sleep(20)  
 
                     if not executor_loaded:
                         globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExecutor didn't load. Rejoining...\033[0m"

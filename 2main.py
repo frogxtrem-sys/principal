@@ -1222,31 +1222,31 @@ class Runner:
     @staticmethod
     def force_rejoin(server_links, interval, stop_event):
     # Garante que o intervalo seja tratado como número
-    try:
-        force_rejoin_interval = float(interval) * 60 if interval else 1800.0
-    except:
-        force_rejoin_interval = 1800.0
+        try:
+            force_rejoin_interval = float(interval) * 60 if interval else 1800.0
+        except:
+            force_rejoin_interval = 1800.0
 
-    last_rejoin = time.time() # Define o tempo inicial
+        last_rejoin = time.time() # Define o tempo inicial
 
-    while not stop_event.is_set():
-        current_time = time.time()
-        elapsed = current_time - last_rejoin
+        while not stop_event.is_set():
+            current_time = time.time()
+            elapsed = current_time - last_rejoin
         
-        if elapsed >= force_rejoin_interval:
-            print(f"\033[1;31m[ Shouko.dev ] - Limite de {interval} min atingido. Forçando Rejoin...\033[0m")
+            if elapsed >= force_rejoin_interval:
+                print(f"\033[1;31m[ Shouko.dev ] - Limite de {interval} min atingido. Forçando Rejoin...\033[0m")
             
-            # 1. Mata tudo
-            RobloxManager.kill_roblox_processes()
-            time.sleep(5)
+                # 1. Mata tudo
+                RobloxManager.kill_roblox_processes()
+                time.sleep(5)
             
-            # 2. Reloga
-            Runner.launch_package_sequentially(server_links)
+                # 2. Reloga
+                Runner.launch_package_sequentially(server_links)
             
-            # 3. RESET FUNDAMENTAL: Atualiza o cronômetro
-            last_rejoin = time.time()
+                # 3. RESET FUNDAMENTAL: Atualiza o cronômetro
+                last_rejoin = time.time()
             
-        time.sleep(30) # Verifica a cada 30 segundos pra não pesar a CPU
+            time.sleep(30) # Verifica a cada 30 segundos pra não pesar a CPU
 
     @staticmethod
     def update_status_table_periodically():

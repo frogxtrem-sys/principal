@@ -198,8 +198,16 @@ executors = {
     "Evon": "/storage/emulated/0/Evon/",
     "h202": "/storage/emulated/0/h202/",
 }
+# Lista baseada nos executores padrão
 workspace_paths = [f"{base_path}Workspace" for base_path in executors.values()] + \
-                [f"{base_path}workspace" for base_path in executors.values()]
+                  [f"{base_path}workspace" for base_path in executors.values()]
+
+# ADICIONE ESTAS LINHAS ABAIXO para incluir os seus clones específicos:
+clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+for pkg in clones_internos:
+    workspace_paths.append(f"/data/data/{pkg}/files/workspace")
+    workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
+
 globals()["workspace_paths"] = workspace_paths
 globals()["executors"] = executors
 

@@ -532,8 +532,8 @@ class RobloxManager:
         try:
             # Em vez de ["/system/bin/am", "force-stop", package_name]
             # Use assim para garantir o root:
-            subprocess.run
-                (["su", "-c", f"am force-stop {package_name}"], check=True),
+            subprocess.run(
+                ["su", "-c", f"am force-stop {package_name}"], check=True),
                 capture_output=True,
                 text=True,
                 check=True

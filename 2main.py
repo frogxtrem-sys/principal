@@ -949,7 +949,7 @@ class ExecutorManager:
 
         # 🔥 ESSA LINHA MUDA TUDO
                         if executor_loaded:
-                        return
+                            return
 
                             globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExecutor didn't load. Rejoining...\033[0m"
                             UIManager.update_status_table()

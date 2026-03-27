@@ -489,24 +489,51 @@ class RobloxManager:
 
     @staticmethod
     def kill_roblox_processes():
-        packages = RobloxManager.get_roblox_packages()
-    
-        for package_name in packages:
-            try:
-                # Tenta fechar. Se der erro 255 ou Permissão negada, o script ignora e segue.
-                os.system(f"nohup /system/bin/am force-stop {package_name} > /dev/null 2>&1 &")
-            except Exception:
-                pass 
-    
-        print("\033[1;32m[ Shouko.dev ] - Tentativa de fechar processos concluída.\033[0m")
-        time.sleep(2)
+
+        # Lista EXATA dos seus clones (baseada no que você me mandou)
+
+        meus_clones = [
+
+            "ywcw.lnu.exhl", 
+
+            "ub.wnjb.bzz", 
+
+            "ixq.vf.jlr", 
+
+            "srl.mvn.gv",
+
+            "com.roblox.client" # Roblox original, por garantia
+
+        ]
+
+        
+
+        print("\033[1;31m[ ! ] Encerrando processos específicos...\033[0m")
+
+        
+
+        for pacote in meus_clones:
+
+            # Tenta parar pelo gerenciador de atividades
+
+            os.system(f"su -c 'am force-stop {pacote}'")
+
+            # Tenta matar o processo no sistema (kill "bravo")
+
+            os.system(f"su -c 'pkill -f {pacote}'")
+
+            
+
+        print("✅ Todos os clones foram parados.")
 
     @staticmethod
     def kill_roblox_process(package_name):
         print(f"\033[1;96m[ Shouko.dev ] - Killing Roblox process for {package_name}...\033[0m")
         try:
-            subprocess.run(
-                ["/system/bin/am", "force-stop", package_name],
+            # Em vez de ["/system/bin/am", "force-stop", package_name]
+            # Use assim para garantir o root:
+            subprocess.run
+                (["su", "-c", f"am force-stop {package_name}"], check=True),
                 capture_output=True,
                 text=True,
                 check=True
@@ -521,7 +548,7 @@ class RobloxManager:
     def delete_cache_for_package(package_name):
         cache_path = f'/data/data/{package_name}/cache/'
         if os.path.exists(cache_path):
-            os.system(f"rm -rf {cache_path}")
+            os.system(f"su -c 'rm -rf {cache_path}'")
             print(f"\033[1;32m[ Shouko.dev ] - Cache cleared for {package_name}\033[0m")
         else:
             print(f"\033[1;93m[ Shouko.dev ] - No cache found for {package_name}\033[0m")

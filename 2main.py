@@ -861,29 +861,28 @@ class ExecutorManager:
 
             if not lua_written:
                 if executor_name.upper() == "DELTA":
-                    # Pega o ID da conta atual (package_name aqui seria o clone)
-                    # Nota: Certifique-se de que 'package_name' esteja acessível ou passe como argumento
-                    user_id = globals().get("_user_", {}).get(executor_name, "default")
-                    
                     target_path = "/storage/emulated/0/Delta/Autoexecute"
                     os.makedirs(target_path, exist_ok=True)
                     lua_script_path = os.path.join(target_path, "executor_check.lua")
+                    
+                    # Tenta pegar o ID da conta que está tentando logar agora
+                    # Se não achar, usa 'default'
+                    current_user_id = globals().get("_user_", {}).get(executor_name, "default")
 
-                    # Criamos um conteúdo Lua que usa o ID específico da conta
-                    custom_lua = f"""
+                    # Criamos o conteúdo Lua dinâmico aqui mesmo
+                    lua_content = f"""
                     repeat wait() until game:IsLoaded()
-                    local filename = "{user_id}.main"
+                    local filename = "{current_user_id}.main"
                     writefile(filename, "on")
                     """
 
                     try:
-                        # Usamos o 'su -c' para gravar o script com permissão total
-                        # Importante: Usamos aspas simples por fora para o echo não bugar
-                        comando_echo = f"su -c 'echo \"{custom_lua}\" > {lua_script_path}'"
+                        # Gravamos o script personalizado via Root
+                        comando_echo = f"su -c 'echo \"{lua_content}\" > {lua_script_path}'"
                         os.system(comando_echo)
                     
                         lua_written = True
-                        console.print(f"[bold green][✓] Script de Check (ID: {user_id}) escrito para Delta![/bold green]")
+                        console.print(f"[bold green][✓] Check Script (ID: {current_user_id}) escrito via Root![/bold green]")
                     except Exception as e:
                         console.print(f"[bold red]Erro ao gravar via Root: {e}[/bold red]")
 

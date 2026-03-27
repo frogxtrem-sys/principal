@@ -868,13 +868,15 @@ class ExecutorManager:
                     os.makedirs(target_path, exist_ok=True)
                     lua_script_path = os.path.join(target_path, "executor_check.lua")
                     try:
-                        with open(lua_script_path, 'w') as file:
-                            file.write(lua_script_content)
-                        lua_written = True
-                        console.print(f"[bold green][ Shouko.dev ] - Lua script written to: {lua_script_path}[/bold green]")
-                    except Exception as e:
-                        console.print(f"[bold red][ Shouko.dev ] - Error writing Lua script to {lua_script_path}: {e}[/bold red]")
-                        Utilities.log_error(f"Error writing Lua script to {lua_script_path}: {e}")
+                    # Usamos o 'su -c' para gravar o script com permissão total
+                    comando_echo = f"su -c 'echo \"{lua_script_content}\" > {lua_script_path}'"
+                    os.system(comando_echo)
+                    
+                    lua_written = True
+                    console.print(f"[bold green][ Shouko.dev ] - Lua script written via Root to: {lua_script_path}[/bold green]")
+                except Exception as e:
+                    console.print(f"[bold red][ Shouko.dev ] - Error writing via Root: {e}[/bold red]")
+                    Utilities.log_error(f"Error writing Lua script via Root to {lua_script_path}: {e}")
 
                 if not lua_written:
                     for path in possible_autoexec_paths:

@@ -937,15 +937,15 @@ class ExecutorManager:
                     start_time = time.time()
                     executor_loaded = False
 
-                while time.time() - start_time < 180:
-                    if ExecutorManager.check_executor_status(package_name):
-                        globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor has loaded successfully\033[0m"
-                        UIManager.update_status_table()
-                        executor_loaded = True
-                        next_package_event.set()
-                    break
+            while time.time() - start_time < 180:
+                if ExecutorManager.check_executor_status(package_name):
+                    globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor has loaded successfully\033[0m"
+                    UIManager.update_status_table()
+                    executor_loaded = True
+                    next_package_event.set()
+                break
 
-                    time.sleep(3)
+                time.sleep(3)
 
         # 🔥 ESSA LINHA MUDA TUDO
         if executor_loaded:

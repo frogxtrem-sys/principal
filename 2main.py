@@ -874,9 +874,9 @@ class ExecutorManager:
                     
                         lua_written = True
                         console.print(f"[bold green][ Shouko.dev ] - Lua script written via Root to: {lua_script_path}[/bold green]")
-                except Exception as e:
-                    console.print(f"[bold red][ Shouko.dev ] - Error writing via Root: {e}[/bold red]")
-                    Utilities.log_error(f"Error writing Lua script via Root to {lua_script_path}: {e}")
+                    except Exception as e:
+                        console.print(f"[bold red][ Shouko.dev ] - Error writing via Root: {e}[/bold red]")
+                        Utilities.log_error(f"Error writing Lua script via Root to {lua_script_path}: {e}")
 
                 if not lua_written:
                     for path in possible_autoexec_paths:

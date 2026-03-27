@@ -861,19 +861,31 @@ class ExecutorManager:
 
             if not lua_written:
                 if executor_name.upper() == "DELTA":
-                    target_path = os.path.join(base_path, "Autoexecute")
+                    # Pega o ID da conta atual (package_name aqui seria o clone)
+                    # Nota: Certifique-se de que 'package_name' esteja acessível ou passe como argumento
+                    user_id = globals().get("_user_", {}).get(executor_name, "default")
+                    
+                    target_path = "/storage/emulated/0/Delta/Autoexecute"
                     os.makedirs(target_path, exist_ok=True)
                     lua_script_path = os.path.join(target_path, "executor_check.lua")
+
+                    # Criamos um conteúdo Lua que usa o ID específico da conta
+                    custom_lua = f"""
+                    repeat wait() until game:IsLoaded()
+                    local filename = "{user_id}.main"
+                    writefile(filename, "on")
+                    """
+
                     try:
                         # Usamos o 'su -c' para gravar o script com permissão total
-                        comando_echo = f"su -c 'echo \"{lua_script_content}\" > {lua_script_path}'"
+                        # Importante: Usamos aspas simples por fora para o echo não bugar
+                        comando_echo = f"su -c 'echo \"{custom_lua}\" > {lua_script_path}'"
                         os.system(comando_echo)
                     
                         lua_written = True
-                        console.print(f"[bold green][ Shouko.dev ] - Lua script written via Root to: {lua_script_path}[/bold green]")
+                        console.print(f"[bold green][✓] Script de Check (ID: {user_id}) escrito para Delta![/bold green]")
                     except Exception as e:
-                        console.print(f"[bold red][ Shouko.dev ] - Error writing via Root: {e}[/bold red]")
-                        Utilities.log_error(f"Error writing Lua script via Root to {lua_script_path}: {e}")
+                        console.print(f"[bold red]Erro ao gravar via Root: {e}[/bold red]")
 
                 if not lua_written:
                     for path in possible_autoexec_paths:

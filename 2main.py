@@ -897,26 +897,35 @@ class ExecutorManager:
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
         retry_timeout = time.time() + max_wait_time
+        
+        # Pega o ID. Se não encontrar no dicionário, tenta um valor padrão
         user_id = globals().get("_user_", {}).get(package_name)
         
+        # LOG DE DEBUG para você ver no terminal se o ID está correto
         if not user_id:
+            print(f"[ DEBUG ] ID não encontrado para {package_name}. Verifique a Opção 2.")
             return False
 
         while True:
-            # Forçamos a busca em todas as pastas possíveis, incluindo a do Delta real
+            # Lista de pastas para procurar
             search_paths = globals().get("workspace_paths", [])
-            search_paths.append("/storage/emulated/0/Delta/workspace")
+            # Forçamos a pasta padrão do Delta que os clones costumam usar
+            if "/storage/emulated/0/Delta/workspace" not in search_paths:
+                search_paths.append("/storage/emulated/0/Delta/workspace")
             
             for workspace in search_paths:
+                # Procura o arquivo com o ID
                 file_path = os.path.join(workspace, f"{user_id}.main")
                 
-                # Se o arquivo existe, o executor está ON
+                # Se o arquivo existe, o executor carregou!
                 if os.path.exists(file_path):
+                    print(f"[ OK ] Executor detectado para {user_id}!")
                     return True
 
             if not continuous or time.time() > retry_timeout:
                 return False
-            time.sleep(10) # Diminuímos o tempo de espera para ser mais rápido
+            
+            time.sleep(5) # Espera 5 segundos antes de tentar de novo
 
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):

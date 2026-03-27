@@ -231,7 +231,7 @@ def login_gboard_estavel():
         print("      1. Clique em 'Log In'")
         print("      2. Clique no campo de 'Username' (Teclado deve subir)")
         
-        for t in range(20, 0, -1):
+        for t in range(25, 0, -1):
             print(f"      -> Injetando em: {t}s   ", end="\r")
             time.sleep(1)
 

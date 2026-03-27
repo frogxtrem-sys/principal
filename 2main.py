@@ -489,11 +489,11 @@ class RobloxManager:
 
     @staticmethod
     def kill_roblox_processes():
-    clones = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "com.roblox.client"]
-    for p in clones:
-        # O 'timeout 5' impede que o comando fique travado se o root demorar
-        os.system(f"su -c 'timeout 5 am force-stop {p} && pkill -9 {p}'")
-    time.sleep(2)
+        clones = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "com.roblox.client"]
+        for p in clones:
+            # O 'timeout 5' impede que o comando fique travado se o root demorar
+            os.system(f"su -c 'timeout 5 am force-stop {p} && pkill -9 {p}'")
+        time.sleep(2)
     
     @staticmethod
     def kill_roblox_process(package_name):

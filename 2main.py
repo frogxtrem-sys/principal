@@ -530,13 +530,12 @@ class RobloxManager:
     def kill_roblox_process(package_name):
         print(f"\033[1;96m[ Shouko.dev ] - Killing Roblox process for {package_name}...\033[0m")
         try:
-            # Em vez de ["/system/bin/am", "force-stop", package_name]
-            # Use assim para garantir o root:
+            # O comando abaixo deve estar exatamente alinhado
             subprocess.run(
-                ["su", "-c", f"am force-stop {package_name}"], check=True),
+                ["su", "-c", f"am force-stop {package_name}"],
+                check=True,
                 capture_output=True,
-                text=True,
-                check=True
+                text=True
             )
             print(f"\033[1;32m[ Shouko.dev ] - Killed process for {package_name}\033[0m")
             time.sleep(2)

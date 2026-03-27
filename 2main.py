@@ -952,7 +952,7 @@ class ExecutorManager:
                         UIManager.update_status_table()
                         time.sleep(15)
 
-                        ExecutorManager.reset_executor_file(package_name)
+                        # ExecutorManager.reset_executor_file(package_name)
                         time.sleep(0.5)
                         RobloxManager.kill_roblox_process(package_name)
                         RobloxManager.delete_cache_for_package(package_name)
@@ -969,7 +969,7 @@ class ExecutorManager:
                     UIManager.update_status_table()
                     time.sleep(10)
 
-                    ExecutorManager.reset_executor_file(package_name)
+                    # ExecutorManager.reset_executor_file(package_name)
                     time.sleep(2)
                     RobloxManager.kill_roblox_process(package_name)
                     RobloxManager.delete_cache_for_package(package_name)

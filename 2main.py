@@ -922,8 +922,14 @@ class ExecutorManager:
 
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):
-        user_id = globals()["_user_"][package_name]
+        # ADICIONE ISSO AQUI: 
+        # Dá um pequeno fôlego para o sistema não atropelar os clones
+        time.sleep(5) 
+        
+        user_id = globals()["_user_"].get(package_name)
         detected_executors = ExecutorManager.detect_executors()
+        
+        # ... resto do código ...
 
         if detected_executors:
             globals()["package_statuses"][package_name]["Status"] = "\033[1;33mChecking executor...\033[0m"

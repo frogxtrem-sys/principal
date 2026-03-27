@@ -660,6 +660,8 @@ print("\nIniciando o bot...")
 # Exemplo: import seu_modulo_do_bot
 
 class UIManager:
+    last_update_time = 0
+    update_interval = 5
     @staticmethod
     def print_header(version):
         console = Console()
@@ -732,16 +734,13 @@ class UIManager:
 
     @staticmethod
     def update_status_table():
-        # Referencia as variáveis globais de tempo
-        global last_update_time, update_interval
-        
         current_time = time.time()
-        # Se não passou tempo suficiente (ex: 5 segundos), sai da função sem fazer nada
-        if current_time - last_update_time < update_interval:
+        
+        # Agora acessamos usando UIManager.
+        if current_time - UIManager.last_update_time < UIManager.update_interval:
             return
 
-        # Se passou o tempo, atualiza o marcador e segue com o desenho
-        last_update_time = current_time
+        UIManager.last_update_time = current_time
         
         try:
             cpu_usage = psutil.cpu_percent(interval=None)

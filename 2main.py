@@ -896,36 +896,49 @@ class ExecutorManager:
 
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
+        """
+        Verifica se o executor carregou usando Arquivo (.main) OU Online Check.
+        """
         retry_timeout = time.time() + max_wait_time
-        
-        # Pega o ID. Se não encontrar no dicionário, tenta um valor padrão
         user_id = globals().get("_user_", {}).get(package_name)
-        
-        # LOG DE DEBUG para você ver no terminal se o ID está correto
-        if not user_id:
-            print(f"[ DEBUG ] ID não encontrado para {package_name}. Verifique a Opção 2.")
-            return False
 
         while True:
-            # Lista de pastas para procurar
-            search_paths = globals().get("workspace_paths", [])
-            # Forçamos a pasta padrão do Delta que os clones costumam usar
-            if "/storage/emulated/0/Delta/workspace" not in search_paths:
-                search_paths.append("/storage/emulated/0/Delta/workspace")
-            
-            for workspace in search_paths:
-                # Procura o arquivo com o ID
-                file_path = os.path.join(workspace, f"{user_id}.main")
-                
-                # Se o arquivo existe, o executor carregou!
-                if os.path.exists(file_path):
-                    print(f"[ OK ] Executor detectado para {user_id}!")
-                    return True
+            # 1. TENTATIVA POR ARQUIVO (Mais rápido)
+            # Lista de pastas baseada nos seus clones
+            workspace_paths = [
+                "/storage/emulated/0/Delta/workspace",
+                f"/data/data/{package_name}/files/workspace",
+                f"/data/data/{package_name}/files/Workspace",
+                "/sdcard/Delta/workspace"
+            ]
+
+            if user_id:
+                for workspace in workspace_paths:
+                    file_path = os.path.join(workspace, f"{user_id}.main")
+                    if os.path.exists(file_path):
+                        return True
+
+            # 2. TENTATIVA POR ONLINE CHECK (Caso o arquivo falhe)
+            if user_id:
+                try:
+                    url = "https://presence.roblox.com/v1/presence/last-online"
+                    payload = json.dumps({"userIds": [int(user_id)]})
+                    headers = {'Content-Type': 'application/json'}
+                    response = requests.post(url, data=payload, headers=headers, timeout=5)
+                    data = response.json()
+                    
+                    if data and "lastOnlinePresences" in data:
+                        # PresenceType 2 = No Jogo, 3 = Studio
+                        status = data["lastOnlinePresences"][0].get("userPresenceType", 0)
+                        if status >= 2:
+                            return True
+                except:
+                    pass
 
             if not continuous or time.time() > retry_timeout:
                 return False
             
-            time.sleep(5) # Espera 5 segundos antes de tentar de novo
+            time.sleep(5)
 
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):

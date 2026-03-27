@@ -489,43 +489,12 @@ class RobloxManager:
 
     @staticmethod
     def kill_roblox_processes():
-
-        # Lista EXATA dos seus clones (baseada no que você me mandou)
-
-        meus_clones = [
-
-            "ywcw.lnu.exhl", 
-
-            "ub.wnjb.bzz", 
-
-            "ixq.vf.jlr", 
-
-            "srl.mvn.gv",
-
-            "com.roblox.client" # Roblox original, por garantia
-
-        ]
-
-        
-
-        print("\033[1;31m[ ! ] Encerrando processos específicos...\033[0m")
-
-        
-
-        for pacote in meus_clones:
-
-            # Tenta parar pelo gerenciador de atividades
-
-            os.system(f"su -c 'am force-stop {pacote}'")
-
-            # Tenta matar o processo no sistema (kill "bravo")
-
-            os.system(f"su -c 'pkill -f {pacote}'")
-
-            
-
-        print("✅ Todos os clones foram parados.")
-
+    clones = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "com.roblox.client"]
+    for p in clones:
+        # O 'timeout 5' impede que o comando fique travado se o root demorar
+        os.system(f"su -c 'timeout 5 am force-stop {p} && pkill -9 {p}'")
+    time.sleep(2)
+    
     @staticmethod
     def kill_roblox_process(package_name):
         print(f"\033[1;96m[ Shouko.dev ] - Killing Roblox process for {package_name}...\033[0m")
@@ -763,9 +732,16 @@ class UIManager:
 
     @staticmethod
     def update_status_table():
+        # Referencia as variáveis globais de tempo
+        global last_update_time, update_interval
+        
         current_time = time.time()
-        if current_time - UIManager.last_update_time < UIManager.update_interval:
+        # Se não passou tempo suficiente (ex: 5 segundos), sai da função sem fazer nada
+        if current_time - last_update_time < update_interval:
             return
+
+        # Se passou o tempo, atualiza o marcador e segue com o desenho
+        last_update_time = current_time
         
         try:
             cpu_usage = psutil.cpu_percent(interval=None)

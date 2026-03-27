@@ -897,25 +897,26 @@ class ExecutorManager:
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
         retry_timeout = time.time() + max_wait_time
-        # Pega o ID com segurança
         user_id = globals().get("_user_", {}).get(package_name)
         
         if not user_id:
-            print(f"[ ! ] Erro: ID não encontrado para o pacote {package_name}")
             return False
 
         while True:
-            # Tenta verificar em TODOS os workspaces possíveis dos clones
-            for workspace in globals().get("workspace_paths", []):
-                # O caminho real dentro do seu clone no UGPhone
+            # Forçamos a busca em todas as pastas possíveis, incluindo a do Delta real
+            search_paths = globals().get("workspace_paths", [])
+            search_paths.append("/storage/emulated/0/Delta/workspace")
+            
+            for workspace in search_paths:
                 file_path = os.path.join(workspace, f"{user_id}.main")
                 
+                # Se o arquivo existe, o executor está ON
                 if os.path.exists(file_path):
                     return True
-            
-            if continuous and time.time() > retry_timeout:
+
+            if not continuous or time.time() > retry_timeout:
                 return False
-            time.sleep(20)
+            time.sleep(10) # Diminuímos o tempo de espera para ser mais rápido
 
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):

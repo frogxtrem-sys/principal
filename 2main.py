@@ -1014,7 +1014,7 @@ class ExecutorManager:
                 print(f"Erro ao resetar sinal: {e}")
 
     class Runner:
-    @staticmethod
+
     def launch_package_sequentially(server_links):
         next_package_event = Event()
         next_package_event.set()

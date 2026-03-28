@@ -907,49 +907,31 @@ class ExecutorManager:
 
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
-        """
-        Verifica se o executor carregou usando Arquivo (.main) OU Online Check.
-        """
-        retry_timeout = time.time() + max_wait_time
+        # Pega o ID da conta mapeado
         user_id = globals().get("_user_", {}).get(package_name)
+        if not user_id:
+            user_id = UIManager.get_user_id_from_storage(package_name)
+        
+        if not user_id:
+            return False
 
-        while True:
-            # 1. TENTATIVA POR ARQUIVO (Mais rápido)
-            # Lista de pastas baseada nos seus clones
-            workspace_paths = [
-                "/storage/emulated/0/Delta/workspace",
-                f"/data/data/{package_name}/files/workspace",
-                f"/data/data/{package_name}/files/Workspace",
-                "/sdcard/Delta/workspace"
-            ]
-
-            if user_id:
-                for workspace in workspace_paths:
-                    file_path = os.path.join(workspace, f"{user_id}.main")
-                    if os.path.exists(file_path):
+        timeout = time.time() + max_wait_time
+        while time.time() < timeout:
+            try:
+                # API de Presença da Roblox
+                url = "https://presence.roblox.com/v1/presence/last-online"
+                res = requests.post(url, json={"userIds": [int(user_id)]}, timeout=10)
+                data = res.json()
+                if data.get("lastOnlinePresences"):
+                    # Type 2 = InGame
+                    if data["lastOnlinePresences"][0].get("userPresenceType", 0) >= 2:
                         return True
-
-            # 2. TENTATIVA POR ONLINE CHECK (Caso o arquivo falhe)
-            if user_id:
-                try:
-                    url = "https://presence.roblox.com/v1/presence/last-online"
-                    payload = json.dumps({"userIds": [int(user_id)]})
-                    headers = {'Content-Type': 'application/json'}
-                    response = requests.post(url, data=payload, headers=headers, timeout=5)
-                    data = response.json()
-                    
-                    if data and "lastOnlinePresences" in data:
-                        # PresenceType 2 = No Jogo, 3 = Studio
-                        status = data["lastOnlinePresences"][0].get("userPresenceType", 0)
-                        if status >= 2:
-                            return True
-                except:
-                    pass
-
-            if not continuous or time.time() > retry_timeout:
-                return False
+            except:
+                pass
+            if not continuous: break
+            time.sleep(15)
+        return False
             
-            time.sleep(5)
 
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):

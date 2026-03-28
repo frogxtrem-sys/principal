@@ -858,22 +858,32 @@ print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
         if not lua_written:
             console.print("[bold red][X] Erro: Nao foi possivel gravar o Autoexec em nenhum caminho![/bold red]")
     @staticmethod
+    
     def check_executor_status(package_name, max_wait_time=180):
-        # Pega o ID da conta que está rodando nesse clone agora
+        # Pega o ID da conta vinculada ao clone (ywcw.lnu.exhl, etc)
         user_id = globals().get("_user_", {}).get(package_name)
-        if not user_id: return False
+        if not user_id: 
+            return False
 
-        # O CAMINHO MUDOU: Agora buscamos na pasta unificada do Delta
-        # O seu script Lua deve fazer: writefile(id..".main", "online")
-        signal_file = f"/sdcard/Delta/{user_id}.main"
+        # Lista de caminhos onde o Delta costuma salvar o writefile
+        # 1. Dentro da workspace (mais comum)
+        # 2. Na raiz da pasta Delta
+        possible_files = [
+            f"/sdcard/Delta/workspace/{user_id}.main",
+            f"/sdcard/Delta/{user_id}.main"
+        ]
 
         timeout = time.time() + max_wait_time
+    
         while time.time() < timeout:
-            if os.path.exists(signal_file):
-                return True
+            for signal_file in possible_files:
+                if os.path.exists(signal_file):
+                    # Achou o arquivo! O executor carregou.
+                    return True
+          
+            # Espera 10 segundos para a proxima checagem (melhora a resposta)
+            time.sleep(10) 
         
-            # O bot espera 15 segundos antes de checar a pasta de novo
-            time.sleep(15) 
         return False
             
     @staticmethod

@@ -864,22 +864,22 @@ class ExecutorManager:
             console.print("[bold red][X] Erro: Nao foi possivel gravar o script de Autoexec em nenhum caminho![/bold red]")
     @staticmethod
     def check_executor_status(package_name, max_wait_time=180):
-    # Pega o ID da conta que está rodando nesse clone agora
-    user_id = globals().get("_user_", {}).get(package_name)
-    if not user_id: return False
+        # Pega o ID da conta que está rodando nesse clone agora
+        user_id = globals().get("_user_", {}).get(package_name)
+        if not user_id: return False
 
-    # O CAMINHO MUDOU: Agora buscamos na pasta unificada do Delta
-    # O seu script Lua deve fazer: writefile(id..".main", "online")
-    signal_file = f"/sdcard/Delta/{user_id}.main"
+        # O CAMINHO MUDOU: Agora buscamos na pasta unificada do Delta
+        # O seu script Lua deve fazer: writefile(id..".main", "online")
+        signal_file = f"/sdcard/Delta/{user_id}.main"
 
-    timeout = time.time() + max_wait_time
-    while time.time() < timeout:
-        if os.path.exists(signal_file):
-            return True
+        timeout = time.time() + max_wait_time
+        while time.time() < timeout:
+            if os.path.exists(signal_file):
+                return True
         
-        # O bot espera 15 segundos antes de checar a pasta de novo
-        time.sleep(15) 
-    return False
+            # O bot espera 15 segundos antes de checar a pasta de novo
+            time.sleep(15) 
+        return False
             
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):

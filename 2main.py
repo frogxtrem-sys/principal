@@ -1237,7 +1237,7 @@ def main():
                 for task in [
                     (Runner.monitor_presence, (server_links, stop_main_event)),
                     (Runner.force_rejoin, (server_links, force_rejoin_interval, stop_main_event)),
-                    ]
+                ]:
 
                 # Inicia as tarefas de monitoramento
                 for task_func, task_args in tasks:

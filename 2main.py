@@ -907,23 +907,28 @@ class ExecutorManager:
 
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
+        # Vai buscar o ID da conta que está no dicionário global
         user_id = globals().get("_user_", {}).get(package_name)
         if not user_id:
             user_id = UIManager.get_user_id_from_storage(package_name)
+        
         if not user_id: return False
 
         timeout = time.time() + max_wait_time
         while time.time() < timeout:
             try:
+                # Pergunta à Roblox se este ID está num servidor (InGame)
                 url = "https://presence.roblox.com/v1/presence/last-online"
                 res = requests.post(url, json={"userIds": [int(user_id)]}, timeout=10)
                 data = res.json()
                 if data.get("lastOnlinePresences"):
+                    # Type 2 significa "No Jogo"
                     if data["lastOnlinePresences"][0].get("userPresenceType", 0) >= 2:
                         return True
-            except: pass
+            except:
+                pass
             if not continuous: break
-            time.sleep(15)
+            time.sleep(15) # Espera 15s para não ser bloqueado
         return False
             
     @staticmethod

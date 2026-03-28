@@ -810,53 +810,42 @@ class ExecutorManager:
     def write_lua_script(detected_executors):
         console = Console()
     
-        # O script Lua identifica o ID da conta e avisa o Python
-        # O writefile no Delta salva por padrao na pasta 'workspace'
+        # Este script apenas avisa o Python que o executor ligou.
+        # O seu farm ja esta na pasta e vai rodar junto com este.
         lua_content = """
 repeat task.wait() until game:IsLoaded()
 local lp = game:GetService("Players").LocalPlayer
 repeat task.wait() until lp and lp.UserId ~= 0
 local myId = tostring(lp.UserId)
-writefile(myId .. ".main", "online")
-print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
+
+-- Grava o sinal em TODOS os lugares possiveis para o Python achar
+pcall(function() writefile(myId .. ".main", "online") end)
+pcall(function() writefile("workspace/" .. myId .. ".main", "online") end)
+
+print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
     """
 
-        # Baseado na sua print: /sdcard/Delta/Autoexecute
-        target_paths = [
-            "/sdcard/Delta/Autoexecute",
-            "/sdcard/Delta/autoexecute",
-            "/sdcard/Delta/Autoexec"
-        ]
+        # Pasta base do seu Delta conforme a Screenshot
+        target_path = "/sdcard/Delta/Autoexecute"
 
-        lua_written = False
+        try:
+            os.makedirs(target_path, exist_ok=True)
+            # Nomeamos com 00_ para o Delta carregar este PRIMEIRO
+            lua_script_path = os.path.join(target_path, "00_shouko_check.lua")
 
-        for target_path in target_paths:
-            try:
-                # Garante que a pasta existe
-                os.makedirs(target_path, exist_ok=True)
-                lua_script_path = os.path.join(target_path, "executor_check.lua")
-            
-                # Escrita normal
-                with open(lua_script_path, "w") as f:
-                    f.write(lua_content)
-            
-                lua_written = True
-                console.print(f"[bold green][✓] Script Global de Check criado em: {lua_script_path}[/bold green]")
-                break 
+            # Tenta escrita normal
+            with open(lua_script_path, "w") as f:
+                f.write(lua_content)
         
-            except Exception:
-                # Escrita via Root (Seguro para Cloud Phone)
-                try:
-                    lua_script_path = os.path.join(target_path, "executor_check.lua")
-                    os.system(f"su -c 'echo \"{lua_content}\" > {lua_script_path}'")
-                    lua_written = True
-                    console.print(f"[bold yellow][!] Script gravado via Root em: {target_path}[/bold yellow]")
-                    break
-                except:
-                    continue
+            console.print(f"[bold green][✓] Script de sinal criado em: {lua_script_path}[/bold green]")
 
-        if not lua_written:
-            console.print("[bold red][X] Erro: Nao foi possivel gravar o Autoexec em nenhum caminho![/bold red]")
+        except Exception:
+            # Se falhar (comum em Cloud Phone), força via Root
+            try:
+                os.system(f"su -c 'echo \"{lua_content}\" > {lua_script_path}'")
+                console.print(f"[bold yellow][!] Script de sinal gravado via Root![/bold yellow]")
+            except Exception as e:
+                console.print(f"[bold red][X] Erro ao gravar script: {e}[/bold red]")
     @staticmethod
     
     def check_executor_status(package_name, max_wait_time=180):

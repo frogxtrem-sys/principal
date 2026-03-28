@@ -849,30 +849,26 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
     @staticmethod
     
     def check_executor_status(package_name, max_wait_time=180):
-        # Pega o ID da conta vinculada ao clone (ywcw.lnu.exhl, etc)
         user_id = globals().get("_user_", {}).get(package_name)
-        if not user_id: 
-            return False
+        if not user_id: return False
 
-        # Lista de caminhos onde o Delta costuma salvar o writefile
-        # 1. Dentro da workspace (mais comum)
-        # 2. Na raiz da pasta Delta
+        # Lista de caminhos possíveis que o Delta usa no VMOS/UGPhone
         possible_files = [
-            f"/sdcard/Delta/workspace/{user_id}.main",
-            f"/sdcard/Delta/{user_id}.main"
+            f"/sdcard/Delta/workspace/{user_id}.main",      # Caminho mais provável
+            f"/sdcard/Delta/{user_id}.main",                # Raiz da pasta Delta
+            f"/storage/emulated/0/Delta/workspace/{user_id}.main",
+            f"/storage/emulated/0/Delta/{user_id}.main"
         ]
 
         timeout = time.time() + max_wait_time
-    
         while time.time() < timeout:
             for signal_file in possible_files:
                 if os.path.exists(signal_file):
-                    # Achou o arquivo! O executor carregou.
+                    # Se achou, printa no console do Termux para você ver
+                    print(f"\033[1;32m[✓] Sinal detectado em: {signal_file}\033[0m")
                     return True
-          
-            # Espera 10 segundos para a proxima checagem (melhora a resposta)
-            time.sleep(10) 
         
+            time.sleep(10) 
         return False
             
     @staticmethod

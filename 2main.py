@@ -891,10 +891,11 @@ print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
         while True:  # <--- O Loop Infinito começa AQUI
             time.sleep(5) 
             user_id = globals().get("_user_", {}).get(package_name)
-            
+        
+            # Inicia a checagem visual na tabela
             globals()["package_statuses"][package_name]["Status"] = "\033[1;33mChecking executor...\033[0m"
             UIManager.update_status_table()
-            
+        
             start_time = time.time()
             executor_loaded = False
 
@@ -904,67 +905,70 @@ print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
                     globals()["package_statuses"][package_name]["Status"] = "\033[1;32mFarming (30m)...\033[0m"
                     UIManager.update_status_table()
                     executor_loaded = True
-                    
-                    # Libera a próxima conta para abrir enquanto esta já farma
+                
+                    # SUCESSO: Libera a fila para a PRÓXIMA conta abrir enquanto esta farma
                     next_package_event.set() 
                     break 
 
                 time.sleep(10)
 
             if executor_loaded:
-                # FASE 2: O "Descanso" do Farm (Aqui ficam os seus 30 minutos)
-                # O boneco fica pescando/cuidando dos pets aqui
-                time.sleep(1800) # 1800 segundos = 30 minutos
-                
+                # FASE 2: O Tempo de Farm (30 minutos colhendo frutos)
+                time.sleep(1800) 
                 print(f"\033[1;36m[ Shouko.dev ] - Tempo de 30min esgotado para {package_name}. Resetando...\033[0m")
             else:
-                # FASE 3: Se não carregou em 3 min, deu erro
+                # FASE 3: Se der Timeout (3 min sem sinal), pula para o reset para tentar de novo
                 print(f"\033[1;31m[ Shouko.dev ] - Timeout no executor de {package_name}!\033[0m")
-                next_package_event.set() # Libera a fila mesmo se der erro para não travar o bot
+                next_package_event.set() # Libera a fila para não travar o bot inteiro
 
-            # FASE 4: O Reset (Fecha e limpa para a próxima volta do loop)
+            # FASE 4: O Reset e Reinicialização
             globals()["package_statuses"][package_name]["Status"] = "\033[1;31mResetting...\033[0m"
             UIManager.update_status_table()
-            
+        
+            # Limpa o arquivo .main para o proximo check ser real
             ExecutorManager.reset_executor_file(package_name)
+        
+            # Fecha o Roblox
             RobloxManager.kill_roblox_process(package_name)
-            time.sleep(5)
-            
-            # Abre o Roblox de novo e o "while True" lá do topo recomeça tudo!
+        
+            time.sleep(5) # Pausa para o Android processar o fechamento
+        
+            # !!! O QUE FALTAVA: MANDAR ABRIR O ROBLOX DE NOVO !!!
+            # Isso faz o "while True" recomeçar com o jogo abrindo do zero
+            print(f"\033[1;34m[ Shouko.dev ] - Reiniciando {package_name} para novo ciclo.\033[0m")
             RobloxManager.launch_roblox(package_name, server_link)
-        @staticmethod
-        def reset_executor_file(package_name):
-            """
-            Remove o arquivo de sinal do ID específico na pasta central do Delta 
-            antes de iniciar uma nova rodada no farm.
-            """
-            try:
-                # Pega o ID da conta vinculada a esse clone (ywcw.lnu.exhl, etc)
-                user_id = globals().get("_user_", {}).get(package_name)
-                if not user_id: 
-                    return
+            def reset_executor_file(package_name):
+                """
+                Remove o arquivo de sinal do ID específico na pasta central do Delta 
+                antes de iniciar uma nova rodada no farm.
+                """
+                try:
+                    # Pega o ID da conta vinculada a esse clone (ywcw.lnu.exhl, etc)
+                    user_id = globals().get("_user_", {}).get(package_name)
+                    if not user_id: 
+                        return
 
-                # Caminhos centralizados (Workspace e Raiz do Delta)
-                possible_paths = [
-                    f"/sdcard/Delta/workspace/{user_id}.main",
-                    f"/sdcard/Delta/{user_id}.main"
-                ]
+                    # Caminhos centralizados (Workspace e Raiz do Delta)
+                    possible_paths = [
+                        f"/sdcard/Delta/workspace/{user_id}.main",
+                        f"/sdcard/Delta/{user_id}.main"
+                    ]
 
-                for path in possible_paths:
-                    if os.path.exists(path):
-                        try:
-                            # Tenta remover direto pelo Python
-                            os.remove(path)
-                        except:
-                            # Se der erro de permissao, usa o Root do Cloud Phone
-                            os.system(f"su -c 'rm {path}'")
+                    for path in possible_paths:
+                        if os.path.exists(path):
+                            try:
+                                # Tenta remover direto pelo Python
+                                os.remove(path)
+                            except:
+                                # Se der erro de permissao, usa o Root do Cloud Phone
+                                os.system(f"su -c 'rm {path}'")
                 
-                        print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
-                        # Nao damos 'return' aqui para garantir que ele tente limpar 
-                        # ambos os caminhos se existirem duplicatas.
+                            print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
+                            # Nao damos 'return' aqui para garantir que ele tente limpar 
+                            # ambos os caminhos se existirem duplicatas.
 
-            except Exception as e:
-                print(f"Erro ao resetar sinal do executor: {e}")
+                except Exception as e:
+                    print(f"Erro ao resetar sinal do executor: {e}")
 
 class Runner:
 

@@ -982,25 +982,31 @@ class ExecutorManager:
         @staticmethod
         def reset_executor_file(package_name):
             try:
+                # Pega o ID da conta vinculada a esse clone específico
                 user_id = globals().get("_user_", {}).get(package_name)
-                if not user_id: return
+                if not user_id: 
+                return
 
-                # CAMINHO DINÂMICO PARA CLONES DA UGPHONE:
-                # Ele entra na pasta específica de cada clone que você está usando
-                clone_path = f"/storage/emulated/0/Android/data/{package_name}/files/delta/workspace/{user_id}.main"
+            # CAMINHO UNIFICADO: O Delta no seu Cloud Phone centraliza tudo aqui
+            # Ajustamos para a pasta que o seu Executor realmente usa (Delta/workspace)
+            central_path = f"/sdcard/Delta/workspace/{user_id}.main"
+        
+            # Backup caso a pasta não tenha o 'workspace' no nome
+            alt_path = f"/sdcard/Delta/{user_id}.main"
 
-                if os.path.exists(clone_path):
-                    # Usamos su -c porque em Cloud Phone às vezes a pasta /data/ precisa de root
-                    os.system(f"su -c 'rm {clone_path}'")
-                    print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado no Clone: {package_name}\033[0m")
-                else:
-                    # Caso o clone use um caminho simplificado na raiz (Backup)
-                    root_path = f"/storage/emulated/0/Delta/workspace/{user_id}.main"
-                    if os.path.exists(root_path):
-                        os.remove(root_path)
+            for path in [central_path, alt_path]:
+                if os.path.exists(path):
+                    # Tentamos remover normalmente, se falhar, usamos o su -c
+                    try:
+                        os.remove(path)
+                    except:
+                        os.system(f"su -c 'rm {path}'")
+                
+                    print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado para ID {user_id} em {package_name}\033[0m")
+                    return # Se removeu um, já está ok
 
-            except Exception as e:
-                print(f"Erro ao resetar sinal: {e}")
+        except Exception as e:
+            print(f"Erro ao resetar sinal: {e}")
 
 class Runner:
 

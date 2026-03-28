@@ -1237,13 +1237,19 @@ def main():
                 for task in [
                     (Runner.monitor_presence, (server_links, stop_main_event)),
                     (Runner.force_rejoin, (server_links, force_rejoin_interval, stop_main_event)),
-                    (Runner.update_status_table_periodically, ())
-                ]:
-                    threading.Thread(target=task[0], args=task[1], daemon=True).start()
+                ]
+
+                # Inicia as tarefas de monitoramento
+                for task_func, task_args in tasks:
+                    threading.Thread(target=task_func, args=task_args, daemon=True).start()
+
+                # Inicia a atualização da tabela visual (UIManager) em uma thread separada
+                threading.Thread(target=UIManager.update_status_table_periodically, daemon=True).start()
 
                 while not stop_main_event.is_set():
                     time.sleep(500)
                     with status_lock:
+                        # Atualiza a tabela na tela principal também
                         UIManager.update_status_table()
                     Utilities.collect_garbage()
 

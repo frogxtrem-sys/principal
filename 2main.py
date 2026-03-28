@@ -773,42 +773,35 @@ class ExecutorManager:
     @staticmethod
     def detect_executors():
         """
-        Detecta dinamicamente as pastas de Autoexec para cada clone 
-        instalado no UGPhone (Baseado nos pacotes da imagem).
+        Detecta a pasta global do Delta que atende a todos os clones.
         """
         console = Console()
         detected_packages = []
         
-        # Pegamos a lista de clones que você já definiu na RobloxManager
         packages = RobloxManager.get_roblox_packages()
         
-        # Caminhos comuns onde os executores guardam o Autoexec dentro do Android/data
-        # O UGPhone geralmente usa o caminho /storage/emulated/0/
-        sub_paths = [
-            "files/delta/Autoexec",     # Padrão Delta
-            "files/delta/autoexec",     # Variação de letra
-            "files/fluxus/Autoexec",    # Caso use Fluxus
-            "delta/Autoexec"            # Alguns clones salvam direto na raiz
-        ]
+        # O caminho unificado que o Delta usa para todos os clones no UGPhone
+        GLOBAL_DELTA_PATH = "/sdcard/Delta"
+        AUTOEXEC_PATH = f"{GLOBAL_DELTA_PATH}/Autoexec"
+        WORKSPACE_PATH = f"{GLOBAL_DELTA_PATH}/workspace"
 
-        for package in packages:
-            found_for_this_package = False
-            for sub in sub_paths:
-                # Monta o caminho real: /storage/emulated/0/Android/data/nome.do.pacote/files/...
-                full_path = f"/storage/emulated/0/Android/data/{package}/{sub}"
-                
-                if os.path.exists(full_path):
-                    detected_packages.append({
-                        "package": package,
-                        "autoexec_path": full_path,
-                        "workspace_path": full_path.replace("Autoexec", "workspace").replace("autoexec", "workspace")
-                    })
-                    console.print(f"[bold green][ Shouko.dev ] - Executor Detectado no Clone: {package}[/bold green]")
-                    found_for_this_package = True
-                    break # Se achou um caminho pro clone, pula pro próximo pacote
-            
-            if not found_for_this_package:
-                console.print(f"[bold yellow][ Shouko.dev ] - Aviso: Pasta Autoexec não achada para {package}[/bold yellow]")
+        # Verifica se a pasta global do Delta existe
+        if os.path.exists(AUTOEXEC_PATH):
+            for package in packages:
+                # Agora todos os clones usam o MESMO caminho global
+                detected_packages.append({
+                    "package": package,
+                    "autoexec_path": AUTOEXEC_PATH,
+                    "workspace_path": WORKSPACE_PATH
+                })
+                console.print(f"[bold green][ Shouko.dev ] - Vinculando Pasta Global Delta ao Clone: {package}[/bold green]")
+        else:
+            console.print(f"[bold red][ Shouko.dev ] - Erro Crítico: Pasta Global {AUTOEXEC_PATH} não encontrada![/bold red]")
+            # Se não achar a /sdcard/Delta, tenta o caminho alternativo interno
+            alt_path = "/storage/emulated/0/Delta/Autoexec"
+            if os.path.exists(alt_path):
+                 console.print(f"[bold yellow][ Shouko.dev ] - Usando caminho alternativo: {alt_path}[/bold yellow]")
+                 # Repete a lógica para o alt_path...
 
         return detected_packages
     

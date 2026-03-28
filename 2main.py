@@ -854,19 +854,18 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
 
         possible_files = [
             f"/sdcard/Delta/workspace/{user_id}.main",
-            f"/sdcard/Delta/{user_id}.main",
-            f"/storage/emulated/0/Delta/workspace/{user_id}.main"
+            f"/sdcard/Delta/{user_id}.main"
         ]
 
         timeout = time.time() + max_wait_time
         while time.time() < timeout:
             for signal_file in possible_files:
-                # Usamos Root para ler
+                # Root check para evitar o 'Permission Denied'
                 check_cmd = os.system(f"su -c 'ls {signal_file}' > /dev/null 2>&1")
                 if check_cmd == 0:
-                    print(f"\033[1;32m[✓] SINAL DETECTADO VIA ROOT: {signal_file}\033[0m")
+                    print(f"\033[1;32m[✓] SINAL DETECTADO: {signal_file}\033[0m")
                     return True
-            time.sleep(10) 
+            time.sleep(10)
         return False
             
     @staticmethod
@@ -920,23 +919,18 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
             # Isso faz o "while True" recomeçar com o jogo abrindo do zero
             print(f"\033[1;34m[ Shouko.dev ] - Reiniciando {package_name} para novo ciclo.\033[0m")
             RobloxManager.launch_roblox(package_name, server_link)
-            def reset_executor_file(package_name):
-                try:
-                    user_id = globals().get("_user_", {}).get(package_name)
-                    if not user_id: return
-
-                    possible_paths = [
-                        f"/sdcard/Delta/workspace/{user_id}.main",
-                        f"/sdcard/Delta/{user_id}.main"
-                    ]
-
-                    for path in possible_paths:
-                        # Forçamos a remoção via Root para não dar 'Permission Denied' no reset
-                        os.system(f"su -c 'rm -f {path}'")
+    @staticmethod
+    def reset_executor_file(package_name):
+        try:
+            user_id = globals().get("_user_", {}).get(package_name)
+            if not user_id: return
             
-                    print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
-                except Exception as e:
-                    print(f"Erro ao resetar sinal do executor: {e}")
+            # Limpa o sinal via Root para o próximo ciclo começar do zero
+            os.system(f"su -c 'rm -f /sdcard/Delta/workspace/{user_id}.main'")
+            os.system(f"su -c 'rm -f /sdcard/Delta/{user_id}.main'")
+            print(f"\033[1;32m[ Shouko.dev ] - Reset concluído para ID {user_id}\033[0m")
+        except Exception as e:
+            print(f"Erro no reset: {e}")
 
 class Runner:
 

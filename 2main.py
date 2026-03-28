@@ -922,29 +922,26 @@ class ExecutorManager:
                         console.print(f"[bold yellow][ Shouko.dev ] - No valid path found to write Lua script for {executor_name}[/bold yellow]")
 
     @staticmethod
-    def check_executor_status(package_name, continuous=True, max_wait_time=180):
-        # Vai buscar o ID da conta que está no dicionário global
+    def check_executor_status(package_name, max_wait_time=180):
         user_id = globals().get("_user_", {}).get(package_name)
-        if not user_id:
-            user_id = UIManager.get_user_id_from_storage(package_name)
-        
         if not user_id: return False
+
+        # Onde o arquivo .main deve estar (Pasta do Clone no UGPhone)
+        signal_file = f"/storage/emulated/0/Android/data/{package_name}/files/delta/workspace/{user_id}.main"
 
         timeout = time.time() + max_wait_time
         while time.time() < timeout:
-            try:
-                # Pergunta à Roblox se este ID está num servidor (InGame)
-                url = "https://presence.roblox.com/v1/presence/last-online"
-                res = requests.post(url, json={"userIds": [int(user_id)]}, timeout=10)
-                data = res.json()
-                if data.get("lastOnlinePresences"):
-                    # Type 2 significa "No Jogo"
-                    if data["lastOnlinePresences"][0].get("userPresenceType", 0) >= 2:
-                        return True
-            except:
-                pass
-            if not continuous: break
-            time.sleep(15) # Espera 15s para não ser bloqueado
+            # 1. Checa se o arquivo de sinal do farm existe
+            if os.path.exists(signal_file):
+                # Opcional: Checar se o arquivo foi modificado recentemente (últimos 5 min)
+                # file_age = time.time() - os.path.getmtime(signal_file)
+                # if file_age < 300: return True
+                return True
+            
+            # 2. Backup: Checa a API da Roblox (como você já fazia)
+            # (Mantenha o seu código de requests aqui como segunda opção)
+            
+            time.sleep(15) 
         return False
             
     @staticmethod

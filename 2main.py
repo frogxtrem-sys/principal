@@ -1626,7 +1626,7 @@ def main():
             continue
             
             
-        elif setup_type == "7":
+        elif setup_type == "6":
             console = Console()
             console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO FORÇADO)...[/bold yellow]")
         

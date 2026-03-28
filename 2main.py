@@ -773,35 +773,36 @@ class ExecutorManager:
     @staticmethod
     def detect_executors():
         """
-        Detecta a pasta global do Delta que atende a todos os clones.
+        Detecta a pasta global do Delta (/sdcard/Delta/Autoexecute) 
+        e vincula a todos os clones instalados.
         """
         console = Console()
         detected_packages = []
-        
+    
+        # Lista de pacotes dos seus 4 clones (ywcw.lnu.exhl, etc)
         packages = RobloxManager.get_roblox_packages()
-        
-        # O caminho unificado que o Delta usa para todos os clones no UGPhone
+    
+        # Caminho EXATO da sua Screenshot
         GLOBAL_DELTA_PATH = "/sdcard/Delta"
-        AUTOEXEC_PATH = f"{GLOBAL_DELTA_PATH}/Autoexec"
+        AUTOEXEC_PATH = f"{GLOBAL_DELTA_PATH}/Autoexecute"
         WORKSPACE_PATH = f"{GLOBAL_DELTA_PATH}/workspace"
 
-        # Verifica se a pasta global do Delta existe
+        # Verifica se a pasta existe (usamos su -c mkdir como garantia se nao existir)
+        if not os.path.exists(AUTOEXEC_PATH):
+            os.system(f"su -c 'mkdir -p {AUTOEXEC_PATH}'")
+            os.system(f"su -c 'mkdir -p {WORKSPACE_PATH}'")
+
         if os.path.exists(AUTOEXEC_PATH):
             for package in packages:
-                # Agora todos os clones usam o MESMO caminho global
+                # Vincula cada clone a pasta central do Delta
                 detected_packages.append({
                     "package": package,
                     "autoexec_path": AUTOEXEC_PATH,
                     "workspace_path": WORKSPACE_PATH
                 })
-                console.print(f"[bold green][ Shouko.dev ] - Vinculando Pasta Global Delta ao Clone: {package}[/bold green]")
+                console.print(f"[bold green][ Shouko.dev ] - Vinculando Delta Central ao Clone: {package}[/bold green]")
         else:
-            console.print(f"[bold red][ Shouko.dev ] - Erro Crítico: Pasta Global {AUTOEXEC_PATH} não encontrada![/bold red]")
-            # Se não achar a /sdcard/Delta, tenta o caminho alternativo interno
-            alt_path = "/storage/emulated/0/Delta/Autoexec"
-            if os.path.exists(alt_path):
-                 console.print(f"[bold yellow][ Shouko.dev ] - Usando caminho alternativo: {alt_path}[/bold yellow]")
-                 # Repete a lógica para o alt_path...
+            console.print(f"[bold red][ Shouko.dev ] - ERRO: Nao foi possivel acessar {AUTOEXEC_PATH}[/bold red]")
 
         return detected_packages
     

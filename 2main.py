@@ -992,28 +992,28 @@ class ExecutorManager:
             RobloxManager.launch_roblox(package_name, server_link)
         @staticmethod
         def reset_executor_file(package_name):
-        try:
-            user_id = globals().get("_user_", {}).get(package_name)
-            if not user_id: return
+            try:
+                user_id = globals().get("_user_", {}).get(package_name)
+                if not user_id: return
 
-            # CAMINHO DINÂMICO PARA CLONES DA UGPHONE:
-            # Ele entra na pasta específica de cada clone que você está usando
-            clone_path = f"/storage/emulated/0/Android/data/{package_name}/files/delta/workspace/{user_id}.main"
+                # CAMINHO DINÂMICO PARA CLONES DA UGPHONE:
+                # Ele entra na pasta específica de cada clone que você está usando
+                clone_path = f"/storage/emulated/0/Android/data/{package_name}/files/delta/workspace/{user_id}.main"
 
-            if os.path.exists(clone_path):
-                # Usamos su -c porque em Cloud Phone às vezes a pasta /data/ precisa de root
-                os.system(f"su -c 'rm {clone_path}'")
-                print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado no Clone: {package_name}\033[0m")
-            else:
-                # Caso o clone use um caminho simplificado na raiz (Backup)
-                root_path = f"/storage/emulated/0/Delta/workspace/{user_id}.main"
-                if os.path.exists(root_path):
-                    os.remove(root_path)
+                if os.path.exists(clone_path):
+                    # Usamos su -c porque em Cloud Phone às vezes a pasta /data/ precisa de root
+                    os.system(f"su -c 'rm {clone_path}'")
+                    print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado no Clone: {package_name}\033[0m")
+                else:
+                    # Caso o clone use um caminho simplificado na raiz (Backup)
+                    root_path = f"/storage/emulated/0/Delta/workspace/{user_id}.main"
+                    if os.path.exists(root_path):
+                        os.remove(root_path)
 
-        except Exception as e:
-            print(f"Erro ao resetar sinal: {e}")
+            except Exception as e:
+                print(f"Erro ao resetar sinal: {e}")
 
-class Runner:
+    class Runner:
     @staticmethod
     def launch_package_sequentially(server_links):
         next_package_event = Event()

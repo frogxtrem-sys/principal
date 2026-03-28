@@ -449,16 +449,16 @@ class FileManager:
 class RobloxManager:
     @staticmethod
     def check_user_online(user_id, cookie=None):
-    # Endpoint mais preciso para saber se está IN-GAME
-    url = "https://presence.roblox.com/v1/presence/last-online"
-    body = {"userIds": [int(user_id)]}
+        # Endpoint mais preciso para saber se está IN-GAME
+        url = "https://presence.roblox.com/v1/presence/last-online"
+        body = {"userIds": [int(user_id)]}
     
-    try:
-        res = requests.post(url, json=body, timeout=10)
-        data = res.json()
-        if data.get("lastOnlinePresences"):
-            presence = data["lastOnlinePresences"][0]
-            # 2 = No Jogo / 3 = No Studio
+        try:
+            res = requests.post(url, json=body, timeout=10)
+            data = res.json()
+            if data.get("lastOnlinePresences"):
+                presence = data["lastOnlinePresences"][0]
+                # 2 = No Jogo / 3 = No Studio
             if presence.get("userPresenceType", 0) >= 2:
                 return 2 # Retorna que está Online/No Jogo
         return 0 # Offline

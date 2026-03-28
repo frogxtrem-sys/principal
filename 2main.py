@@ -910,95 +910,45 @@ class ExecutorManager:
             
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):
-        # ADICIONE ISSO AQUI: 
-        # Dá um pequeno fôlego para o sistema não atropelar os clones
         time.sleep(5) 
         
-        user_id = globals()["_user_"].get(package_name)
+        user_id = globals().get("_user_", {}).get(package_name)
         detected_executors = ExecutorManager.detect_executors()
         
-        # ... resto do código ...
-
         if detected_executors:
             globals()["package_statuses"][package_name]["Status"] = "\033[1;33mChecking executor...\033[0m"
             UIManager.update_status_table()
-            while True:
-                try:
-                    start_time = time.time()
-                    executor_loaded = False
+            
+            start_time = time.time()
+            executor_loaded = False
 
-                    while time.time() - start_time < 180:
-                        if ExecutorManager.check_executor_status(package_name):
-                            globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor has loaded successfully\033[0m"
-                            UIManager.update_status_table()
-                            executor_loaded = True
-                            next_package_event.set()
-                        break
-
-                        time.sleep(3)
-
-        # 🔥 ESSA LINHA MUDA TUDO
-                        if executor_loaded:
-                            return
-
-                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExecutor didn't load. Rejoining...\033[0m"
-                            UIManager.update_status_table()
-                            time.sleep(15)
-
-                            ExecutorManager.reset_executor_file(package_name)
-                            time.sleep(0.5)
-                            RobloxManager.kill_roblox_process(package_name)
-                            RobloxManager.delete_cache_for_package(package_name)
-                            time.sleep(15)
-
-                            print(f"\033[1;33m[ Shouko.dev ] - Rejoining {package_name}...\033[0m")
-                            globals()["package_statuses"][package_name]["Status"] = "\033[1;36mRejoining\033[0m"
-                            UIManager.update_status_table()
- 
-                            RobloxManager.launch_roblox(package_name, server_link)
-
-                            globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
-                            UIManager.update_status_table()
-
-                except Exception as e:
-                    globals()["package_statuses"][package_name]["Status"] = f"\033[1;31mError checking executor for {package_name}: {e}\033[0m"
+            # Tenta verificar por 3 minutos (180s)
+            while time.time() - start_time < 180:
+                if ExecutorManager.check_executor_status(package_name):
+                    globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor Loaded!\033[0m"
                     UIManager.update_status_table()
-                    time.sleep(10)
+                    executor_loaded = True
+                    next_package_event.set()
+                    return # SAI DA FUNÇÃO POIS DEU TUDO CERTO
 
-                    ExecutorManager.reset_executor_file(package_name)
-                    time.sleep(2)
-                    RobloxManager.kill_roblox_process(package_name)
-                    RobloxManager.delete_cache_for_package(package_name)
-                    time.sleep(10)
-  
-                    print(f"\033[1;33m[ Shouko.dev ] - Rejoining {package_name} after error...\033[0m")
-                    globals()["package_statuses"][package_name]["Status"] = "\033[1;36mRejoining\033[0m"
-                    UIManager.update_status_table()
+                time.sleep(5) # Espera 5s para checar de novo
 
-                    RobloxManager.launch_roblox(package_name, server_link)
-
-                    globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
-                    UIManager.update_status_table()
-
+            # SE CHEGOU AQUI, É PORQUE PASSOU 180s E NÃO CARREGOU
+            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExec Timeout. Rejoining...\033[0m"
+            UIManager.update_status_table()
+            
+            # Limpa e tenta de novo
+            ExecutorManager.reset_executor_file(package_name)
+            RobloxManager.kill_roblox_process(package_name)
+            time.sleep(5)
+            RobloxManager.launch_roblox(package_name, server_link)
+            
         else:
-            globals()["package_statuses"][package_name]["Status"] = f"\033[1;32mJoined without executor for {user_id}\033[0m"
+            # Se não usa executor, apenas segue em frente
+            globals()["package_statuses"][package_name]["Status"] = f"\033[1;32mJoined (No Exec)\033[0m"
             UIManager.update_status_table()
             next_package_event.set()
-        return 
-    @staticmethod
-    def reset_executor_file(package_name):
-        try:
-            # Pegamos o ID específico desta conta
-            user_id = globals().get("_user_", {}).get(package_name)
-            if not user_id: return
-
-            for workspace in globals().get("workspace_paths", []):
-                file_path = os.path.join(workspace, f"{user_id}.main")
-                if os.path.exists(file_path):
-                    os.remove(file_path) # Apaga SÓ o sinal desta conta
-        except:
-            pass
-
+        return
 class CodexBypass:
     @staticmethod
     def get_headers(android_session, ref):
@@ -1248,29 +1198,36 @@ class Runner:
 
     @staticmethod
     def force_rejoin(server_links, interval, stop_event):
-        # Converte minutos para segundos (padrão 30 min)
-        try:
-            force_rejoin_interval = float(interval) * 60 if interval else 1800.0
-        except:
-            force_rejoin_interval = 1800.0
+    # Converte o intervalo para segundos
+    try:
+        force_rejoin_interval = float(interval) * 60 if interval else 1800.0
+    except:
+        force_rejoin_interval = 1800.0
 
-        last_rejoin = time.time()
+    last_rejoin = time.time()
 
-        while not stop_event.is_set():
-            if time.time() - last_rejoin >= force_rejoin_interval:
-                print(f"\033[1;31m[ Shouko.dev ] - Reset de {interval} min atingido. Reiniciando clones...\033[0m")
+    while not stop_event.is_set():
+        current_time = time.time()
+        elapsed = current_time - last_rejoin
+    
+        if elapsed >= force_rejoin_interval:
+            print(f"\033[1;31m[ Shouko.dev ] - Limite de {interval} min atingido. Forçando Rejoin...\033[0m")
+        
+            # --- MUDANÇA AQUI: FECHAMENTO INDIVIDUAL E FORÇADO ---
+            for package_name, _ in server_links:
+                print(f"[ ! ] Fechando: {package_name}")
+                os.system(f"su -c 'am force-stop {package_name}'")
+                time.sleep(1) # Intervalo para não travar o Cloud Phone
             
-                for package_name, _ in server_links:
-                    # Fecha o clone específico com segurança
-                    os.system(f"su -c 'am force-stop {package_name}'")
-                    time.sleep(2) # Pausa curta para não sobrecarregar
+            time.sleep(5)
             
-                # Reabre os clones na sequência correta
-                Runner.launch_package_sequentially(server_links)
-                last_rejoin = time.time()
-            
-            time.sleep(10) # Verifica mais rápido (a cada 10s)
-
+            # 2. Reabre todos os clones na sequência
+            Runner.launch_package_sequentially(server_links)
+        
+            # 3. RESET DO CRONÔMETRO
+            last_rejoin = time.time()
+        
+        time.sleep(30) # Verifica a cada 30 segundos
     @staticmethod
     def update_status_table_periodically():
         while True:

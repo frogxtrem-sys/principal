@@ -1234,16 +1234,17 @@ def main():
                 Runner.launch_package_sequentially(server_links)
                 globals()["is_runner_ez"] = True
 
-                for task in [
+                # Define as tarefas de monitoramento
+                tasks = [
                     (Runner.monitor_presence, (server_links, stop_main_event)),
-                    (Runner.force_rejoin, (server_links, force_rejoin_interval, stop_main_event)),
-                ]:
+                    (Runner.force_rejoin, (server_links, force_rejoin_interval, stop_main_event))
+                ]
 
-                # Inicia as tarefas de monitoramento
+                # Inicia as tarefas em threads separadas
                 for task_func, task_args in tasks:
                     threading.Thread(target=task_func, args=task_args, daemon=True).start()
 
-                # Inicia a atualização da tabela visual (UIManager) em uma thread separada
+                # Inicia a atualização da tabela visual
                 threading.Thread(target=UIManager.update_status_table_periodically, daemon=True).start()
 
                 while not stop_main_event.is_set():

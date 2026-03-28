@@ -461,9 +461,9 @@ class RobloxManager:
                 # 2 = No Jogo / 3 = No Studio
             if presence.get("userPresenceType", 0) >= 2:
                 return 2 # Retorna que está Online/No Jogo
-        return 0 # Offline
-    except:
-        return None
+            return 0 # Offline
+        except:
+            return None
 
     @staticmethod
     def get_roblox_packages():

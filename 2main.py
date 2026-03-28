@@ -1271,32 +1271,28 @@ class Runner:
 
     @staticmethod
     def force_rejoin(server_links, interval, stop_event):
-    # Garante que o intervalo seja tratado como número
-        try:
-            force_rejoin_interval = float(interval) * 60 if interval else 1800.0
-        except:
-            force_rejoin_interval = 1800.0
+    # Converte minutos para segundos (padrão 30 min)
+    try:
+        force_rejoin_interval = float(interval) * 60 if interval else 1800.0
+    except:
+        force_rejoin_interval = 1800.0
 
-        last_rejoin = time.time() # Define o tempo inicial
+    last_rejoin = time.time()
 
-        while not stop_event.is_set():
-            current_time = time.time()
-            elapsed = current_time - last_rejoin
-        
-            if elapsed >= force_rejoin_interval:
-                print(f"\033[1;31m[ Shouko.dev ] - Limite de {interval} min atingido. Forçando Rejoin...\033[0m")
+    while not stop_event.is_set():
+        if time.time() - last_rejoin >= force_rejoin_interval:
+            print(f"\033[1;31m[ Shouko.dev ] - Reset de {interval} min atingido. Reiniciando clones...\033[0m")
             
-                # 1. Mata tudo
-                RobloxManager.kill_roblox_processes()
-                time.sleep(5)
+            for package_name, _ in server_links:
+                # Fecha o clone específico com segurança
+                os.system(f"su -c 'am force-stop {package_name}'")
+                time.sleep(2) # Pausa curta para não sobrecarregar
             
-                # 2. Reloga
-                Runner.launch_package_sequentially(server_links)
+            # Reabre os clones na sequência correta
+            Runner.launch_package_sequentially(server_links)
+            last_rejoin = time.time()
             
-                # 3. RESET FUNDAMENTAL: Atualiza o cronômetro
-                last_rejoin = time.time()
-            
-            time.sleep(30) # Verifica a cada 30 segundos pra não pesar a CPU
+        time.sleep(10) # Verifica mais rápido (a cada 10s)
 
     @staticmethod
     def update_status_table_periodically():

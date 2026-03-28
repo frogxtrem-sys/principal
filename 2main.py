@@ -808,112 +808,60 @@ class ExecutorManager:
     @staticmethod
     def write_lua_script(detected_executors):
         console = Console()
-        config_file = os.path.join("Shouko.dev", "checkui.lua")
+        # O script Lua agora é gerado dinamicamente para identificar o ID de cada conta
+        lua_content = """
+        -- Script de Auto-Identificacao para 4 Clones (Shouko.dev)
+        repeat task.wait() until game:IsLoaded()
+        local lp = game:GetService("Players").LocalPlayer
+        
+        -- Espera carregar o ID do usuario (essencial para clones)
+        repeat task.wait() until lp and lp.UserId ~= 0
+        
+        local myId = tostring(lp.UserId)
+        
+        -- Cria o arquivo de sinal que o Python esta esperando
+        -- O caminho do writefile no Delta geralmente aponta para a pasta workspace
+        writefile(myId .. ".main", "online")
+        
+        print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
+        """
 
-        try:
-            with open(config_file, "r") as f:
-                lua_script_content = f.read()
-        except Exception as e:
-            console.print(f"[bold red][ Shouko.dev ] - Error reading config from {config_file}: {e}[/bold red]")
-            return
+        # Como o Delta no seu Cloud Phone centraliza tudo, definimos o caminho global
+        # Se quiser garantir, ele tentara os dois caminhos mais comuns
+        target_paths = [
+            "/sdcard/Delta/Autoexec",
+            "/storage/emulated/0/Delta/Autoexec"
+        ]
 
-        for executor_name in detected_executors:
-            base_path = executors[executor_name]
-            possible_autoexec_paths = [
-                os.path.join(base_path, "Autoexec"),
-                os.path.join(base_path, "Autoexecute"),
-                os.path.join(base_path, "autoexec")
-            ]
+        lua_written = False
 
-            lua_written = False
+        for target_path in target_paths:
+            try:
+                # Cria a pasta se nao existir
+                os.makedirs(target_path, exist_ok=True)
+                lua_script_path = os.path.join(target_path, "executor_check.lua")
 
-            if executor_name.upper() == "KRNL":
-                autoruns_path = os.path.join("/storage/emulated/0/krnl/workspace/.storage", "autoruns.json")
-                tabs_path = os.path.join("/storage/emulated/0/krnl/workspace/.storage/tabs", "check_executor.luau")
-
-                if os.path.exists(autoruns_path):
-                    with open(autoruns_path, "r") as f:
-                        try:
-                            autoruns_data = json.load(f)
-                            if not isinstance(autoruns_data, list):
-                                autoruns_data = []
-                        except json.JSONDecodeError:
-                            autoruns_data = []
-                else:
-                    autoruns_data = []
-
-                if "check_executor" not in autoruns_data:
-                    autoruns_data.append("check_executor")
-                    try:
-                        with open(autoruns_path, "w") as f:
-                            json.dump(autoruns_data, f)
-                        console.print(f"[bold green][ Shouko.dev ] - Added script into KRNL autoexec![/bold green]")
-                    except Exception as e:
-                        console.print(f"[bold red][ Shouko.dev ] - Error updating KRNL autoexec: {e}[/bold red]")
-                        Utilities.log_error(f"Error updating KRNL autoexec: {e}")
-                else:
-                    console.print(f"[bold green][ Shouko.dev ] - Script already exists in KRNL autoexec![/bold green]")
-
+                # Escreve o script inteligente
+                with open(lua_script_path, "w") as f:
+                    f.write(lua_content)
+                
+                lua_written = True
+                console.print(f"[bold green][✓] Script Global de Check criado em: {lua_script_path}[/bold green]")
+                break # Se conseguiu escrever em um, ja basta
+            
+            except Exception as e:
+                # Se falhar a escrita normal, tenta via Root (comum em Cloud Phones)
                 try:
-                    os.makedirs(os.path.dirname(tabs_path), exist_ok=True)
-                    with open(tabs_path, "w") as f:
-                        f.write(lua_script_content)
-                    lua_written = True
-                    console.print(f"[bold green][ Shouko.dev ] - Lua script written successfully![/bold green]")
-                except Exception as e:
-                    console.print(f"[bold red][ Shouko.dev ] - Error writing Lua script to KRNL autoexec: {e}[/bold red]")
-                    Utilities.log_error(f"Error writing Lua script to KRNL autoexec: {e}")
-
-            if not lua_written:
-                if executor_name.upper() == "DELTA":
-                    # Em vez de caminho fixo, usamos o caminho do pacote atual
-                    package = executor_name # Assumindo que o nome vindo do loop é o pacote
-                    target_path = f"/storage/emulated/0/Android/data/{package}/files/delta/Autoexecute"
-    
-                    # Restante do código...
-                    os.makedirs(target_path, exist_ok=True)
                     lua_script_path = os.path.join(target_path, "executor_check.lua")
-                    
-                    # Tenta pegar o ID da conta que está tentando logar agora
-                    # Se não achar, usa 'default'
-                    current_user_id = globals().get("_user_", {}).get(executor_name, "default")
+                    os.system(f"su -c 'echo \"{lua_content}\" > {lua_script_path}'")
+                    lua_written = True
+                    console.print(f"[bold yellow][!] Script gravado via Root em: {target_path}[/bold yellow]")
+                    break
+                except:
+                    continue
 
-                    # Criamos o conteúdo Lua dinâmico aqui mesmo
-                    lua_content = f"""
-                    repeat wait() until game:IsLoaded()
-                    local filename = "{current_user_id}.main"
-                    writefile(filename, "on")
-                    """
-
-                    try:
-                        # Gravamos o script personalizado via Root
-                        comando_echo = f"su -c 'echo \"{lua_content}\" > {lua_script_path}'"
-                        os.system(comando_echo)
-                    
-                        lua_written = True
-                        console.print(f"[bold green][✓] Check Script (ID: {current_user_id}) escrito via Root![/bold green]")
-                    except Exception as e:
-                        console.print(f"[bold red]Erro ao gravar via Root: {e}[/bold red]")
-
-                if not lua_written:
-                    for path in possible_autoexec_paths:
-                        if os.path.exists(path):
-                            lua_script_path = os.path.join(path, "executor_check.lua")
-
-                            try:
-                                with open(lua_script_path, 'w') as file:
-                                    file.write(lua_script_content)
-                                lua_written = True
-                                console.print(f"[bold green][ Shouko.dev ] - Lua script written to: {lua_script_path}[/bold green]")
-                                break
-
-                            except Exception as e:
-                                console.print(f"[bold red][ Shouko.dev ] - Error writing Lua script to {lua_script_path}: {e}[/bold red]")
-                                Utilities.log_error(f"Error writing Lua script to {lua_script_path}: {e}")
-
-                    if not lua_written:
-                        console.print(f"[bold yellow][ Shouko.dev ] - No valid path found to write Lua script for {executor_name}[/bold yellow]")
-
+        if not lua_written:
+            console.print("[bold red][X] Erro: Nao foi possivel gravar o script de Autoexec em nenhum caminho![/bold red]")
     @staticmethod
     def check_executor_status(package_name, max_wait_time=180):
     # Pega o ID da conta que está rodando nesse clone agora

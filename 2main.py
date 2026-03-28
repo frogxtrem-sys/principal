@@ -477,10 +477,17 @@ class RobloxManager:
 
     @staticmethod
     def kill_roblox_processes():
-        clones = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "com.roblox.client"]
+        # Usamos a função de cima para garantir que a lista é a mesma!
+        clones = RobloxManager.get_roblox_packages()
+        # Adicionamos o oficial só por segurança
+        clones.append("com.roblox.client") 
+        
         for p in clones:
-            # O 'timeout 5' impede que o comando fique travado se o root demorar
-            os.system(f"su -c 'timeout 5 am force-stop {p} && pkill -9 {p}'")
+            print(f"\033[1;31m[ Shouko.dev ] - Finalizando: {p}\033[0m")
+            # Comando simplificado e direto para Cloud Phones
+            os.system(f"su -c 'am force-stop {p}'")
+            # O 'pkill' às vezes buga se o processo já morreu, então o force-stop é melhor sozinho
+        
         time.sleep(2)
     
     @staticmethod

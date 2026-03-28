@@ -933,7 +933,7 @@ class ExecutorManager:
                 # Pega o ID da conta vinculada a esse clone específico
                 user_id = globals().get("_user_", {}).get(package_name)
                 if not user_id: 
-                return
+            return
 
             # CAMINHO UNIFICADO: O Delta no seu Cloud Phone centraliza tudo aqui
             # Ajustamos para a pasta que o seu Executor realmente usa (Delta/workspace)

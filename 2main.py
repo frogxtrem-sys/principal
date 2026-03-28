@@ -869,7 +869,7 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
                     print(f"\033[1;32m[✓] SINAL DETECTADO VIA ROOT: {signal_file}\033[0m")
                     return True
         
-             time.sleep(10) 
+            time.sleep(10) 
         return False
             
     @staticmethod

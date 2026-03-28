@@ -946,45 +946,31 @@ class ExecutorManager:
             
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):
-        time.sleep(5) 
+        # ... (Parte inicial de abrir o jogo) ...
         
-        user_id = globals().get("_user_", {}).get(package_name)
-        detected_executors = ExecutorManager.detect_executors()
-        
-        if detected_executors:
-            globals()["package_statuses"][package_name]["Status"] = "\033[1;33mChecking executor...\033[0m"
-            UIManager.update_status_table()
-            
-            start_time = time.time()
-            executor_loaded = False
+        start_time = time.time()
+        # LOOP 1: Esperar o jogo carregar (Timeout de 3 min)
+        while time.time() - start_time < 180:
+            if ExecutorManager.check_executor_status(package_name):
+                globals()["package_statuses"][package_name]["Status"] = "\033[1;32mFarming...\033[0m"
+                next_package_event.set() # Libera para abrir a próxima conta
+                
+                # --- AGORA ENTRA O MONITORAMENTO DE 30 MINUTOS ---
+                farm_start = time.time()
+                while time.time() - farm_start < 1800: # 1800s = 30 minutos
+                    # Se o arquivo .main sumir ANTES dos 30 min, o jogo crashou
+                    if not ExecutorManager.check_executor_status(package_name):
+                        break # Sai para dar Rejoin
+                    time.sleep(30) # Checa a cada 30 segundos
+                
+                # Se saiu do loop (por tempo ou crash), dá o Reset
+                print(f"Resetando {package_name} (Tempo esgotado ou Crash)")
+                RobloxManager.kill_roblox_process(package_name)
+                time.sleep(5)
+                RobloxManager.launch_roblox(package_name, server_link)
+                return check_executor_and_rejoin(package_name, server_link, next_package_event) # Reinicia o ciclo
 
-            # Tenta verificar por 3 minutos (180s)
-            while time.time() - start_time < 180:
-                if ExecutorManager.check_executor_status(package_name):
-                    globals()["package_statuses"][package_name]["Status"] = "\033[1;32mExecutor Loaded!\033[0m"
-                    UIManager.update_status_table()
-                    executor_loaded = True
-                    next_package_event.set()
-                    return # SAI DA FUNÇÃO POIS DEU TUDO CERTO
-
-                time.sleep(5) # Espera 5s para checar de novo
-
-            # SE CHEGOU AQUI, É PORQUE PASSOU 180s E NÃO CARREGOU
-            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mExec Timeout. Rejoining...\033[0m"
-            UIManager.update_status_table()
-            
-            # Limpa e tenta de novo
-            ExecutorManager.reset_executor_file(package_name)
-            RobloxManager.kill_roblox_process(package_name)
             time.sleep(5)
-            RobloxManager.launch_roblox(package_name, server_link)
-            
-        else:
-            # Se não usa executor, apenas segue em frente
-            globals()["package_statuses"][package_name]["Status"] = f"\033[1;32mJoined (No Exec)\033[0m"
-            UIManager.update_status_table()
-            next_package_event.set()
-        return
         @staticmethod
         def reset_executor_file(package_name):
             try:

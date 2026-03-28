@@ -873,7 +873,11 @@ class ExecutorManager:
 
             if not lua_written:
                 if executor_name.upper() == "DELTA":
-                    target_path = "/storage/emulated/0/Delta/Autoexecute"
+                    # Em vez de caminho fixo, usamos o caminho do pacote atual
+                    package = executor_name # Assumindo que o nome vindo do loop é o pacote
+                    target_path = f"/storage/emulated/0/Android/data/{package}/files/delta/Autoexecute"
+    
+                    # Restante do código...
                     os.makedirs(target_path, exist_ok=True)
                     lua_script_path = os.path.join(target_path, "executor_check.lua")
                     

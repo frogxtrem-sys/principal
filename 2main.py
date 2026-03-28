@@ -934,37 +934,37 @@ print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
             RobloxManager.launch_roblox(package_name, server_link)
         @staticmethod
         def reset_executor_file(package_name):
-        """
-        Remove o arquivo de sinal do ID específico na pasta central do Delta 
-        antes de iniciar uma nova rodada no farm.
-        """
-        try:
-            # Pega o ID da conta vinculada a esse clone (ywcw.lnu.exhl, etc)
-            user_id = globals().get("_user_", {}).get(package_name)
-            if not user_id: 
-                return
+            """
+            Remove o arquivo de sinal do ID específico na pasta central do Delta 
+            antes de iniciar uma nova rodada no farm.
+            """
+            try:
+                # Pega o ID da conta vinculada a esse clone (ywcw.lnu.exhl, etc)
+                user_id = globals().get("_user_", {}).get(package_name)
+                if not user_id: 
+                    return
 
-            # Caminhos centralizados (Workspace e Raiz do Delta)
-            possible_paths = [
-                f"/sdcard/Delta/workspace/{user_id}.main",
-                f"/sdcard/Delta/{user_id}.main"
-            ]
+                # Caminhos centralizados (Workspace e Raiz do Delta)
+                possible_paths = [
+                    f"/sdcard/Delta/workspace/{user_id}.main",
+                    f"/sdcard/Delta/{user_id}.main"
+                ]
 
-            for path in possible_paths:
-                if os.path.exists(path):
-                    try:
-                        # Tenta remover direto pelo Python
-                        os.remove(path)
-                    except:
-                        # Se der erro de permissao, usa o Root do Cloud Phone
-                        os.system(f"su -c 'rm {path}'")
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        try:
+                            # Tenta remover direto pelo Python
+                            os.remove(path)
+                        except:
+                            # Se der erro de permissao, usa o Root do Cloud Phone
+                            os.system(f"su -c 'rm {path}'")
                 
-                    print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
-                    # Nao damos 'return' aqui para garantir que ele tente limpar 
-                    # ambos os caminhos se existirem duplicatas.
+                        print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
+                        # Nao damos 'return' aqui para garantir que ele tente limpar 
+                        # ambos os caminhos se existirem duplicatas.
 
-        except Exception as e:
-            print(f"Erro ao resetar sinal do executor: {e}")
+            except Exception as e:
+                print(f"Erro ao resetar sinal do executor: {e}")
 
 class Runner:
 

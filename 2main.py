@@ -852,7 +852,6 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
         user_id = globals().get("_user_", {}).get(package_name)
         if not user_id: return False
 
-        # Lista de onde o Delta pode salvar (Workspace e Raiz)
         possible_files = [
             f"/sdcard/Delta/workspace/{user_id}.main",
             f"/sdcard/Delta/{user_id}.main",
@@ -862,13 +861,11 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
         timeout = time.time() + max_wait_time
         while time.time() < timeout:
             for signal_file in possible_files:
-                # Usamos 'su -c ls' para ignorar o 'Permission Denied'
+                # Usamos Root para ler
                 check_cmd = os.system(f"su -c 'ls {signal_file}' > /dev/null 2>&1")
-            
                 if check_cmd == 0:
                     print(f"\033[1;32m[✓] SINAL DETECTADO VIA ROOT: {signal_file}\033[0m")
                     return True
-        
             time.sleep(10) 
         return False
             
@@ -924,37 +921,22 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
             print(f"\033[1;34m[ Shouko.dev ] - Reiniciando {package_name} para novo ciclo.\033[0m")
             RobloxManager.launch_roblox(package_name, server_link)
             def reset_executor_file(package_name):
-                """
-                Remove o arquivo de sinal do ID específico na pasta central do Delta 
-                antes de iniciar uma nova rodada no farm.
-                """
-                try:
-                    # Pega o ID da conta vinculada a esse clone (ywcw.lnu.exhl, etc)
-                    user_id = globals().get("_user_", {}).get(package_name)
-                    if not user_id: 
-                        return
+            try:
+                user_id = globals().get("_user_", {}).get(package_name)
+                if not user_id: return
 
-                    # Caminhos centralizados (Workspace e Raiz do Delta)
-                    possible_paths = [
-                        f"/sdcard/Delta/workspace/{user_id}.main",
-                        f"/sdcard/Delta/{user_id}.main"
-                    ]
+                possible_paths = [
+                    f"/sdcard/Delta/workspace/{user_id}.main",
+                    f"/sdcard/Delta/{user_id}.main"
+                ]
 
-                    for path in possible_paths:
-                        if os.path.exists(path):
-                            try:
-                                # Tenta remover direto pelo Python
-                                os.remove(path)
-                            except:
-                                # Se der erro de permissao, usa o Root do Cloud Phone
-                                os.system(f"su -c 'rm {path}'")
-                
-                            print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
-                            # Nao damos 'return' aqui para garantir que ele tente limpar 
-                            # ambos os caminhos se existirem duplicatas.
-
-                except Exception as e:
-                    print(f"Erro ao resetar sinal do executor: {e}")
+                for path in possible_paths:
+                    # Forçamos a remoção via Root para não dar 'Permission Denied' no reset
+                    os.system(f"su -c 'rm -f {path}'")
+            
+                print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
+            except Exception as e:
+                print(f"Erro ao resetar sinal do executor: {e}")
 
 class Runner:
 

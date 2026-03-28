@@ -921,22 +921,22 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
             print(f"\033[1;34m[ Shouko.dev ] - Reiniciando {package_name} para novo ciclo.\033[0m")
             RobloxManager.launch_roblox(package_name, server_link)
             def reset_executor_file(package_name):
-            try:
-                user_id = globals().get("_user_", {}).get(package_name)
-                if not user_id: return
+                try:
+                    user_id = globals().get("_user_", {}).get(package_name)
+                    if not user_id: return
 
-                possible_paths = [
-                    f"/sdcard/Delta/workspace/{user_id}.main",
-                    f"/sdcard/Delta/{user_id}.main"
-                ]
+                    possible_paths = [
+                        f"/sdcard/Delta/workspace/{user_id}.main",
+                        f"/sdcard/Delta/{user_id}.main"
+                    ]
 
-                for path in possible_paths:
-                    # Forçamos a remoção via Root para não dar 'Permission Denied' no reset
-                    os.system(f"su -c 'rm -f {path}'")
+                    for path in possible_paths:
+                        # Forçamos a remoção via Root para não dar 'Permission Denied' no reset
+                        os.system(f"su -c 'rm -f {path}'")
             
-                print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
-            except Exception as e:
-                print(f"Erro ao resetar sinal do executor: {e}")
+                    print(f"\033[1;32m[ Shouko.dev ] - Sinal do ID {user_id} limpo com sucesso!\033[0m")
+                except Exception as e:
+                    print(f"Erro ao resetar sinal do executor: {e}")
 
 class Runner:
 

@@ -949,6 +949,30 @@ class ExecutorManager:
             UIManager.update_status_table()
             next_package_event.set()
         return
+        @staticmethod
+        def reset_executor_file(package_name):
+            try:
+                # Puxa o ID do usuário para saber qual arquivo apagar
+                user_id = globals().get("_user_", {}).get(package_name)
+                if not user_id:
+                    return
+
+                # O script procura na pasta 'workspace' do seu executor (Delta/Fluxus)
+                # Geralmente fica em /storage/emulated/0/Delta/workspace/
+                workspace_paths = [
+                    "/storage/emulated/0/Delta/workspace",
+                    "/storage/emulated/0/Fluxus/workspace",
+                    "/storage/emulated/0/Arceus/workspace"
+                ]
+
+                for path in workspace_paths:
+                    # O arquivo que o seu checkonline.lua cria tem o nome: ID_DO_USUARIO.main
+                    file_path = os.path.join(path, f"{user_id}.main")
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado para {package_name}\033[0m")
+            except Exception as e:
+                print(f"Erro ao resetar arquivo: {e}")
 class CodexBypass:
     @staticmethod
     def get_headers(android_session, ref):

@@ -852,23 +852,24 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
         user_id = globals().get("_user_", {}).get(package_name)
         if not user_id: return False
 
-        # Lista de caminhos possíveis que o Delta usa no VMOS/UGPhone
+        # Lista de onde o Delta pode salvar (Workspace e Raiz)
         possible_files = [
-            f"/sdcard/Delta/workspace/{user_id}.main",      # Caminho mais provável
-            f"/sdcard/Delta/{user_id}.main",                # Raiz da pasta Delta
-            f"/storage/emulated/0/Delta/workspace/{user_id}.main",
-            f"/storage/emulated/0/Delta/{user_id}.main"
+            f"/sdcard/Delta/workspace/{user_id}.main",
+            f"/sdcard/Delta/{user_id}.main",
+            f"/storage/emulated/0/Delta/workspace/{user_id}.main"
         ]
 
         timeout = time.time() + max_wait_time
         while time.time() < timeout:
             for signal_file in possible_files:
-                if os.path.exists(signal_file):
-                    # Se achou, printa no console do Termux para você ver
-                    print(f"\033[1;32m[✓] Sinal detectado em: {signal_file}\033[0m")
+                # Usamos 'su -c ls' para ignorar o 'Permission Denied'
+                check_cmd = os.system(f"su -c 'ls {signal_file}' > /dev/null 2>&1")
+            
+                if check_cmd == 0:
+                    print(f"\033[1;32m[✓] SINAL DETECTADO VIA ROOT: {signal_file}\033[0m")
                     return True
         
-            time.sleep(10) 
+             time.sleep(10) 
         return False
             
     @staticmethod

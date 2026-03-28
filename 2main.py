@@ -772,23 +772,45 @@ class UIManager:
 class ExecutorManager:
     @staticmethod
     def detect_executors():
+        """
+        Detecta dinamicamente as pastas de Autoexec para cada clone 
+        instalado no UGPhone (Baseado nos pacotes da imagem).
+        """
         console = Console()
-        detected_executors = []
+        detected_packages = []
+        
+        # Pegamos a lista de clones que você já definiu na RobloxManager
+        packages = RobloxManager.get_roblox_packages()
+        
+        # Caminhos comuns onde os executores guardam o Autoexec dentro do Android/data
+        # O UGPhone geralmente usa o caminho /storage/emulated/0/
+        sub_paths = [
+            "files/delta/Autoexec",     # Padrão Delta
+            "files/delta/autoexec",     # Variação de letra
+            "files/fluxus/Autoexec",    # Caso use Fluxus
+            "delta/Autoexec"            # Alguns clones salvam direto na raiz
+        ]
 
-        for executor_name, base_path in executors.items():
-            possible_autoexec_paths = [
-                os.path.join(base_path, "Autoexec"),
-                os.path.join(base_path, "Autoexecute"),
-                os.path.join(base_path, "autoexec")
-            ]
+        for package in packages:
+            found_for_this_package = False
+            for sub in sub_paths:
+                # Monta o caminho real: /storage/emulated/0/Android/data/nome.do.pacote/files/...
+                full_path = f"/storage/emulated/0/Android/data/{package}/{sub}"
+                
+                if os.path.exists(full_path):
+                    detected_packages.append({
+                        "package": package,
+                        "autoexec_path": full_path,
+                        "workspace_path": full_path.replace("Autoexec", "workspace").replace("autoexec", "workspace")
+                    })
+                    console.print(f"[bold green][ Shouko.dev ] - Executor Detectado no Clone: {package}[/bold green]")
+                    found_for_this_package = True
+                    break # Se achou um caminho pro clone, pula pro próximo pacote
+            
+            if not found_for_this_package:
+                console.print(f"[bold yellow][ Shouko.dev ] - Aviso: Pasta Autoexec não achada para {package}[/bold yellow]")
 
-            for path in possible_autoexec_paths:
-                if os.path.exists(path):
-                    detected_executors.append(executor_name)
-                    console.print(f"[bold green][ Shouko.dev ] - Detected executor: {executor_name}[/bold green]")
-                    break
-
-        return detected_executors
+        return detected_packages
     
     @staticmethod
     def write_lua_script(detected_executors):

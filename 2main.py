@@ -973,28 +973,26 @@ class ExecutorManager:
             time.sleep(5)
         @staticmethod
         def reset_executor_file(package_name):
-            try:
-                # Puxa o ID do usuário para saber qual arquivo apagar
-                user_id = globals().get("_user_", {}).get(package_name)
-                if not user_id:
-                    return
+        try:
+            user_id = globals().get("_user_", {}).get(package_name)
+            if not user_id: return
 
-                # O script procura na pasta 'workspace' do seu executor (Delta/Fluxus)
-                # Geralmente fica em /storage/emulated/0/Delta/workspace/
-                workspace_paths = [
-                    "/storage/emulated/0/Delta/workspace",
-                    "/storage/emulated/0/Fluxus/workspace",
-                    "/storage/emulated/0/Arceus/workspace"
-                ]
+            # CAMINHO DINÂMICO PARA CLONES DA UGPHONE:
+            # Ele entra na pasta específica de cada clone que você está usando
+            clone_path = f"/storage/emulated/0/Android/data/{package_name}/files/delta/workspace/{user_id}.main"
 
-                for path in workspace_paths:
-                    # O arquivo que o seu checkonline.lua cria tem o nome: ID_DO_USUARIO.main
-                    file_path = os.path.join(path, f"{user_id}.main")
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                        print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado para {package_name}\033[0m")
-            except Exception as e:
-                print(f"Erro ao resetar arquivo: {e}")
+            if os.path.exists(clone_path):
+                # Usamos su -c porque em Cloud Phone às vezes a pasta /data/ precisa de root
+                os.system(f"su -c 'rm {clone_path}'")
+                print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado no Clone: {package_name}\033[0m")
+            else:
+                # Caso o clone use um caminho simplificado na raiz (Backup)
+                root_path = f"/storage/emulated/0/Delta/workspace/{user_id}.main"
+                if os.path.exists(root_path):
+                    os.remove(root_path)
+
+        except Exception as e:
+            print(f"Erro ao resetar sinal: {e}")
 class CodexBypass:
     @staticmethod
     def get_headers(android_session, ref):

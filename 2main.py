@@ -448,20 +448,26 @@ class FileManager:
     
 class RobloxManager:
     @staticmethod
-    def check_user_online(user_id, cookie=None):
-        # Endpoint mais preciso para saber se está IN-GAME
+    def check_user_online(user_id):
         url = "https://presence.roblox.com/v1/presence/last-online"
         body = {"userIds": [int(user_id)]}
+        # Headers básicos para a Roblox não bloquear o Termux
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
     
         try:
-            res = requests.post(url, json=body, timeout=10)
-            data = res.json()
-            if data.get("lastOnlinePresences"):
-                presence = data["lastOnlinePresences"][0]
-                # 2 = No Jogo / 3 = No Studio
-            if presence.get("userPresenceType", 0) >= 2:
-                return 2 # Retorna que está Online/No Jogo
-            return 0 # Offline
+            import requests
+            res = requests.post(url, json=body, headers=headers, timeout=10)
+            if res.status_code == 200:
+                data = res.json()
+                if data.get("lastOnlinePresences"):
+                    presence = data["lastOnlinePresences"][0]
+                    # Se o status for 2 (In-Game), ele está farmando
+                    if presence.get("userPresenceType", 0) == 2:
+                        return 2 
+            return 0 # Caso contrário, está Offline ou no Menu
         except:
             return None
 

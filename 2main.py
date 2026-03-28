@@ -907,27 +907,21 @@ class ExecutorManager:
 
     @staticmethod
     def check_executor_status(package_name, continuous=True, max_wait_time=180):
-        # Pega o ID da conta mapeado
         user_id = globals().get("_user_", {}).get(package_name)
         if not user_id:
             user_id = UIManager.get_user_id_from_storage(package_name)
-        
-        if not user_id:
-            return False
+        if not user_id: return False
 
         timeout = time.time() + max_wait_time
         while time.time() < timeout:
             try:
-                # API de Presença da Roblox
                 url = "https://presence.roblox.com/v1/presence/last-online"
                 res = requests.post(url, json={"userIds": [int(user_id)]}, timeout=10)
                 data = res.json()
                 if data.get("lastOnlinePresences"):
-                    # Type 2 = InGame
                     if data["lastOnlinePresences"][0].get("userPresenceType", 0) >= 2:
                         return True
-            except:
-                pass
+            except: pass
             if not continuous: break
             time.sleep(15)
         return False

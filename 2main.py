@@ -916,26 +916,22 @@ class ExecutorManager:
 
     @staticmethod
     def check_executor_status(package_name, max_wait_time=180):
-        user_id = globals().get("_user_", {}).get(package_name)
-        if not user_id: return False
+    # Pega o ID da conta que está rodando nesse clone agora
+    user_id = globals().get("_user_", {}).get(package_name)
+    if not user_id: return False
 
-        # Onde o arquivo .main deve estar (Pasta do Clone no UGPhone)
-        signal_file = f"/storage/emulated/0/Android/data/{package_name}/files/delta/workspace/{user_id}.main"
+    # O CAMINHO MUDOU: Agora buscamos na pasta unificada do Delta
+    # O seu script Lua deve fazer: writefile(id..".main", "online")
+    signal_file = f"/sdcard/Delta/{user_id}.main"
 
-        timeout = time.time() + max_wait_time
-        while time.time() < timeout:
-            # 1. Checa se o arquivo de sinal do farm existe
-            if os.path.exists(signal_file):
-                # Opcional: Checar se o arquivo foi modificado recentemente (últimos 5 min)
-                # file_age = time.time() - os.path.getmtime(signal_file)
-                # if file_age < 300: return True
-                return True
-            
-            # 2. Backup: Checa a API da Roblox (como você já fazia)
-            # (Mantenha o seu código de requests aqui como segunda opção)
-            
-            time.sleep(15) 
-        return False
+    timeout = time.time() + max_wait_time
+    while time.time() < timeout:
+        if os.path.exists(signal_file):
+            return True
+        
+        # O bot espera 15 segundos antes de checar a pasta de novo
+        time.sleep(15) 
+    return False
             
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):

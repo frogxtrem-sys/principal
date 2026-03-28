@@ -809,49 +809,43 @@ class ExecutorManager:
     @staticmethod
     def write_lua_script(detected_executors):
         console = Console()
-        # O script Lua agora é gerado dinamicamente para identificar o ID de cada conta
+    
+        # O script Lua identifica o ID da conta e avisa o Python
+        # O writefile no Delta salva por padrao na pasta 'workspace'
         lua_content = """
-        -- Script de Auto-Identificacao para 4 Clones (Shouko.dev)
-        repeat task.wait() until game:IsLoaded()
-        local lp = game:GetService("Players").LocalPlayer
-        
-        -- Espera carregar o ID do usuario (essencial para clones)
-        repeat task.wait() until lp and lp.UserId ~= 0
-        
-        local myId = tostring(lp.UserId)
-        
-        -- Cria o arquivo de sinal que o Python esta esperando
-        -- O caminho do writefile no Delta geralmente aponta para a pasta workspace
-        writefile(myId .. ".main", "online")
-        
-        print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
-        """
+repeat task.wait() until game:IsLoaded()
+local lp = game:GetService("Players").LocalPlayer
+repeat task.wait() until lp and lp.UserId ~= 0
+local myId = tostring(lp.UserId)
+writefile(myId .. ".main", "online")
+print("[Shouko.dev] Sinal de vida enviado para o ID: " .. myId)
+    """
 
-        # Como o Delta no seu Cloud Phone centraliza tudo, definimos o caminho global
-        # Se quiser garantir, ele tentara os dois caminhos mais comuns
+        # Baseado na sua print: /sdcard/Delta/Autoexecute
         target_paths = [
-            "/sdcard/Delta/Autoexec",
-            "/storage/emulated/0/Delta/Autoexec"
+            "/sdcard/Delta/Autoexecute",
+            "/sdcard/Delta/autoexecute",
+            "/sdcard/Delta/Autoexec"
         ]
 
         lua_written = False
 
         for target_path in target_paths:
             try:
-                # Cria a pasta se nao existir
+                # Garante que a pasta existe
                 os.makedirs(target_path, exist_ok=True)
                 lua_script_path = os.path.join(target_path, "executor_check.lua")
-
-                # Escreve o script inteligente
+            
+                # Escrita normal
                 with open(lua_script_path, "w") as f:
                     f.write(lua_content)
-                
+            
                 lua_written = True
                 console.print(f"[bold green][✓] Script Global de Check criado em: {lua_script_path}[/bold green]")
-                break # Se conseguiu escrever em um, ja basta
-            
-            except Exception as e:
-                # Se falhar a escrita normal, tenta via Root (comum em Cloud Phones)
+                break 
+        
+            except Exception:
+                # Escrita via Root (Seguro para Cloud Phone)
                 try:
                     lua_script_path = os.path.join(target_path, "executor_check.lua")
                     os.system(f"su -c 'echo \"{lua_content}\" > {lua_script_path}'")
@@ -862,7 +856,7 @@ class ExecutorManager:
                     continue
 
         if not lua_written:
-            console.print("[bold red][X] Erro: Nao foi possivel gravar o script de Autoexec em nenhum caminho![/bold red]")
+            console.print("[bold red][X] Erro: Nao foi possivel gravar o Autoexec em nenhum caminho![/bold red]")
     @staticmethod
     def check_executor_status(package_name, max_wait_time=180):
         # Pega o ID da conta que está rodando nesse clone agora

@@ -935,26 +935,26 @@ class ExecutorManager:
                 if not user_id: 
                     return
 
-            # CAMINHO UNIFICADO: O Delta no seu Cloud Phone centraliza tudo aqui
-            # Ajustamos para a pasta que o seu Executor realmente usa (Delta/workspace)
-            central_path = f"/sdcard/Delta/workspace/{user_id}.main"
+                # CAMINHO UNIFICADO: O Delta no seu Cloud Phone centraliza tudo aqui
+                # Ajustamos para a pasta que o seu Executor realmente usa (Delta/workspace)
+                central_path = f"/sdcard/Delta/workspace/{user_id}.main"
         
-            # Backup caso a pasta não tenha o 'workspace' no nome
-            alt_path = f"/sdcard/Delta/{user_id}.main"
+                # Backup caso a pasta não tenha o 'workspace' no nome
+                alt_path = f"/sdcard/Delta/{user_id}.main"
 
-            for path in [central_path, alt_path]:
-                if os.path.exists(path):
-                    # Tentamos remover normalmente, se falhar, usamos o su -c
-                    try:
-                        os.remove(path)
-                    except:
-                        os.system(f"su -c 'rm {path}'")
+                for path in [central_path, alt_path]:
+                    if os.path.exists(path):
+                        # Tentamos remover normalmente, se falhar, usamos o su -c
+                        try:
+                            os.remove(path)
+                        except:
+                            os.system(f"su -c 'rm {path}'")
                 
-                    print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado para ID {user_id} em {package_name}\033[0m")
-                    return # Se removeu um, já está ok
+                        print(f"\033[1;32m[ Shouko.dev ] - Sinal resetado para ID {user_id} em {package_name}\033[0m")
+                        return # Se removeu um, já está ok
 
-        except Exception as e:
-            print(f"Erro ao resetar sinal: {e}")
+            except Exception as e:
+                print(f"Erro ao resetar sinal: {e}")
 
 class Runner:
 

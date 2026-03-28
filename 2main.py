@@ -1099,42 +1099,74 @@ class Runner:
                 time.sleep(60)
 
     @staticmethod
-    def force_rejoin(server_links, interval, stop_event):
-    # Converte o intervalo para segundos
-    try:
-        force_rejoin_interval = float(interval) * 60 if interval else 1800.0
-    except:
-        force_rejoin_interval = 1800.0
+    def force_rejoin(server_links, interval_minutes, stop_event):
+        """
+        Gerencia o reset individual de cada clone para evitar sobrecarga na Cloud.
+        """
+        console = Console()
+        
+        # Converte minutos para segundos (Padrão 30 min = 1800s)
+        try:
+            rejoin_interval = float(interval_minutes) * 60
+        except:
+            rejoin_interval = 1800.0
 
-    last_rejoin = time.time()
+        # Dicionário para controlar o tempo de cada conta separadamente
+        last_rejoin_times = {package: time.time() for package, _ in server_links}
 
-    while not stop_event.is_set():
-        current_time = time.time()
-        elapsed = current_time - last_rejoin
-    
-        if elapsed >= force_rejoin_interval:
-            print(f"\033[1;31m[ Shouko.dev ] - Limite de {interval} min atingido. Forçando Rejoin...\033[0m")
-        
-            # --- MUDANÇA AQUI: FECHAMENTO INDIVIDUAL E FORÇADO ---
-            for package_name, _ in server_links:
-                print(f"[ ! ] Fechando: {package_name}")
-                os.system(f"su -c 'am force-stop {package_name}'")
-                time.sleep(1) # Intervalo para não travar o Cloud Phone
-            
-            time.sleep(5)
-            
-            # 2. Reabre todos os clones na sequência
-            Runner.launch_package_sequentially(server_links)
-        
-            # 3. RESET DO CRONÔMETRO
-            last_rejoin = time.time()
-        
-        time.sleep(30) # Verifica a cada 30 segundos
-    @staticmethod
-    def update_status_table_periodically():
-        while True:
-            UIManager.update_status_table()
-            time.sleep(30)
+        console.print(f"[bold cyan][ Shouko.dev ] - Cronômetro de {interval_minutes} min iniciado para {len(server_links)} contas.[/bold cyan]")
+
+        while not stop_event.is_set():
+            current_time = time.time()
+
+            for package_name, server_link in server_links:
+                elapsed = current_time - last_rejoin_times[package_name]
+
+                if elapsed >= rejoin_interval:
+                    console.print(f"[bold red][ ! ] Limite atingido para {package_name}. Resetando individualmente...[/bold red]")
+                    
+                    try:
+                        # 1. Atualiza o status na tabela do UIManager
+                        with status_lock:
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mForcing Rejoin\033[0m"
+                        UIManager.update_status_table()
+
+                        # 2. Fecha apenas este clone específico via ROOT (su -c)
+                        # O comando 'am force-stop' é o mais limpo para Cloud Phones
+                        os.system(f"su -c 'am force-stop {package_name}'")
+                        
+                        # 3. Pequena pausa para o Android respirar
+                        time.sleep(3)
+
+                        # 4. Limpa o sinal antigo para o executor não se confundir
+                        ExecutorManager.reset_executor_file(package_name)
+
+                        # 5. Reabre apenas este clone com o link do mapa (Fisch/Adopt Me)
+                        RobloxManager.launch_roblox(package_name, server_link)
+
+                        # 6. Verifica se o executor carregou antes de seguir para a próxima conta
+                        # Isso evita que o script tente resetar a Conta 2 enquanto a 1 ainda está abrindo
+                        next_event = threading.Event()
+                        threading.Thread(
+                            target=ExecutorManager.check_executor_and_rejoin,
+                            args=(package_name, server_link, next_event),
+                            daemon=True
+                        ).start()
+                        
+                        # Espera um sinal de que a abertura iniciou com sucesso ou timeout
+                        next_event.wait(timeout=60) 
+
+                        # 7. Reseta o cronômetro apenas desta conta
+                        last_rejoin_times[package_name] = time.time()
+                        
+                        console.print(f"[bold green][✓] {package_name} resetado e monitorando![/bold green]")
+
+                    except Exception as e:
+                        console.print(f"[bold red]Erro no reset de {package_name}: {e}[/bold red]")
+                        Utilities.log_error(f"Force Rejoin Error ({package_name}): {e}")
+
+            # Verifica a cada 15 segundos se alguma conta precisa de reset
+            time.sleep(15)
 
 def check_activation_status():
     try:

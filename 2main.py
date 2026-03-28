@@ -946,31 +946,50 @@ class ExecutorManager:
             
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):
-        # ... (Parte inicial de abrir o jogo) ...
-        
-        start_time = time.time()
-        # LOOP 1: Esperar o jogo carregar (Timeout de 3 min)
-        while time.time() - start_time < 180:
-            if ExecutorManager.check_executor_status(package_name):
-                globals()["package_statuses"][package_name]["Status"] = "\033[1;32mFarming...\033[0m"
-                next_package_event.set() # Libera para abrir a próxima conta
-                
-                # --- AGORA ENTRA O MONITORAMENTO DE 30 MINUTOS ---
-                farm_start = time.time()
-                while time.time() - farm_start < 1800: # 1800s = 30 minutos
-                    # Se o arquivo .main sumir ANTES dos 30 min, o jogo crashou
-                    if not ExecutorManager.check_executor_status(package_name):
-                        break # Sai para dar Rejoin
-                    time.sleep(30) # Checa a cada 30 segundos
-                
-                # Se saiu do loop (por tempo ou crash), dá o Reset
-                print(f"Resetando {package_name} (Tempo esgotado ou Crash)")
-                RobloxManager.kill_roblox_process(package_name)
-                time.sleep(5)
-                RobloxManager.launch_roblox(package_name, server_link)
-                return check_executor_and_rejoin(package_name, server_link, next_package_event) # Reinicia o ciclo
+        while True:  # <--- O Loop Infinito começa AQUI
+            time.sleep(5) 
+            user_id = globals().get("_user_", {}).get(package_name)
+            
+            globals()["package_statuses"][package_name]["Status"] = "\033[1;33mChecking executor...\033[0m"
+            UIManager.update_status_table()
+            
+            start_time = time.time()
+            executor_loaded = False
 
+            # FASE 1: Espera o Executor injetar (Limite de 3 min)
+            while time.time() - start_time < 180:
+                if ExecutorManager.check_executor_status(package_name):
+                    globals()["package_statuses"][package_name]["Status"] = "\033[1;32mFarming (30m)...\033[0m"
+                    UIManager.update_status_table()
+                    executor_loaded = True
+                    
+                    # Libera a próxima conta para abrir enquanto esta já farma
+                    next_package_event.set() 
+                    break 
+
+                time.sleep(10)
+
+            if executor_loaded:
+                # FASE 2: O "Descanso" do Farm (Aqui ficam os seus 30 minutos)
+                # O boneco fica pescando/cuidando dos pets aqui
+                time.sleep(1800) # 1800 segundos = 30 minutos
+                
+                print(f"\033[1;36m[ Shouko.dev ] - Tempo de 30min esgotado para {package_name}. Resetando...\033[0m")
+            else:
+                # FASE 3: Se não carregou em 3 min, deu erro
+                print(f"\033[1;31m[ Shouko.dev ] - Timeout no executor de {package_name}!\033[0m")
+                next_package_event.set() # Libera a fila mesmo se der erro para não travar o bot
+
+            # FASE 4: O Reset (Fecha e limpa para a próxima volta do loop)
+            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mResetting...\033[0m"
+            UIManager.update_status_table()
+            
+            ExecutorManager.reset_executor_file(package_name)
+            RobloxManager.kill_roblox_process(package_name)
             time.sleep(5)
+            
+            # Abre o Roblox de novo e o "while True" lá do topo recomeça tudo!
+            RobloxManager.launch_roblox(package_name, server_link)
         @staticmethod
         def reset_executor_file(package_name):
         try:

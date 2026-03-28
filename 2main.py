@@ -932,15 +932,6 @@ class ExecutorManager:
             time.sleep(15)
         return False
             
-
-    @staticmethod
-    def check_executor_and_rejoin(package_name, server_link, next_package_event):
-        # ADICIONE ISSO AQUI: 
-        # Dá um pequeno fôlego para o sistema não atropelar os clones
-        time.sleep(5) 
-        
-        user_id = globals()["_user_"].get(package_name)
-
     @staticmethod
     def check_executor_and_rejoin(package_name, server_link, next_package_event):
         # ADICIONE ISSO AQUI: 

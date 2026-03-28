@@ -1013,7 +1013,7 @@ class ExecutorManager:
             except Exception as e:
                 print(f"Erro ao resetar sinal: {e}")
 
-    class Runner:
+class Runner:
 
     def launch_package_sequentially(server_links):
         next_package_event = Event()

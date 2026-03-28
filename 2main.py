@@ -449,44 +449,21 @@ class FileManager:
 class RobloxManager:
     @staticmethod
     def check_user_online(user_id, cookie=None):
-        max_retries = 2
-        delay = 2
-        body = {"userIds": [user_id]}
-        headers = {"Content-Type": "application/json"}
-        if cookie is not None:
-            headers["Cookie"] = f".ROBLOSECURITY={cookie}"
-        for attempt in range(max_retries):
-            try:
-                with requests.Session() as session:
-                    primary_response = session.post("https://presence.roblox.com/v1/presence/users", headers=headers, json=body, timeout=7)
-                primary_response.raise_for_status()
-                primary_data = primary_response.json()
-                primary_presence_type = primary_data["userPresences"][0]["userPresenceType"]
-                return primary_presence_type
-
-            except requests.exceptions.RequestException as e:
-                print(f"\033[1;31mError checking online status for user {user_id} (Attempt {attempt + 1}) for Roblox API: {e}\033[0m")
-                if attempt < max_retries - 1:
-                    time.sleep(delay)
-                    delay *= 2
-
-        headers = {"Content-Type": "application/json"}
-        for attempt in range(max_retries):
-            try:
-                with requests.Session() as session:
-                    primary_response = session.post("https://presence.roproxy.com/v1/presence/users", headers=headers, json=body, timeout=7)
-                primary_response.raise_for_status()
-                primary_data = primary_response.json()
-                primary_presence_type = primary_data["userPresences"][0]["userPresenceType"]
-                return primary_presence_type
-
-            except requests.exceptions.RequestException as e:
-                print(f"\033[1;31mError checking online status for user {user_id} (Attempt {attempt + 1}) for RoProxy API: {e}\033[0m")
-                if attempt < max_retries - 1:
-                    time.sleep(delay)
-                    delay *= 2
-                else:
-                    return None
+    # Endpoint mais preciso para saber se está IN-GAME
+    url = "https://presence.roblox.com/v1/presence/last-online"
+    body = {"userIds": [int(user_id)]}
+    
+    try:
+        res = requests.post(url, json=body, timeout=10)
+        data = res.json()
+        if data.get("lastOnlinePresences"):
+            presence = data["lastOnlinePresences"][0]
+            # 2 = No Jogo / 3 = No Studio
+            if presence.get("userPresenceType", 0) >= 2:
+                return 2 # Retorna que está Online/No Jogo
+        return 0 # Offline
+    except:
+        return None
 
     @staticmethod
     def get_roblox_packages():

@@ -290,7 +290,7 @@ def menu_login_opcoes():
     ]
 
     while True:
-        Utilities.clear_console()
+        Utilities.clear_screen()
         print("\033[1;35m========================================\033[0m")
         print("\033[1;37m       GERENCIADOR DE LOGIN GBOARD      \033[0m")
         print("\033[1;35m========================================\033[0m")

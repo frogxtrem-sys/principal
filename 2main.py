@@ -216,53 +216,95 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def login_gboard_estavel():
-    print("\n\033[1;34m[ ! ] Iniciando Login (Modo Gboard)\033[0m")
-    contas = [
+def login_gboard_estavel(lista_de_contas, nome_set):
+    """
+    Realiza o login automatizado para um grupo específico de contas.
+    """
+    Utilities.clear_console()
+    print(f"\n\033[1;34m[ ! ] Iniciando Login - {nome_set} (Modo Gboard)\033[0m")
+    
+    total = len(lista_de_contas)
+
+    for i, conta in enumerate(lista_de_contas, 1):
+        pkg = conta['pkg']
+        user = conta['user']
+        pw = conta['pass']
+
+        print(f"\n\033[1;36m[ {i}/{total} ] Abrindo Clone: {pkg}\033[0m")
+        
+        # 1. Abre o clone do Roblox
+        os.system(f"su -c 'monkey -p {pkg} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
+        
+        print("   -> AGUARDANDO PREPARAÇÃO:")
+        print("      1. Clique em 'Log In'")
+        print("      2. Clique no campo 'Username' (Teclado deve subir)")
+        
+        # Contagem regressiva para você preparar a tela
+        for t in range(25, 0, -1):
+            print(f"      -> Injetando em: {t}s   ", end="\r")
+            time.sleep(1)
+
+        print(f"\n   -> Injetando dados da conta: {user}...")
+        
+        # PASSO 1: Digita o Usuário
+        os.system(f"su -c 'input text {user}'")
+        time.sleep(2.0) 
+        
+        # PASSO 2: Pressiona 'Enter/Seta' para pular para a senha
+        os.system(f"su -c 'input keyevent 66'") 
+        time.sleep(2.5) 
+        
+        # PASSO 3: Digita a Senha
+        print(f"      * Escrevendo senha...")
+        os.system(f"su -c 'input text {pw}'")
+        time.sleep(1.5)
+        
+        # PASSO 4: Enter Final para Logar
+        os.system(f"su -c 'input keyevent 66'")
+        print(f"   \033[1;32m[ OK ] {user} processado.\033[0m")
+        time.sleep(2)
+
+    print(f"\n\033[1;32m[ SUCESSO ] O ciclo do {nome_set} foi concluído!\033[0m")
+    input("\033[1;33mPressione Enter para voltar ao menu...\033[0m")
+
+def menu_login_opcoes():
+    """
+    Menu para escolher qual grupo de contas logar.
+    """
+    # GRUPO 01 (Suas contas atuais)
+    contas_set_1 = [
         {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
         {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
         {"user": "saitama0000437", "pass": "saitama37", "pkg": "ixq.vf.jlr"},
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    for i, conta in enumerate(contas, 1):
-        print(f"\n\033[1;36m[ {i}/4 ] Abrindo: {conta['pkg']}\033[0m")
-        
-        # 1. Abre o app (Com o nome da categoria corrigido)
-        os.system(f"su -c 'monkey -p {conta['pkg']} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
-        
-        # 2. Tempo para você preparar a tela
-        print("   -> PREPARAÇÃO MANUAL:")
-        print("      1. Clique em 'Log In'")
-        print("      2. Clique no campo de 'Username' (Teclado deve subir)")
-        
-        for t in range(25, 0, -1):
-            print(f"      -> Injetando em: {t}s   ", end="\r")
-            time.sleep(1)
+    # GRUPO 02 (Suas novas contas para outra Cloud)
+    # COLOQUE OS DADOS NOVOS AQUI:
+    contas_set_2 = [
+        {"user": "USUARIO_NOVO_1", "pass": "SENHA_1", "pkg": "PKG_CLONE_5"},
+        {"user": "USUARIO_NOVO_2", "pass": "SENHA_2", "pkg": "PKG_CLONE_6"},
+        {"user": "USUARIO_NOVO_3", "pass": "SENHA_3", "pkg": "PKG_CLONE_7"},
+        {"user": "USUARIO_NOVO_4", "pass": "SENHA_4", "pkg": "PKG_CLONE_8"}
+    ]
 
+    while True:
+        Utilities.clear_console()
+        print("\033[1;35m========================================\033[0m")
+        print("\033[1;37m       GERENCIADOR DE LOGIN GBOARD      \033[0m")
+        print("\033[1;35m========================================\033[0m")
+        print("\n\033[1;34m[ 1 ]\033[0m Logar SET 01 (Contas 1-4)")
+        print("\033[1;34m[ 2 ]\033[0m Logar SET 02 (Contas 5-8)")
+        print("\033[1;31m[ B ]\033[0m Voltar")
         
-        # 3. Injeção de dados (MÉTODO DA SETA - GBOARD)
-        print(f"\n   -> Injetando dados no {conta['pkg']}...")
-        
-        # PASSO 1: Escreve o Usuário
-        os.system(f"su -c 'input text {conta['user']}'")
-        time.sleep(2.0) 
-        
-        # PASSO 2: Simula o clique na 'Seta' (Próximo)
-        print("      * Clicando na Seta para pular...")
-        os.system(f"su -c 'input keyevent 66'") 
-        time.sleep(2.5) # Pausa para o cursor sair de uma caixa e entrar na outra
-        
-        # PASSO 3: Escreve a Senha
-        # Se ele logar direto sem escrever a senha, avise aqui!
-        print(f"      * Escrevendo senha...")
-        os.system(f"su -c 'input text {conta['pass']}'")
-        time.sleep(1.5)
-        
-        # PASSO 4: Enter Final para Logar
-        os.system(f"su -c 'input keyevent 66'")
+        opcao = input("\n\033[1;32mEscolha o grupo de contas: \033[0m").lower()
 
-    print("\n\033[1;32m[ SUCESSO ] Todas as contas foram processadas!\033[0m")
+        if opcao == '1':
+            login_gboard_estavel(contas_set_1, "SET 01")
+        elif opcao == '2':
+            login_gboard_estavel(contas_set_2, "SET 02")
+        elif opcao == 'b':
+            break
 class Utilities:
     @staticmethod
     def collect_garbage():
@@ -1238,11 +1280,52 @@ def main():
 
         elif setup_type == "2":
             try:
-                login_gboard_estavel()
-                time.sleep(9.0)
-            # --------------------------------------------------------------
-                print("\033[1;32m[ Shouko.dev ] - Auto Setup User IDs from appStorage.json...\033[0m")
-                packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi"]
+                Utilities.clear_console()
+                print("\n\033[1;35m========================================\033[0m")
+                print("\033[1;37m      CONFIGURAÇÃO DE GRUPO (SET)       \033[0m")
+                print("\033[1;35m========================================\033[0m")
+                print("\n\033[1;34m[ 1 ]\033[0m SET 01 (Contas 1-4)")
+                print("\033[1;34m[ 2 ]\033[0m SET 02 (Contas 5-8)")
+                print("\033[1;31m[ B ]\033[0m Voltar")
+                
+                set_choice = input("\n\033[1;32mEscolha o grupo para configurar: \033[0m").lower()
+
+                if set_choice == 'b':
+                    continue
+
+                # --- CONFIGURAÇÃO DOS DADOS POR GRUPO ---
+                if set_choice == "1":
+                    current_set_name = "SET 01"
+                    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
+                    contas_login = [
+                        {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
+                        {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
+                        {"user": "saitama0000437", "pass": "saitama37", "pkg": "ixq.vf.jlr"},
+                        {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
+                    ]
+                elif set_choice == "2":
+                    current_set_name = "SET 02"
+                    # AJUSTE OS NOMES DOS PACOTES DA OUTRA CLOUD AQUI
+                    packages = ["pkg.cloud2.clone1", "pkg.cloud2.clone2", "pkg.cloud2.clone3", "pkg.cloud2.clone4"]
+                    contas_login = [
+                        {"user": "USUARIO_5", "pass": "SENHA_5", "pkg": "pkg.cloud2.clone1"},
+                        {"user": "USUARIO_6", "pass": "SENHA_6", "pkg": "pkg.cloud2.clone2"},
+                        {"user": "USUARIO_7", "pass": "SENHA_7", "pkg": "pkg.cloud2.clone3"},
+                        {"user": "USUARIO_8", "pass": "SENHA_8", "pkg": "pkg.cloud2.clone4"}
+                    ]
+                else:
+                    print("\033[1;31m[ ! ] Opção inválida.\033[0m")
+                    time.sleep(2)
+                    continue
+
+                # 1. Executa o Login Gboard para o Set escolhido
+                login_gboard_estavel(contas_login, current_set_name)
+                
+                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Aguardando estabilização...\033[0m")
+                time.sleep(5.0)
+
+                # 2. Busca automática de User IDs nos pacotes do Set escolhido
+                print(f"\033[93m[ Shouko.dev ] - Extraindo IDs do {current_set_name}...\033[0m")
                 accounts = []
 
                 for package_name in packages:
@@ -1251,33 +1334,33 @@ def main():
                         user_id = FileManager.find_userid_from_file(file_path)
                         if user_id and user_id != "-1":
                             accounts.append((package_name, user_id))
-                            print(f"\033[96m[ Shouko.dev ] - Found UserId for {package_name}: {user_id}\033[0m")
+                            print(f"\033[96m[ ✓ ] Sucesso: {package_name} -> {user_id}\033[0m")
                         else:
-                            print(f"\033[1;31m[ Shouko.dev ] - UserId not found for {package_name}.\033[0m")
+                            print(f"\033[1;31m[ ✗ ] Falha: UserId não encontrado em {package_name}\033[0m")
                     except Exception as e:
-                        print(f"\033[1;31m[ Shouko.dev ] - Error reading file for {package_name}: {e}\033[0m")
-                        Utilities.log_error(f"Error reading appStorage.json for {package_name}: {e}")
+                        print(f"\033[1;31m[ ! ] Erro ao ler {package_name}: {e}\033[0m")
 
+                # 3. Salva os IDs encontrados
                 if accounts:
                     FileManager.save_accounts(accounts)
-                    print("\033[1;32m[ Shouko.dev ] - User IDs saved!\033[0m")
+                    print(f"\033[1;32m[ Shouko.dev ] - {len(accounts)} IDs salvos com sucesso!\033[0m")
                 else:
-                    print("\033[1;31m[ Shouko.dev ] - No User IDs found.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
+                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta foi detectada. Verifique o login.\033[0m")
+                    input("\033[1;32mPressione Enter para voltar...\033[0m")
                     continue
 
-                print("\033[93m[ Shouko.dev ] - Select game:\033[0m")
+                # 4. Seleção de Jogo (Igual ao seu código original)
+                print("\n\033[93m[ Shouko.dev ] - Selecione o jogo para este grupo:\033[0m")
                 games = [
                     "1. Blox Fruits", "2. Anime Defenders", "3. King Legacy", "4. Fisch",
                     "5. Bee Swarm Simulator", "6. Anime Vanguards", "7. Pet GO",
                     "8. Pet Simulator 99", "9. Meme Sea", "10. Anime Adventures",
                     "11. Anime Last Stand", "12. Da Hood", "13. Da Hood VC", "14. Arise Crossover",
-                    "15. Bubble Gum Simulator", "16. Anime Ranger X", "17. Other game or Private Server Link"
+                    "15. Bubble Gum Simulator", "16. Anime Ranger X", "17. Outro (ID ou Link)"
                 ]
-                for game in games:
-                    print(f"\033[96m{game}\033[0m")
+                for game in games: print(f"\033[96m{game}\033[0m")
 
-                choice = input("\033[93m[ Shouko.dev ] - Enter choice: \033[0m").strip()
+                choice = input("\n\033[93mEscolha: \033[0m").strip()
                 game_ids = {
                     "1": "2753915549", "2": "17017769292", "3": "4520749081", "4": "16732694052",
                     "5": "1537690962", "6": "16146832113", "7": "18901165922", "8": "8737899170",
@@ -1288,25 +1371,22 @@ def main():
                 if choice in game_ids:
                     server_link = game_ids[choice]
                 elif choice == "17":
-                    server_link = input("\033[93m[ Shouko.dev ] - Enter game ID or private server link: \033[0m")
+                    server_link = input("\033[93m[ Shouko.dev ] - Digite o ID ou Link: \033[0m")
                 else:
-                    print("\033[1;31m[ Shouko.dev ] - Invalid choice.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
                     continue
 
                 formatted_link = RobloxManager.format_server_link(server_link)
                 if formatted_link:
                     server_links = [(package_name, formatted_link) for package_name, _ in accounts]
                     FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ Shouko.dev ] - Game ID or server link saved!\033[0m")
-                else:
-                    print("\033[1;31m[ Shouko.dev ] - Invalid server link.\033[0m")
+                    print("\033[1;32m[ Shouko.dev ] - Configuração finalizada!\033[0m")
+                
             except Exception as e:
                 print(f"\033[1;31m[ Shouko.dev ] - Error: {e}\033[0m")
-                Utilities.log_error(f"Setup error: {e}")
                 input("\033[1;32mPress Enter to return...\033[0m")
                 continue
-            input("\033[1;32mPress Enter to return...\033[0m")
+            
+            input("\033[1;32mFinalizado! Press Enter to return...\033[0m")
             continue
 
         elif setup_type == "3":

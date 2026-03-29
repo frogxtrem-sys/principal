@@ -13,6 +13,7 @@ import psutil
 import sys
 import gc
 import os
+import platform
 from rich.live import Live
 from datetime import datetime, timezone
 from rich.table import Table #type: ignore

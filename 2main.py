@@ -221,7 +221,7 @@ def login_gboard_estavel(lista_de_contas, nome_set):
     """
     Realiza o login automatizado para um grupo específico de contas.
     """
-    Utilities.clear_console()
+    Utilities.clear_screen()
     print(f"\n\033[1;34m[ ! ] Iniciando Login - {nome_set} (Modo Gboard)\033[0m")
     
     total = len(lista_de_contas)

@@ -269,9 +269,9 @@ def login_gboard_estavel(lista_de_contas, nome_set):
 
 def menu_login_opcoes():
     """
-    Menu para escolher qual grupo de contas logar.
+    Menu para escolher qual grupo de contas logar e retornar os pacotes para o setup.
     """
-    # GRUPO 01 (Suas contas atuais)
+    # GRUPO 01 (Suas contas da Cloud principal)
     contas_set_1 = [
         {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
         {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
@@ -279,13 +279,13 @@ def menu_login_opcoes():
         {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
     ]
 
-    # GRUPO 02 (Suas novas contas para outra Cloud)
-    # COLOQUE OS DADOS NOVOS AQUI:
+    # GRUPO 02 (Suas contas da segunda Cloud / Novos Clones)
+    # SUBSTITUA PELOS SEUS DADOS REAIS ABAIXO:
     contas_set_2 = [
-        {"user": "USUARIO_NOVO_1", "pass": "SENHA_1", "pkg": "PKG_CLONE_5"},
-        {"user": "USUARIO_NOVO_2", "pass": "SENHA_2", "pkg": "PKG_CLONE_6"},
-        {"user": "USUARIO_NOVO_3", "pass": "SENHA_3", "pkg": "PKG_CLONE_7"},
-        {"user": "USUARIO_NOVO_4", "pass": "SENHA_4", "pkg": "PKG_CLONE_8"}
+        {"user": "USUARIO_CLOUDB_1", "pass": "SENHA_1", "pkg": "PKG_CLONE_5"},
+        {"user": "USUARIO_CLOUDB_2", "pass": "SENHA_2", "pkg": "PKG_CLONE_6"},
+        {"user": "USUARIO_CLOUDB_3", "pass": "SENHA_3", "pkg": "PKG_CLONE_7"},
+        {"user": "USUARIO_CLOUDB_4", "pass": "SENHA_4", "pkg": "PKG_CLONE_8"}
     ]
 
     while True:
@@ -295,16 +295,22 @@ def menu_login_opcoes():
         print("\033[1;35m========================================\033[0m")
         print("\n\033[1;34m[ 1 ]\033[0m Logar SET 01 (Contas 1-4)")
         print("\033[1;34m[ 2 ]\033[0m Logar SET 02 (Contas 5-8)")
-        print("\033[1;31m[ B ]\033[0m Voltar")
+        print("\033[1;31m[ B ]\033[0m Voltar ao Menu Principal")
         
         opcao = input("\n\033[1;32mEscolha o grupo de contas: \033[0m").lower()
 
         if opcao == '1':
             login_gboard_estavel(contas_set_1, "SET 01")
+            # Retorna a lista de pacotes do SET 01 para o setup automático de IDs
+            return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"], "SET 01"
+
         elif opcao == '2':
             login_gboard_estavel(contas_set_2, "SET 02")
+            # Retorna a lista de pacotes do SET 02 (Troque pelos nomes reais dos pacotes)
+            return ["PKG_CLONE_5", "PKG_CLONE_6", "PKG_CLONE_7", "PKG_CLONE_8"], "SET 02"
+
         elif opcao == 'b':
-            break
+            return None, None
 class Utilities:
     @staticmethod
     def collect_garbage():

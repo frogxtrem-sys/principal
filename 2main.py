@@ -308,7 +308,7 @@ def menu_login_opcoes():
         elif opcao == '2':
             login_gboard_estavel(contas_set_2, "SET 02")
             # Retorna a lista de pacotes do SET 02 (Troque pelos nomes reais dos pacotes)
-            return ["PKG_CLONE_5", "PKG_CLONE_6", "PKG_CLONE_7", "PKG_CLONE_8"], "SET 02"
+            return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"], "SET 02"
 
         elif opcao == 'b':
             return None, None

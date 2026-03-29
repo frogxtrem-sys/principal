@@ -1280,52 +1280,18 @@ def main():
 
         elif setup_type == "2":
             try:
-                Utilities.clear_console()
-                print("\n\033[1;35m========================================\033[0m")
-                print("\033[1;37m      CONFIGURAÇÃO DE GRUPO (SET)       \033[0m")
-                print("\033[1;35m========================================\033[0m")
-                print("\n\033[1;34m[ 1 ]\033[0m SET 01 (Contas 1-4)")
-                print("\033[1;34m[ 2 ]\033[0m SET 02 (Contas 5-8)")
-                print("\033[1;31m[ B ]\033[0m Voltar")
+                # 1. Chama o menu de login e recebe os pacotes e o nome do SET escolhido
+                packages, current_set_name = menu_login_opcoes()
                 
-                set_choice = input("\n\033[1;32mEscolha o grupo para configurar: \033[0m").lower()
-
-                if set_choice == 'b':
+                # Se o usuário escolher 'Voltar', ele retorna ao menu principal
+                if not packages:
                     continue
 
-                # --- CONFIGURAÇÃO DOS DADOS POR GRUPO ---
-                if set_choice == "1":
-                    current_set_name = "SET 01"
-                    packages = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"]
-                    contas_login = [
-                        {"user": "saitama0000432", "pass": "saitama32", "pkg": "ywcw.lnu.exhl"},
-                        {"user": "saitama0000436", "pass": "saitama36", "pkg": "ub.wnjb.bzz"},
-                        {"user": "saitama0000437", "pass": "saitama37", "pkg": "ixq.vf.jlr"},
-                        {"user": "saitama0000447", "pass": "saitama47", "pkg": "srl.mvn.gv"}
-                    ]
-                elif set_choice == "2":
-                    current_set_name = "SET 02"
-                    # AJUSTE OS NOMES DOS PACOTES DA OUTRA CLOUD AQUI
-                    packages = ["pkg.cloud2.clone1", "pkg.cloud2.clone2", "pkg.cloud2.clone3", "pkg.cloud2.clone4"]
-                    contas_login = [
-                        {"user": "USUARIO_5", "pass": "SENHA_5", "pkg": "pkg.cloud2.clone1"},
-                        {"user": "USUARIO_6", "pass": "SENHA_6", "pkg": "pkg.cloud2.clone2"},
-                        {"user": "USUARIO_7", "pass": "SENHA_7", "pkg": "pkg.cloud2.clone3"},
-                        {"user": "USUARIO_8", "pass": "SENHA_8", "pkg": "pkg.cloud2.clone4"}
-                    ]
-                else:
-                    print("\033[1;31m[ ! ] Opção inválida.\033[0m")
-                    time.sleep(2)
-                    continue
-
-                # 1. Executa o Login Gboard para o Set escolhido
-                login_gboard_estavel(contas_login, current_set_name)
-                
-                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Aguardando estabilização...\033[0m")
+                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Buscando IDs do {current_set_name}...\033[0m")
                 time.sleep(5.0)
 
                 # 2. Busca automática de User IDs nos pacotes do Set escolhido
-                print(f"\033[93m[ Shouko.dev ] - Extraindo IDs do {current_set_name}...\033[0m")
+                print(f"\033[93m[ Shouko.dev ] - Extraindo IDs do sistema...\033[0m")
                 accounts = []
 
                 for package_name in packages:
@@ -1340,16 +1306,16 @@ def main():
                     except Exception as e:
                         print(f"\033[1;31m[ ! ] Erro ao ler {package_name}: {e}\033[0m")
 
-                # 3. Salva os IDs encontrados
+                # 3. Salva os IDs encontrados no arquivo de farm
                 if accounts:
                     FileManager.save_accounts(accounts)
                     print(f"\033[1;32m[ Shouko.dev ] - {len(accounts)} IDs salvos com sucesso!\033[0m")
                 else:
-                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta foi detectada. Verifique o login.\033[0m")
+                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada. Verifique o login.\033[0m")
                     input("\033[1;32mPressione Enter para voltar...\033[0m")
                     continue
 
-                # 4. Seleção de Jogo (Igual ao seu código original)
+                # 4. Seleção de Jogo para o grupo atual
                 print("\n\033[93m[ Shouko.dev ] - Selecione o jogo para este grupo:\033[0m")
                 games = [
                     "1. Blox Fruits", "2. Anime Defenders", "3. King Legacy", "4. Fisch",
@@ -1379,14 +1345,14 @@ def main():
                 if formatted_link:
                     server_links = [(package_name, formatted_link) for package_name, _ in accounts]
                     FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ Shouko.dev ] - Configuração finalizada!\033[0m")
+                    print("\033[1;32m[ Shouko.dev ] - Configuração finalizada com sucesso!\033[0m")
                 
             except Exception as e:
-                print(f"\033[1;31m[ Shouko.dev ] - Error: {e}\033[0m")
-                input("\033[1;32mPress Enter to return...\033[0m")
+                print(f"\033[1;31m[ Shouko.dev ] - Erro Crítico: {e}\033[0m")
+                input("\033[1;32mPressione Enter para voltar...\033[0m")
                 continue
             
-            input("\033[1;32mFinalizado! Press Enter to return...\033[0m")
+            input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
             continue
 
         elif setup_type == "3":

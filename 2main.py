@@ -219,53 +219,60 @@ version = "2.2.5 | Customized by Shouko.dev"
 
 def login_gboard_estavel(lista_de_contas, nome_set):
     """
-    Realiza o login automatizado para um grupo específico de contas.
+    Realiza o login usando cliques apenas para abrir a tela e focar o usuário.
+    O restante é feito via comandos de teclado (Seta/Enter).
     """
-    Utilities.clear_screen()
-    print(f"\n\033[1;34m[ ! ] Iniciando Login - {nome_set} (Modo Gboard)\033[0m")
+    print(f"\n\033[1;34m[ ! ] Iniciando Login Automático - {nome_set}\033[0m")
     
     total = len(lista_de_contas)
+
+    # COORDENADAS (Ajustadas conforme suas fotos em 160 DPI)
+    BTN_LOG_IN_INICIAL = "340 540"  # Botão 'Log In' da tela inicial (Sign In vermelho)
+    CAMPO_USER = "470 560"          # Primeiro campo: 'Username/Email/Phone'
 
     for i, conta in enumerate(lista_de_contas, 1):
         pkg = conta['pkg']
         user = conta['user']
         pw = conta['pass']
 
-        print(f"\n\033[1;36m[ {i}/{total} ] Abrindo Clone: {pkg}\033[0m")
+        print(f"\n\033[1;36m[ {i}/{total} ] Abrindo: {pkg}\033[0m")
         
-        # 1. Abre o clone do Roblox
+        # 1. Abre o app do zero
+        os.system(f"su -c 'am force-stop {pkg}'")
+        time.sleep(1)
         os.system(f"su -c 'monkey -p {pkg} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
         
-        print("   -> AGUARDANDO PREPARAÇÃO:")
-        print("      1. Clique em 'Log In'")
-        print("      2. Clique no campo 'Username' (Teclado deve subir)")
-        
-        # Contagem regressiva para você preparar a tela
-        for t in range(25, 0, -1):
-            print(f"      -> Injetando em: {t}s   ", end="\r")
-            time.sleep(1)
+        # 2. Aguarda a tela inicial carregar
+        time.sleep(20) 
 
-        print(f"\n   -> Injetando dados da conta: {user}...")
-        
-        # PASSO 1: Digita o Usuário
+        # 3. PASSO ESSENCIAL: Clica no 'Log In' para chegar nos campos
+        os.system(f"su -c 'input tap {BTN_LOG_IN_INICIAL}'")
+        time.sleep(5)
+
+        # 4. PASSO ESSENCIAL: Clica no campo de Usuário para o teclado subir
+        os.system(f"su -c 'input tap {CAMPO_USER}'")
+        time.sleep(1.5)
+
+        # 5. Digita o Usuário
+        print(f"   -> Injetando: {user}")
         os.system(f"su -c 'input text {user}'")
+        time.sleep(1.5) 
+        
+        # 6. Pressiona Enter (Seta) -> Pula para a Senha
+        os.system(f"su -c 'input keyevent 66'") 
         time.sleep(2.0) 
         
-        # PASSO 2: Pressiona 'Enter/Seta' para pular para a senha
-        os.system(f"su -c 'input keyevent 66'") 
-        time.sleep(2.5) 
-        
-        # PASSO 3: Digita a Senha
-        print(f"      * Escrevendo senha...")
+        # 7. Digita a Senha
         os.system(f"su -c 'input text {pw}'")
         time.sleep(1.5)
         
-        # PASSO 4: Enter Final para Logar
+        # 8. Enter Final -> Logar
         os.system(f"su -c 'input keyevent 66'")
         print(f"   \033[1;32m[ OK ] {user} processado.\033[0m")
-        time.sleep(2)
+        
+        time.sleep(10) # Tempo para o login processar antes de ir para o próximo
 
-    print(f"\n\033[1;32m[ SUCESSO ] O ciclo do {nome_set} foi concluído!\033[0m")
+    print(f"\n\033[1;32m[ SUCESSO ] Logins de {nome_set} concluídos!\033[0m")
     input("\033[1;33mPressione Enter para voltar ao menu...\033[0m")
 
 def menu_login_opcoes():

@@ -217,64 +217,103 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def login_gboard_estavel(lista_de_contas, nome_set):
-    """
-    Realiza o login usando cliques apenas para abrir a tela e focar o usuário.
-    O restante é feito via comandos de teclado (Seta/Enter).
-    """
-    print(f"\n\033[1;34m[ ! ] Iniciando Login Automático - {nome_set}\033[0m")
+def su_cmd(comando):
+    os.system(f"su -c '{comando}'")
+
+def enviar_para_discord(link_delta):
+    """Envia o link formatado para o seu bot do Discord via Webhook."""
+    webhook_url = "https://discord.com/api/webhooks/1376758923431903414/_Ek7PIg2uXc59ds8pkp5EUsKNZYpniGJKl92J1iYTzmQcC-qqG5XHmvwQUqDCoKFrvcE"
     
+    # Formata a mensagem exatamente como o seu bot precisa para o comando de slash
+    # Nota: Se o seu bot for um bot de comandos reais, ele pode precisar que 
+    # você escreva a mensagem comum, mas via Webhook ele apenas 'posta' o texto.
+    conteudo = {
+        "content": f"/bypass url:{link_delta}"
+    }
+    
+    try:
+        response = requests.post(webhook_url, json=conteudo)
+        if response.status_code == 204 or response.status_code == 200:
+            print("\n\033[1;32m[ 📡 ] Link enviado para o Discord com sucesso!\033[0m")
+        else:
+            print(f"\n\033[1;31m[ ! ] Erro ao enviar Webhook: {response.status_code}\033[0m")
+    except Exception as e:
+        print(f"\n\033[1;31m[ ! ] Falha na conexão com Discord: {e}\033[0m")
+
+def pegar_link_delta():
+    """Lê o clipboard para pegar o link que o Delta copiou."""
+    cmd = "su -c 'service call clipboard 2 | cut -d\"'\" -f2 | sed \"s/ //g\"'"
+    return os.popen(cmd).read().strip()
+
+def login_gboard_estavel(lista_de_contas, nome_set):
+    # --- COORDENADAS (DPI 160 uGPhone) ---
+    BTN_LOG_IN_INICIAL = "340 540" 
+    CAMPO_USER = "470 560"
+    BTN_DELTA_MENU = "50 150" 
+    BTN_GET_KEY = "200 300" 
+
+    LINK_FIXO = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
+
     total = len(lista_de_contas)
 
-    # COORDENADAS (Ajustadas conforme suas fotos em 160 DPI)
-    BTN_LOG_IN_INICIAL = "623 451"  # Botão 'Log In' da tela inicial (Sign In vermelho)
-    CAMPO_USER = "612 381"          # Primeiro campo: 'Username/Email/Phone'
-
+    # --- PASSO 1: LOGINS ---
+    print(f"\n\033[1;34m[ 1/3 ] Realizando Logins de {nome_set}...\033[0m")
     for i, conta in enumerate(lista_de_contas, 1):
         pkg = conta['pkg']
         user = conta['user']
         pw = conta['pass']
 
-        print(f"\n\033[1;36m[ {i}/{total} ] Abrindo: {pkg}\033[0m")
-        
-        # 1. Abre o app do zero
-        os.system(f"su -c 'am force-stop {pkg}'")
+        print(f"   > [{i}/{total}] Logando: {user}")
+        su_cmd(f"am force-stop {pkg}")
         time.sleep(1)
-        os.system(f"su -c 'monkey -p {pkg} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1'")
+        su_cmd(f"monkey -p {pkg} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1")
         
-        # 2. Aguarda a tela inicial carregar
         time.sleep(20) 
-
-        # 3. PASSO ESSENCIAL: Clica no 'Log In' para chegar nos campos
-        os.system(f"su -c 'input tap {BTN_LOG_IN_INICIAL}'")
+        su_cmd(f"input tap {BTN_LOG_IN_INICIAL}")
         time.sleep(5)
-
-        # 4. PASSO ESSENCIAL: Clica no campo de Usuário para o teclado subir
-        os.system(f"su -c 'input tap {CAMPO_USER}'")
-        time.sleep(1.5)
-
-        # 5. Digita o Usuário
-        print(f"   -> Injetando: {user}")
-        os.system(f"su -c 'input text {user}'")
-        time.sleep(1.5) 
+        su_cmd(f"input tap {CAMPO_USER}")
+        time.sleep(1)
+        su_cmd(f"input text {user}")
+        time.sleep(1)
+        su_cmd(f"input keyevent 66") 
+        time.sleep(2)
+        su_cmd(f"input text {pw}")
+        time.sleep(1)
+        su_cmd(f"input keyevent 66") 
         
-        # 6. Pressiona Enter (Seta) -> Pula para a Senha
-        os.system(f"su -c 'input keyevent 66'") 
-        time.sleep(2.0) 
-        
-        # 7. Digita a Senha
-        os.system(f"su -c 'input text {pw}'")
-        time.sleep(1.5)
-        
-        # 8. Enter Final -> Logar
-        os.system(f"su -c 'input keyevent 66'")
-        print(f"   \033[1;32m[ OK ] {user} processado.\033[0m")
-        
-        time.sleep(10) # Tempo para o login processar antes de ir para o próximo
+        time.sleep(10) 
+        su_cmd(f"am force-stop {pkg}")
 
-    print(f"\n\033[1;32m[ SUCESSO ] Logins de {nome_set} concluídos!\033[0m")
-    input("\033[1;33mPressione Enter para voltar ao menu...\033[0m")
+    # --- PASSO 2: LINK FIXO ---
+    print(f"\n\033[1;35m[ 2/3 ] Salvando Link de Farm...\033[0m")
+    with open("game_link.txt", "w") as f:
+        f.write(LINK_FIXO)
 
+    # --- PASSO 3: ABRIR E PEGAR KEY ---
+    print(f"\n\033[1;36m[ 3/3 ] Capturando Key do Delta...\033[0m")
+    primeiro_pkg = lista_de_contas[0]['pkg']
+    
+    su_cmd(f"am start -a android.intent.action.VIEW -d '{LINK_FIXO}' {primeiro_pkg}")
+    
+    print("   -> Aguardando servidor carregar (35s)...")
+    time.sleep(35) 
+
+    print("   -> Clicando no Delta...")
+    su_cmd(f"input tap {BTN_DELTA_MENU}")
+    time.sleep(2)
+    su_cmd(f"input tap {BTN_GET_KEY}")
+    time.sleep(4)
+
+    link_delta = pegar_link_delta()
+    
+    if "plato" in link_delta or "gateway" in link_delta:
+        print(f"\033[1;32m   [🔗] Link detectado: {link_delta}\033[0m")
+        enviar_para_discord(link_delta)
+    else:
+        print("\n\033[1;31m[ ! ] Link não encontrado no clipboard.\033[0m")
+
+    print(f"\n\033[1;32m[ FINALIZADO ] Cheque seu Discord para a Key!\033[0m")
+    input("\033[1;33mPressione Enter para voltar...\033[0m")
 def menu_login_opcoes():
     """
     Menu para escolher qual grupo de contas logar e retornar os pacotes para o setup.

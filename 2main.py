@@ -246,7 +246,7 @@ def pegar_link_delta():
     return os.popen(cmd).read().strip()
 
 def login_gboard_estavel(lista_de_contas, nome_set):
-    # --- COORDENADAS (DPI 160 uGPhone) ---
+    # --- COORDENADAS (Ajustadas conforme sua última mensagem) ---
     BTN_LOG_IN_INICIAL = "623 451" 
     CAMPO_USER = "612 381" 
     BTN_GET_KEY = "901 417" 
@@ -255,7 +255,7 @@ def login_gboard_estavel(lista_de_contas, nome_set):
 
     total = len(lista_de_contas)
 
-    # --- PASSO 1: L0GINS ---
+    # --- PASSO 1: LOGINS ---
     print(f"\n\033[1;34m[ 1/3 ] Realizando Logins de {nome_set}...\033[0m")
     for i, conta in enumerate(lista_de_contas, 1):
         pkg = conta['pkg']
@@ -263,6 +263,8 @@ def login_gboard_estavel(lista_de_contas, nome_set):
         pw = conta['pass']
 
         print(f"   > [{i}/{total}] Logando: {user}")
+        
+        # Fecha antes de abrir para garantir que caia na tela de Login
         su_cmd(f"am force-stop {pkg}")
         time.sleep(1)
         su_cmd(f"monkey -p {pkg} -c android.intent.category.LAUNCHER 1 > /dev/null 2>&1")
@@ -274,14 +276,16 @@ def login_gboard_estavel(lista_de_contas, nome_set):
         time.sleep(1)
         su_cmd(f"input text {user}")
         time.sleep(1)
-        su_cmd(f"input keyevent 66") 
-        time.sleep(2)
+        su_cmd(f"input keyevent 66") # Próximo campo (Senha)
+        time.sleep(2.5) 
         su_cmd(f"input text {pw}")
         time.sleep(1)
-        su_cmd(f"input keyevent 66") 
+        su_cmd(f"input keyevent 66") # Confirmar Login
         
-        time.sleep(10) 
-        su_cmd(f"am force-stop {pkg}")
+        print(f"   \033[1;32m[ ✓ ] Login enviado. Mantendo {pkg} aberto...\033[0m")
+        time.sleep(8) # Tempo para o login processar antes de ir pro próximo
+        
+        # REMOVIDO: su_cmd(f"am force-stop {pkg}") -> Agora a conta fica aberta!
 
     # --- PASSO 2: LINK FIXO ---
     print(f"\n\033[1;35m[ 2/3 ] Salvando Link de Farm...\033[0m")
@@ -289,34 +293,34 @@ def login_gboard_estavel(lista_de_contas, nome_set):
         f.write(LINK_FIXO)
 
     # --- ETAPA 3: ABRIR O PRIMEIRO CLONE E PEGAR KEY ---
-    print(f"\n\033[1;36m[ Passo 3 ] Abrindo primeiro clone para pegar a Key...\033[0m")
+    print(f"\n\033[1;36m[ Passo 3 ] Indo para o primeiro clone pegar a Key...\033[0m")
     primeiro_pkg = lista_de_contas[0]['pkg']
     
-    # Abre o jogo direto pelo link fixo
+    # Abre o jogo no primeiro clone (que já está aberto no lobby)
     su_cmd(f"am start -a android.intent.action.VIEW -d '{LINK_FIXO}' {primeiro_pkg}")
     
-    print("   -> Aguardando o mapa carregar totalmente (40s)...")
-    time.sleep(40) # Aumentei um pouco para garantir que o menu do Delta apareceu
+    print("   -> Aguardando o mapa carregar (40s)...")
+    time.sleep(40) 
 
-    # 1. Abre o menu do Delta (clica na bolinha)
-    # 2. PRIMEIRO CLIQUE: Faz aparecer o 'Checkpoint'
-    print("   -> 1º Clique no Get Key (Gerando Checkpoint)...")
+    # Sequência de 2 cliques no Get Key
+    print("   -> 1º Clique no Get Key (Checkpoint)...")
     su_cmd(f"input tap {BTN_GET_KEY}")
-    time.sleep(3) # Espera a animação do checkpoint carregar
+    time.sleep(4) 
 
-    # 3. SEGUNDO CLIQUE: Abre o link e joga pro Clipboard
     print("   -> 2º Clique no Get Key (Copiando link)...")
     su_cmd(f"input tap {BTN_GET_KEY}")
     time.sleep(3) 
 
-    # Captura o link que agora sim deve estar no clipboard
     link_delta = pegar_link_delta()
     
     if "plato" in link_delta or "gateway" in link_delta:
-        print(f"\033[1;32m   [🔗] Link capturado com sucesso!\033[0m")
+        print(f"\033[1;32m   [🔗] Sucesso! Enviando para o Discord...\033[0m")
         enviar_para_discord(link_delta)
     else:
-        print("\n\033[1;31m[ ! ] O link ainda não está no clipboard. Verifique a posição do Get Key.\033[0m")
+        print("\033[1;31m   [ ! ] Clipboard vazio ou link inválido.\033[0m")
+
+    print(f"\n\033[1;32m[ FINALIZADO ] Todos os clones estão logados e prontos!\033[0m")
+    input("\033[1;33mPressione Enter para voltar...\033[0m")
 def menu_login_opcoes():
     """
     Menu para escolher qual grupo de contas logar e retornar os pacotes para o setup.

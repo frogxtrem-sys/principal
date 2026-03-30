@@ -1319,7 +1319,7 @@ def main():
                     threading.Thread(target=task_func, args=task_args, daemon=True).start()
 
                 # Inicia a atualização da tabela visual
-                threading.Thread(target=UIManager.update_status_table_periodically, daemon=True).start()
+                threading.Thread(target=UIManager.update_status_table(), daemon=True).start()
 
                 while not stop_main_event.is_set():
                     time.sleep(500)

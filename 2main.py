@@ -255,7 +255,7 @@ def login_gboard_estavel(lista_de_contas, nome_set):
 
     total = len(lista_de_contas)
 
-    # --- PASSO 1: LOGINS ---
+    # --- PASSO 1: L0GINS ---
     print(f"\n\033[1;34m[ 1/3 ] Realizando Logins de {nome_set}...\033[0m")
     for i, conta in enumerate(lista_de_contas, 1):
         pkg = conta['pkg']

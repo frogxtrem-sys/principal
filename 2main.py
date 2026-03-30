@@ -1295,67 +1295,56 @@ def main():
 
         if setup_type == "1":
             try:
+                # 1. Carrega os links que salvamos no setup 2 (o link fixo formatado)
                 server_links = FileManager.load_server_links()
                 globals()["accounts"] = FileManager.load_accounts()
                 globals()["_uid_"] = {}
 
-                if not globals()["accounts"]:
-                    print("\033[1;31m[ Shouko.dev ] - No user IDs set up.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
-                    continue
-                if not server_links:
-                    print("\033[1;31m[ Shouko.dev ] - No game ID or server link set up.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
+                if not globals()["accounts"] or not server_links:
+                    print("\033[1;31m[ Shouko.dev ] - Erro: IDs ou Links não configurados.\033[0m")
+                    input("\033[1;32mPressione Enter para voltar...\033[0m")
                     continue
 
-                force_rejoin_input = input(...)
+                # Pergunta do Rejoin (Padrão)
+                force_rejoin_input = input("\033[93m[ Shouko.dev ] - Intervalo de Force Rejoin (min) ou 'q' para pular: \033[0m")
+                
+                if not force_rejoin_input: force_rejoin_input = ""
+                force_rejoin_interval = float('inf') if force_rejoin_input.lower() == 'q' else int(force_rejoin_input) * 60
 
-                if not force_rejoin_input:
-                    force_rejoin_input = ""
-
-                if force_rejoin_input.lower() == 'q':
-                    force_rejoin_interval = float('inf')
-                else:
-                    force_rejoin_interval = int(force_rejoin_input) * 60
-                if force_rejoin_interval <= 0:
-                    print("\033[1;31m[ Shouko.dev ] - Interval must be positive.\033[0m")
-                    input("\033[1;32mPress Enter to return...\033[0m")
-                    continue
-
-                codex_bypass_active = True
-
-                if codex_bypass_active and codex_bypass_enabled:
-                    print("\033[1;32m[ Shouko.dev ] - Codex bypass enabled.\033[0m")
-
+                # 2. Mata processos antigos e inicia a sequência
                 RobloxManager.kill_roblox_processes()
-                time.sleep(5)
+                time.sleep(2)
+                
+                # Inicia os clones (Usando a sua função que já abre no servidor)
                 Runner.launch_package_sequentially(server_links)
                 globals()["is_runner_ez"] = True
 
-                # Define as tarefas de monitoramento
+                # 3. Define as threads (Aqui a mágica acontece)
+                stop_main_event.clear() # Garante que o evento de parada esteja limpo
+                
                 tasks = [
                     (Runner.monitor_presence, (server_links, stop_main_event)),
                     (Runner.force_rejoin, (server_links, force_rejoin_interval, stop_main_event))
                 ]
 
-                # Inicia as tarefas em threads separadas
                 for task_func, task_args in tasks:
                     threading.Thread(target=task_func, args=task_args, daemon=True).start()
 
-                # Inicia a atualização da tabela visual
-                threading.Thread(target=UIManager.update_status_table(), daemon=True).start()
+                # Thread da Tabela Visual
+                threading.Thread(target=UIManager.update_status_table, daemon=True).start()
 
+                # --- MUDANÇA AQUI: Loop de Vida do Script ---
+                print("\033[1;32m[ ! ] Monitoramento de RAM e API Ativado.\033[0m")
                 while not stop_main_event.is_set():
-                    time.sleep(500)
+                    # Em vez de dormir 500s, dormimos menos para manter o script "esperto"
+                    time.sleep(30) 
                     with status_lock:
-                        # Atualiza a tabela na tela principal também
                         UIManager.update_status_table()
-                    Utilities.collect_garbage()
+                    Utilities.collect_garbage() # Limpa a memória do próprio script Python
 
             except Exception as e:
-                print(f"\033[1;31m[ Shouko.dev ] - Error: {e}\033[0m")
-                Utilities.log_error(f"Setup error: {e}")
-                input("\033[1;32mPress Enter to return...\033[0m")
+                print(f"\033[1;31m[ Shouko.dev ] - Erro no Setup 1: {e}\033[0m")
+                input("\033[1;32mPressione Enter para voltar...\033[0m")
                 continue
 
         elif setup_type == "2":

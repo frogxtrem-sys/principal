@@ -1086,25 +1086,43 @@ class Runner:
             try:
                 if globals()["check_exec_enable"] == "0":
                     for package_name, server_link in server_links:
-                        ckhuy = FileManager.xuat(f"/data/data/{package_name}/app_webview/Default/Cookies")
-                        user_id = globals()["_user_"][package_name]
-                            
-                        presence_type = RobloxManager.check_user_online(user_id, ckhuy)
+                        # --- NOVIDADE: CHECAGEM DE PROCESSO REAL ---
+                        # Verifica se o clone está rodando no Android agora
+                        is_running = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                         
+                        user_id = globals()["_user_"][package_name]
+                        ckhuy = FileManager.xuat(f"/data/data/{package_name}/app_webview/Default/Cookies")
+                        presence_type = RobloxManager.check_user_online(user_id, ckhuy)
+
+                        # Se o processo SUMIU do Android, reabre direto
+                        if not is_running:
+                            print(f"\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU NO ANDROID. REABRINDO AGORA...\033[0m")
+                            with status_lock:
+                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
+                            
+                            # Limpa e abre de novo
+                            RobloxManager.kill_roblox_process(package_name)
+                            time.sleep(2)
+                            # Usa a sua função de abrir com o link
+                            threading.Thread(target=RobloxManager.launch_roblox, args=[package_name, server_link], daemon=True).start()
+                            in_game_status[package_name] = False # Reseta o status para monitorar a volta
+                            continue
+
+                        # --- LÓGICA ORIGINAL (VIA API) ---
                         if not in_game_status[package_name]:
                             if presence_type == 2:
                                 with status_lock:
                                     globals()["package_statuses"][package_name]["Status"] = "\033[1;32mIn-Game\033[0m"
                                     UIManager.update_status_table()
                                 in_game_status[package_name] = True
-                                print(f"\033[1;32m[ Shouko.dev ] - {user_id} is now In-Game, monitoring started.\033[0m")
+                                print(f"\033[1;32m[ Shouko.dev ] - {user_id} is now In-Game.\033[0m")
                             continue 
                             
                         if presence_type != 2:
                             with status_lock:
-                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mNot In-Game, Rejoining!\033[0m"
+                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mOffline (API), Rejoining!\033[0m"
                                 UIManager.update_status_table()
-                            print(f"\033[1;31m[ Shouko.dev ] - {user_id} confirmed offline, rejoining...\033[0m")
+                            print(f"\033[1;31m[ Shouko.dev ] - {user_id} confirmed offline pela API, rejoining...\033[0m")
                             RobloxManager.kill_roblox_process(package_name)
                             RobloxManager.delete_cache_for_package(package_name)
                             time.sleep(2)
@@ -1113,10 +1131,13 @@ class Runner:
                             with status_lock:
                                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mIn-Game\033[0m"
                                 UIManager.update_status_table()
-                time.sleep(60)
+                
+                # Diminuí o tempo de 60s para 20s para o monitoramento ser mais "agressivo"
+                time.sleep(20) 
+                
             except Exception as e:
                 Utilities.log_error(f"Error in presence monitor: {e}")
-                time.sleep(60)
+                time.sleep(20)
 
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

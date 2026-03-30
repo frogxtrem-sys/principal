@@ -247,10 +247,9 @@ def pegar_link_delta():
 
 def login_gboard_estavel(lista_de_contas, nome_set):
     # --- COORDENADAS (DPI 160 uGPhone) ---
-    BTN_LOG_IN_INICIAL = "340 540" 
-    CAMPO_USER = "470 560"
-    BTN_DELTA_MENU = "50 150" 
-    BTN_GET_KEY = "200 300" 
+    BTN_LOG_IN_INICIAL = "623 451" 
+    CAMPO_USER = "612 381" 
+    BTN_GET_KEY = "901 417" 
 
     LINK_FIXO = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
 
@@ -300,10 +299,6 @@ def login_gboard_estavel(lista_de_contas, nome_set):
     time.sleep(40) # Aumentei um pouco para garantir que o menu do Delta apareceu
 
     # 1. Abre o menu do Delta (clica na bolinha)
-    print("   -> Abrindo menu do Delta...")
-    su_cmd(f"input tap {BTN_DELTA_MENU}")
-    time.sleep(2)
-
     # 2. PRIMEIRO CLIQUE: Faz aparecer o 'Checkpoint'
     print("   -> 1º Clique no Get Key (Gerando Checkpoint)...")
     su_cmd(f"input tap {BTN_GET_KEY}")

@@ -659,7 +659,7 @@ class RobloxManager:
 
     @staticmethod
     def format_server_link(input_link):
-    """Garante que o link esteja no formato correto para o Android abrir o Roblox."""
+        """Garante que o link esteja no formato correto para o Android abrir o Roblox."""
         if 'roblox.com' in input_link:
             return input_link
         elif input_link.isdigit():

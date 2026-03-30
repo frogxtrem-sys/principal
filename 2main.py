@@ -227,8 +227,8 @@ def login_gboard_estavel(lista_de_contas, nome_set):
     total = len(lista_de_contas)
 
     # COORDENADAS (Ajustadas conforme suas fotos em 160 DPI)
-    BTN_LOG_IN_INICIAL = "340 540"  # Botão 'Log In' da tela inicial (Sign In vermelho)
-    CAMPO_USER = "470 560"          # Primeiro campo: 'Username/Email/Phone'
+    BTN_LOG_IN_INICIAL = "623 451"  # Botão 'Log In' da tela inicial (Sign In vermelho)
+    CAMPO_USER = "612 381"          # Primeiro campo: 'Username/Email/Phone'
 
     for i, conta in enumerate(lista_de_contas, 1):
         pkg = conta['pkg']

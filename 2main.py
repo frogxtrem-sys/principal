@@ -289,31 +289,39 @@ def login_gboard_estavel(lista_de_contas, nome_set):
     with open("game_link.txt", "w") as f:
         f.write(LINK_FIXO)
 
-    # --- PASSO 3: ABRIR E PEGAR KEY ---
-    print(f"\n\033[1;36m[ 3/3 ] Capturando Key do Delta...\033[0m")
+    # --- ETAPA 3: ABRIR O PRIMEIRO CLONE E PEGAR KEY ---
+    print(f"\n\033[1;36m[ Passo 3 ] Abrindo primeiro clone para pegar a Key...\033[0m")
     primeiro_pkg = lista_de_contas[0]['pkg']
     
+    # Abre o jogo direto pelo link fixo
     su_cmd(f"am start -a android.intent.action.VIEW -d '{LINK_FIXO}' {primeiro_pkg}")
     
-    print("   -> Aguardando servidor carregar (35s)...")
-    time.sleep(35) 
+    print("   -> Aguardando o mapa carregar totalmente (40s)...")
+    time.sleep(40) # Aumentei um pouco para garantir que o menu do Delta apareceu
 
-    print("   -> Clicando no Delta...")
+    # 1. Abre o menu do Delta (clica na bolinha)
+    print("   -> Abrindo menu do Delta...")
     su_cmd(f"input tap {BTN_DELTA_MENU}")
     time.sleep(2)
-    su_cmd(f"input tap {BTN_GET_KEY}")
-    time.sleep(4)
 
+    # 2. PRIMEIRO CLIQUE: Faz aparecer o 'Checkpoint'
+    print("   -> 1º Clique no Get Key (Gerando Checkpoint)...")
+    su_cmd(f"input tap {BTN_GET_KEY}")
+    time.sleep(3) # Espera a animação do checkpoint carregar
+
+    # 3. SEGUNDO CLIQUE: Abre o link e joga pro Clipboard
+    print("   -> 2º Clique no Get Key (Copiando link)...")
+    su_cmd(f"input tap {BTN_GET_KEY}")
+    time.sleep(3) 
+
+    # Captura o link que agora sim deve estar no clipboard
     link_delta = pegar_link_delta()
     
     if "plato" in link_delta or "gateway" in link_delta:
-        print(f"\033[1;32m   [🔗] Link detectado: {link_delta}\033[0m")
+        print(f"\033[1;32m   [🔗] Link capturado com sucesso!\033[0m")
         enviar_para_discord(link_delta)
     else:
-        print("\n\033[1;31m[ ! ] Link não encontrado no clipboard.\033[0m")
-
-    print(f"\n\033[1;32m[ FINALIZADO ] Cheque seu Discord para a Key!\033[0m")
-    input("\033[1;33mPressione Enter para voltar...\033[0m")
+        print("\n\033[1;31m[ ! ] O link ainda não está no clipboard. Verifique a posição do Get Key.\033[0m")
 def menu_login_opcoes():
     """
     Menu para escolher qual grupo de contas logar e retornar os pacotes para o setup.

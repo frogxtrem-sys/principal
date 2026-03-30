@@ -1345,7 +1345,7 @@ def main():
                 print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Buscando IDs do {current_set_name}...\033[0m")
                 time.sleep(2.0)
 
-                # 2. Extração de User IDs
+                # 2. Extração de User IDs (Necessário para o Farm)
                 print(f"\033[93m[ Shouko.dev ] - Extraindo IDs do sistema...\033[0m")
                 accounts = []
 
@@ -1356,36 +1356,42 @@ def main():
                         if user_id and user_id != "-1":
                             accounts.append((package_name, user_id))
                             print(f"\033[96m[ ✓ ] Sucesso: {package_name} -> {user_id}\033[0m")
+                        else:
+                            print(f"\033[1;31m[ ✗ ] Falha: UserId não encontrado em {package_name}\033[0m")
                     except Exception as e:
-                        print(f"\033[1;31m[ ! ] Erro em {package_name}: {e}\033[0m")
+                        print(f"\033[1;31m[ ! ] Erro ao ler {package_name}: {e}\033[0m")
 
-                # 3. Salva os IDs e pula a seleção de jogo
+                # 3. Salva os IDs e aplica o Link Fixo Automaticamente
                 if accounts:
                     FileManager.save_accounts(accounts)
                     
-                    # --- LINK FIXO AUTOMÁTICO ---
-                    # Colocamos o seu link de compartilhamento direto aqui
+                    # --- CONFIGURAÇÃO AUTOMÁTICA DO LINK ---
                     fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
                     
-                    print(f"\n\033[1;35m[ Shouko.dev ] - Aplicando Link Fixo de Farm...\033[0m")
+                    print(f"\n\033[1;35m[ Shouko.dev ] - Aplicando Link Fixo do Servidor...\033[0m")
                     
-                    # Formata e salva automaticamente para todos os pacotes detectados
+                    # Usa a função de formatação para garantir que o link seja aceito pelo Android
                     formatted_link = RobloxManager.format_server_link(fixed_link)
                     
                     if formatted_link:
+                        # Associa o link formatado a todos os pacotes das contas encontradas
                         server_links = [(pkg, formatted_link) for pkg, _ in accounts]
                         FileManager.save_server_links(server_links)
-                        print("\033[1;32m[ ✓ ] Link configurado automaticamente para todas as contas!\033[0m")
+                        print("\033[1;32m[ ✓ ] Link configurado e salvo com sucesso para o Farm!\033[0m")
+                    else:
+                        print("\033[1;31m[ ! ] Erro ao formatar o link padrão.\033[0m")
                     
                 else:
-                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada.\033[0m")
+                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada. Verifique o login.\033[0m")
                     input("\033[1;32mPressione Enter para voltar...\033[0m")
                     continue
 
             except Exception as e:
                 print(f"\033[1;31m[ Shouko.dev ] - Erro Crítico: {e}\033[0m")
+                input("\033[1;32mPressione Enter para voltar...\033[0m")
+                continue
             
-            input("\n\033[1;32m[ FINALIZADO ] Setup pronto e link salvo! Enter para voltar...\033[0m")
+            input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
             continue
 
         elif setup_type == "3":

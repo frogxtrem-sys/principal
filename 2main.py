@@ -658,15 +658,14 @@ class RobloxManager:
             Utilities.log_error(error_message)
 
     @staticmethod
-    @staticmethod
-    @staticmethod
     def format_server_link(input_link):
+    """Garante que o link esteja no formato correto para o Android abrir o Roblox."""
         if 'roblox.com' in input_link:
             return input_link
         elif input_link.isdigit():
             return f'roblox://placeID={input_link}'
         else:
-            print("\033[1;31m[ Shouko.dev ] - Invalid input! Please enter a valid game ID or private server link.\033[0m")
+            print("\n\033[1;31m[ ! ] Link/ID inválido!\033[0m")
             return None
 
     

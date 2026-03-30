@@ -1294,17 +1294,16 @@ def main():
 
         elif setup_type == "2":
             try:
-                # 1. Chama o menu de login e recebe os pacotes e o nome do SET escolhido
+                # 1. Chama o menu de login e recebe os pacotes e o nome do SET
                 packages, current_set_name = menu_login_opcoes()
                 
-                # Se o usuário escolher 'Voltar', ele retorna ao menu principal
                 if not packages:
                     continue
 
                 print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Buscando IDs do {current_set_name}...\033[0m")
-                time.sleep(5.0)
+                time.sleep(2.0)
 
-                # 2. Busca automática de User IDs nos pacotes do Set escolhido
+                # 2. Extração de User IDs
                 print(f"\033[93m[ Shouko.dev ] - Extraindo IDs do sistema...\033[0m")
                 accounts = []
 
@@ -1315,58 +1314,36 @@ def main():
                         if user_id and user_id != "-1":
                             accounts.append((package_name, user_id))
                             print(f"\033[96m[ ✓ ] Sucesso: {package_name} -> {user_id}\033[0m")
-                        else:
-                            print(f"\033[1;31m[ ✗ ] Falha: UserId não encontrado em {package_name}\033[0m")
                     except Exception as e:
-                        print(f"\033[1;31m[ ! ] Erro ao ler {package_name}: {e}\033[0m")
+                        print(f"\033[1;31m[ ! ] Erro em {package_name}: {e}\033[0m")
 
-                # 3. Salva os IDs encontrados no arquivo de farm
+                # 3. Salva os IDs e pula a seleção de jogo
                 if accounts:
                     FileManager.save_accounts(accounts)
-                    print(f"\033[1;32m[ Shouko.dev ] - {len(accounts)} IDs salvos com sucesso!\033[0m")
+                    
+                    # --- LINK FIXO AUTOMÁTICO ---
+                    # Colocamos o seu link de compartilhamento direto aqui
+                    fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
+                    
+                    print(f"\n\033[1;35m[ Shouko.dev ] - Aplicando Link Fixo de Farm...\033[0m")
+                    
+                    # Formata e salva automaticamente para todos os pacotes detectados
+                    formatted_link = RobloxManager.format_server_link(fixed_link)
+                    
+                    if formatted_link:
+                        server_links = [(pkg, formatted_link) for pkg, _ in accounts]
+                        FileManager.save_server_links(server_links)
+                        print("\033[1;32m[ ✓ ] Link configurado automaticamente para todas as contas!\033[0m")
+                    
                 else:
-                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada. Verifique o login.\033[0m")
+                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada.\033[0m")
                     input("\033[1;32mPressione Enter para voltar...\033[0m")
                     continue
 
-                # 4. Seleção de Jogo para o grupo atual
-                print("\n\033[93m[ Shouko.dev ] - Selecione o jogo para este grupo:\033[0m")
-                games = [
-                    "1. Blox Fruits", "2. Anime Defenders", "3. King Legacy", "4. Fisch",
-                    "5. Bee Swarm Simulator", "6. Anime Vanguards", "7. Pet GO",
-                    "8. Pet Simulator 99", "9. Meme Sea", "10. Anime Adventures",
-                    "11. Anime Last Stand", "12. Da Hood", "13. Da Hood VC", "14. Arise Crossover",
-                    "15. Bubble Gum Simulator", "16. Anime Ranger X", "17. Outro (ID ou Link)"
-                ]
-                for game in games: print(f"\033[96m{game}\033[0m")
-
-                choice = input("\n\033[93mEscolha: \033[0m").strip()
-                game_ids = {
-                    "1": "2753915549", "2": "17017769292", "3": "4520749081", "4": "16732694052",
-                    "5": "1537690962", "6": "16146832113", "7": "18901165922", "8": "8737899170",
-                    "9": "10260193230", "10": "8304191830", "11": "12886143095", "12": "2788229376",
-                    "13": "7213786345", "14": "87039211657390", "15": "85896571713843", "16": "72829404259339"
-                }
-
-                if choice in game_ids:
-                    server_link = game_ids[choice]
-                elif choice == "17":
-                    server_link = input("\033[93m[ Shouko.dev ] - Digite o ID ou Link: \033[0m")
-                else:
-                    continue
-
-                formatted_link = RobloxManager.format_server_link(server_link)
-                if formatted_link:
-                    server_links = [(package_name, formatted_link) for package_name, _ in accounts]
-                    FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ Shouko.dev ] - Configuração finalizada com sucesso!\033[0m")
-                
             except Exception as e:
                 print(f"\033[1;31m[ Shouko.dev ] - Erro Crítico: {e}\033[0m")
-                input("\033[1;32mPressione Enter para voltar...\033[0m")
-                continue
             
-            input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
+            input("\n\033[1;32m[ FINALIZADO ] Setup pronto e link salvo! Enter para voltar...\033[0m")
             continue
 
         elif setup_type == "3":

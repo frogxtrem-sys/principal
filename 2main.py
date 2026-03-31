@@ -1290,58 +1290,68 @@ def main():
 
         if setup_type == "1":
             try:
+                # Blindagem inicial para o VSPhone não matar o Termux
                 blindar_termux()
-                # 1. Carrega os links que salvamos no setup 2 (o link fixo formatado)
+                
+                # 1. Carrega os links e contas
                 server_links = FileManager.load_server_links()
                 globals()["accounts"] = FileManager.load_accounts()
-                globals()["_uid_"] = {}
+                
+                    if not globals().get("accounts") or not server_links:
+                        print("\033[1;31m[ Shouko.dev ] - Erro: IDs ou Links não configurados.\033[0m")
+                        input("\033[1;32mPressione Enter para voltar...\033[0m")
+                        continue
 
-                if not globals()["accounts"] or not server_links:
-                    print("\033[1;31m[ Shouko.dev ] - Erro: IDs ou Links não configurados.\033[0m")
+                    # Configuração do Rejoin Forçado
+                    print("\033[95m" + "="*50 + "\033[0m")
+                    force_rejoin_input = input("\033[93m[ Shouko.dev ] - Intervalo de Force Rejoin (min) ou 'q' para pular: \033[0m")
+                
+                    if not force_rejoin_input or force_rejoin_input.lower() == 'q':
+                        force_rejoin_interval = 999999 # Praticamente infinito
+                    else:
+                        force_rejoin_interval = int(force_rejoin_input) * 60
+
+                    # 2. Limpeza e Inicialização dos Clones
+                    print("\033[1;33m[ ! ] Reiniciando ambiente e abrindo clones...\033[0m")
+                    RobloxManager.kill_roblox_processes()
+                    time.sleep(2)
+                
+                    # Abre os clones um por um (sequencialmente)
+                    Runner.launch_package_sequentially(server_links)
+                
+                    # 3. Ativação das Threads de Vigilância
+                    stop_main_event.clear()
+                
+                    # Criamos as threads para monitorar se o jogo fechou e para o rejoin por tempo
+                    # IMPORTANTE: monitor_presence agora é o seu 'vigia' contra crash
+                    t_monitor = threading.Thread(target=monitor_presence, args=(server_links, stop_main_event), daemon=True)
+                    t_rejoin = threading.Thread(target=Runner.force_rejoin, args=(server_links, force_rejoin_interval, stop_main_event), daemon=True)
+                
+                    t_monitor.start()
+                    t_rejoin.start()
+
+                    print("\033[1;32m[ ✓ ] Monitor Anti-Crash e Force Rejoin ATIVADOS.\033[0m")
+
+                    # 4. Loop da Tabela Visual e Manutenção de RAM
+                    while not stop_main_event.is_set():
+                        # Atualiza a tabela na tela a cada 30 segundos
+                        with status_lock:
+                            UIManager.update_status_table()
+                    
+                        # Comando de Root para limpar cache do VSPhone e evitar lentidão
+                        os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
+                    
+                        # Pequena pausa para não sobrecarregar a CPU
+                        time.sleep(30)
+                    
+                        # Coleta de lixo do Python para manter o script leve
+                        gc.collect()
+
+                except Exception as e:
+                    print(f"\033[1;31m[ Shouko.dev ] - Erro no Setup 1: {e}\033[0m")
+                    traceback.print_exc() # Mostra onde foi o erro exato se crashar
                     input("\033[1;32mPressione Enter para voltar...\033[0m")
                     continue
-
-                # Pergunta do Rejoin (Padrão)
-                force_rejoin_input = input("\033[93m[ Shouko.dev ] - Intervalo de Force Rejoin (min) ou 'q' para pular: \033[0m")
-                
-                if not force_rejoin_input: force_rejoin_input = ""
-                force_rejoin_interval = float('inf') if force_rejoin_input.lower() == 'q' else int(force_rejoin_input) * 60
-
-                # 2. Mata processos antigos e inicia a sequência
-                RobloxManager.kill_roblox_processes()
-                time.sleep(2)
-                
-                # Inicia os clones (Usando a sua função que já abre no servidor)
-                Runner.launch_package_sequentially(server_links)
-                globals()["is_runner_ez"] = True
-
-                # 3. Define as threads (Aqui a mágica acontece)
-                stop_main_event.clear() # Garante que o evento de parada esteja limpo
-                
-                tasks = [
-                    (Runner.monitor_presence, (server_links, stop_main_event)),
-                    (Runner.force_rejoin, (server_links, force_rejoin_interval, stop_main_event))
-                ]
-
-                for task_func, task_args in tasks:
-                    threading.Thread(target=task_func, args=task_args, daemon=True).start()
-
-                # Thread da Tabela Visual
-                threading.Thread(target=UIManager.update_status_table, daemon=True).start()
-
-                # --- MUDANÇA AQUI: Loop de Vida do Script ---
-                print("\033[1;32m[ ! ] Monitoramento de RAM e API Ativado.\033[0m")
-                while not stop_main_event.is_set():
-                    # Em vez de dormir 500s, dormimos menos para manter o script "esperto"
-                    time.sleep(30) 
-                    with status_lock:
-                        UIManager.update_status_table()
-                    Utilities.collect_garbage() # Limpa a memória do próprio script Python
-
-            except Exception as e:
-                print(f"\033[1;31m[ Shouko.dev ] - Erro no Setup 1: {e}\033[0m")
-                input("\033[1;32mPressione Enter para voltar...\033[0m")
-                continue
 
         elif setup_type == "2":
             try:

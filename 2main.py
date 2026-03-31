@@ -1093,38 +1093,45 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) ATIVADO!\033[0m")
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash ATIVADO!\033[0m")
         while not stop_event.is_set():
             try:
-                # Vamos ver o que tem dentro da lista para ter certeza
+                # server_links chega como uma lista de tuplos: [('pkg', 'url'), ...]
                 for item in server_links:
-                    # Se for (pacote, link)
                     package_name = item[0]
+                    server_link = item[1]
                     
-                    # LOG DE CHECAGEM: Isso TEM que aparecer no seu termux toda hora
-                    # print(f"[ Monitor ] Verificando: {package_name}") 
-                    
+                    # 1. TESTE DE VIDA: O Roblox está aberto?
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] ALVO IDENTIFICADO: {package_name} não está rodando!\033[0m")
+                        # SE NÃO ESTÁ ABERTO, O REJOIN COMEÇA AQUI
+                        print(f"\n\033[1;31m[ ALERT ] {package_name} FECHADO! REANIMANDO...\033[0m")
                         
+                        # Atualiza a tabela visual (se você usar o dicionário de status)
+                        with status_lock:
+                            if package_name in globals().get("package_statuses", {}):
+                                globals()["package_statuses"][package_name]["Status"] = "⚠️ Reabrindo..."
+
+                        # Mata qualquer processo zumbi e abre
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # Tenta abrir
+                        # Abre o App (Método Monkey é o mais estável para clones)
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # Se tiver link, espera e manda
-                        if len(item) > 1 and item[1]:
-                            time.sleep(12)
-                            os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{item[1]}' {package_name}\"")
+                        if server_link:
+                            time.sleep(12) # Tempo pro Roblox respirar
+                            os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
+                    
+                    # 2. SE ESTÁ ABERTO, O SCRIPT SEGUE PARA CHECAR O EXECUTOR (opcional)
+                    # Aqui você poderia chamar sua função de checar o Log do Delta
                 
-                # Diminuí para 10s para você ver o teste mais rápido
-                time.sleep(10)
-                
+                time.sleep(15) # Ronda de vigilância a cada 15 segundos
+                os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'") # Limpa RAM
+
             except Exception as e:
-                print(f"\033[1;31m[ ERRO INTERNO ]: {e}\033[0m")
+                print(f"Erro no Monitor: {e}")
                 time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

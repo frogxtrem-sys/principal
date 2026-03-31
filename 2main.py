@@ -1106,25 +1106,26 @@ class Runner:
                     print(f"\033[1;30m[ DEBUG ] Checando {package_name} | PID: '{is_running}'\033[0m")
 
                     if not is_running:
-                        print(f"\033[1;31m[ ! ] ALVO ENCONTRADO: {package_name} fechou!\033[0m")
+                        print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU! REABRINDO...\033[0m")
                         
-                        # 1. Mata qualquer resquício travado
+                        # 1. Mata qualquer processo zumbi
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # 2. Tenta reabrir pelo método MONKEY (Mais forte para clones)
-                        print(f"\033[1;33m[ DEBUG ] Forçando reabertura via Monkey: {package_name}\033[0m")
+                        # 2. Abre o App (Método Monkey - O mais garantido)
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # 3. Se você tiver o link do servidor, tente ele logo em seguida como backup
+                        # 3. Empurra para o Servidor (Ajuste nas aspas)
                         if server_link:
-                            time.sleep(5)
-                            os.system(f"su -c 'am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}'")
+                            time.sleep(8) # Espera o Roblox carregar um pouco antes de mandar o link
+                            # Usamos f-string com aspas simples externas para o link não quebrar
+                            cmd_link = f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\""
+                            os.system(cmd_link)
                         
                         with status_lock:
                             globals()["package_statuses"][package_name]["Status"] = "\033[1;31mReabrindo...\033[0m"
                         
-                        time.sleep(10)
+                        time.sleep(5)
                         continue
                         
                     time.sleep(15)

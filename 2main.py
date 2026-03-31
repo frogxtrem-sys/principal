@@ -1094,46 +1094,46 @@ class Runner:
     @staticmethod
     def monitor_presence(server_links, stop_event):
         print("\033[1;34m[ DEBUG ] Monitor iniciado. Vigilância ativa...\033[0m")
-        
+    
         while not stop_event.is_set():
             try:
                 for package_name, server_link in server_links:
-                    # TESTE 1: O Python consegue rodar comandos Root?
-                    # Vamos tentar pegar o PID e imprimir na tela
+                    # Checa se o processo existe via PID
                     cmd = f"su -c 'pidof {package_name}'"
                     is_running = os.popen(cmd).read().strip()
-                    
-                    print(f"\033[1;30m[ DEBUG ] Checando {package_name} | PID: '{is_running}'\033[0m")
-
+                
                     if not is_running:
-                        print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU! REABRINDO...\033[0m")
-                        
-                        # 1. Mata qualquer processo zumbi
+                        print(f"\n\033[1;31m[ ! ] {package_name} FECHADO! REABRINDO...\033[0m")
+                    
+                        # 1. Limpa o que restou
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
-                        
-                        # 2. Abre o App (Método Monkey - O mais garantido)
+                    
+                        # 2. Reabre o app (Método Monkey)
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
-                        
-                        # 3. Empurra para o Servidor (Ajuste nas aspas)
+                    
+                        # 3. Força entrada no servidor após 12 segundos (tempo de carregamento)
                         if server_link:
-                            time.sleep(8) # Espera o Roblox carregar um pouco antes de mandar o link
-                            # Usamos f-string com aspas simples externas para o link não quebrar
+                            time.sleep(12)
                             cmd_link = f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\""
                             os.system(cmd_link)
-                        
-                        with status_lock:
-                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mReabrindo...\033[0m"
-                        
+                    
+                        # Atualiza o status na tabela (se ela existir)
+                        try:
+                            with status_lock:
+                                if package_name in globals()["package_statuses"]:
+                                    globals()["package_statuses"][package_name]["Status"] = "\033[1;31mReabrindo...\033[0m"
+                        except:
+                            pass
+                    
                         time.sleep(5)
-                        continue
-                        
-                    time.sleep(15)
+            
+                # Intervalo entre cada checagem total (Não mude para menos de 15)
+                time.sleep(20)
 
             except Exception as e:
-                print(f"\033[1;31m[ ERRO CRÍTICO ]: {e}\033[0m")
+                print(f"\033[1;31m[ ERRO NO MONITOR ]: {e}\033[0m")
                 time.sleep(10)
-
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):
         """

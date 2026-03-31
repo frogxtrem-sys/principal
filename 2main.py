@@ -1128,17 +1128,24 @@ class Runner:
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        # Se entrar aqui, o Termux VAI avisar no log
-                        print(f"\n\033[1;31m[ ! ] REABRINDO AGORA: {package_name}\033[0m")
-                        
-                        # 1. Mata processos zumbis
+                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name}\033[0m")
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
-                        
-                        # Em vez de monkey, use o 'am start' com a classe principal
-                        os.system(f"su -c 'am start -n {package_name}/com.roblox.client.ActivityMain'")
-                        
-                        # 3. Injeta o Servidor (Aumentei o tempo para 15s para garantir)
+
+                        # --- TENTATIVA 1: Versão Nova (Splash) ---
+                        result = os.system(f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash'")
+            
+                        # Se a tentativa 1 falhar (retorno diferente de 0), tenta a antiga
+                        if result != 0:
+                            # --- TENTATIVA 2: Versão Antiga (Main) ---
+                            print("[ DEBUG ] Tentando caminho antigo...")
+                            os.system(f"su -c 'am start -n {package_name}/com.roblox.client.ActivityMain'")
+            
+                            # --- TENTATIVA 3: O Monkey (Coringa) ---
+                            # O monkey serve como última instância caso as atividades tenham nomes doidos
+                            os.system(f"su -c 'monkey -p {package_name} 1'")
+
+                            # Injeta o servidor depois de tentar abrir
                         if server_link:
                             time.sleep(15)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")

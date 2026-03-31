@@ -1093,32 +1093,36 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        # Este print vai confirmar no seu terminal se o monitor ligou
+        # Este print vai aparecer no Termux assim que você escolher a Opção 1
         print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) ATIVADO!\033[0m")
         while not stop_event.is_set():
             try:
-                # Se server_links for uma lista de tuplos [('pkg', 'url')], o loop abaixo funciona:
-                for package_name, server_link in server_links:
-                    # Verifica se o processo está ativo no Android
+                # COMO É UMA LISTA, NÃO USAMOS .items()
+                for item in server_links:
+                    package_name = item[0]
+                    server_link = item[1]
+                    
+                    # Checa se o processo existe
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name} fechou!\033[0m")
-                        # 1. Limpa o processo
+                        print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
+                        
+                        # 1. Mata o que sobrou
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # 2. Abre o ícone do App (Monkey)
+                        # 2. Abre o App pelo Monkey
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # 3. Injeta o link do servidor (Delay para a Cloud carregar)
+                        # 3. Manda para o servidor
                         if server_link:
                             time.sleep(12)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
                 
-                # Espera 20 segundos antes da próxima ronda
+                # Espera 20 segundos para a próxima ronda
                 time.sleep(20)
-                # Limpa cache de RAM do VSPhone
+                # Limpa a RAM do VSPhone
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 
             except Exception as e:

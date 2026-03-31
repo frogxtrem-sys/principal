@@ -417,7 +417,7 @@ class Utilities:
         return expiry_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
 class FileManager:
-    SERVER_LINKS_FILE = "Shouko.dev/server-link.txt"
+    SERVER_LINKS_FILE = os.path.join(BASE_DIR, "Shouko.dev", "server-link.txt")
     ACCOUNTS_FILE = "Shouko.dev/account.txt"
     CONFIG_FILE = "Shouko.dev/config-wh.json"
 

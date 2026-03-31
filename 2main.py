@@ -642,29 +642,24 @@ class RobloxManager:
 
             with status_lock:
                 globals()["_uid_"][globals()["_user_"][package_name]] = time.time()
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mOpening Roblox for {package_name}...\033[0m"
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mAbrindo Splash: {package_name}...\033[0m"
                 UIManager.update_status_table()
 
-            subprocess.run([
-                'am', 'start',
-                '-a', 'android.intent.action.MAIN',
-                '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash'
-            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # --- AQUI ESTÁ O SEGREDO: Adicionamos 'su -c' ---
+            # Abre a Splash Screen (O que o VSPhone exige agora)
+            os.system(f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash'")
 
             time.sleep(10)
 
             with status_lock:
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mJoining Roblox for {package_name}...\033[0m"
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mInjetando Link: {package_name}...\033[0m"
                 UIManager.update_status_table()
 
-            subprocess.run([
-                'am', 'start',
-                '-a', 'android.intent.action.VIEW',
-                '-n', f'{package_name}/com.roblox.client.ActivityProtocolLaunch',
-                '-d', server_link
-            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # --- INJEÇÃO DO LINK COM ROOT ---
+            # Note que usamos a ActivityProtocolLaunch como estava no seu código, mas com 'su -c'
+            os.system(f"su -c \"am start -a android.intent.action.VIEW -n {package_name}/com.roblox.client.ActivityProtocolLaunch -d '{server_link}' {package_name}\"")
 
-            time.sleep(20)
+            time.sleep(15)
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()
@@ -675,7 +670,6 @@ class RobloxManager:
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;31m{error_message}\033[0m"
                 UIManager.update_status_table()
             print(f"\033[1;31m[ Shouko.dev ] - {error_message}\033[0m")
-            Utilities.log_error(error_message)
 
     @staticmethod
     def format_server_link(input_link):

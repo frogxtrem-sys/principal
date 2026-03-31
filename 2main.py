@@ -636,6 +636,7 @@ class RobloxManager:
 
     @staticmethod
     def launch_roblox(package_name, server_link):
+        package_name = package_name.strip()
         try:
             RobloxManager.kill_roblox_process(package_name)
             time.sleep(2)

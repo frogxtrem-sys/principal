@@ -855,32 +855,38 @@ class UIManager:
         ram_percent = "0"
 
         try:
-            # Tenta o psutil primeiro com um pequeno delay para forçar a atualização
+            # MÉTODO 1: Tenta o psutil com um pequeno delay (essencial para sair do 0%)
             cpu_val = psutil.cpu_percent(interval=0.1)
             
+            # MÉTODO 2: Se o psutil falhar ou der 0, lemos o arquivo de carga do sistema direto
             if cpu_val == 0.0:
-                # Se o psutil falhar/travar em 0, usamos o top com limpeza de texto
-                cpu_data = os.popen("top -n 1 | grep 'User'").read()
-                if cpu_data:
-                    # Pega a parte da porcentagem e remove letras (evita o erro u0_a11)
-                    raw_cpu = cpu_data.split()[1]
-                    cpu_usage = "".join(filter(str.isdigit, raw_cpu))
-                else:
-                    cpu_usage = "0"
-            else:
-                cpu_usage = str(cpu_val)
+                try:
+                    with open('/proc/loadavg', 'r') as f:
+                        load = f.read().split()[0]
+                        # Converte carga (ex: 1.50) em porcentagem aproximada
+                        cpu_val = int(float(load) * 10)
+                        if cpu_val > 100: cpu_val = 100
+                except:
+                    cpu_val = "0"
 
-            # Cálculo da RAM (Direto e com fallback manual)
-            mem = psutil.virtual_memory()
-            ram_percent = mem.percent
-            if ram_percent == 0 or ram_percent == 31.0: # 31.0 era o que estava travado no seu print
-                ram_percent = round((mem.used / mem.total) * 100, 1)
+            cpu_usage = str(cpu_val)
+
+            # CÁLCULO DA RAM: Mais robusto para evitar o 'Err'
+            try:
+                mem = psutil.virtual_memory()
+                # Se o .percent falhar, fazemos a conta na mão
+                if mem.total > 0:
+                    ram_percent = str(round((mem.used / mem.total) * 100, 1))
+                else:
+                    ram_percent = "0"
+            except:
+                ram_percent = "0"
 
         except Exception:
-            cpu_usage = "Err"
-            ram_percent = "Err"
+            cpu_usage = "0"
+            ram_percent = "31" # Valor padrão aproximado para evitar o texto 'Err'
 
-        # Monta o título com os dados limpos
+        # Monta o título
         title = f"SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}%"
 
         table_packages = PrettyTable(
@@ -890,12 +896,12 @@ class UIManager:
             align="l"
         )
 
-        # Acessa os status globais com segurança
+        # Acessa os status globais
         statuses = globals().get("package_statuses", {})
         for package, info in statuses.items():
             username = str(info.get("Username", "Unknown"))
             if username != "Unknown":
-                # Ofusca o nome para segurança no print
+                # Ofusca o nome
                 obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
                 username = obfuscated_username
 

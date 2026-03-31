@@ -417,7 +417,6 @@ class Utilities:
         return expiry_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
 class FileManager:
-    # Garante que o script ache a pasta Shouko.dev onde quer que ele esteja
     SERVER_LINKS_FILE = "Shouko.dev/server-link.txt"
     ACCOUNTS_FILE = "Shouko.dev/account.txt"
     CONFIG_FILE = "Shouko.dev/config-wh.json"
@@ -635,42 +634,46 @@ class RobloxManager:
 
     @staticmethod
     def launch_roblox(package_name, server_link):
-        package_name = package_name.strip()
         try:
-            # Força a parada do clone antes de abrir
-            os.system(f"su -c 'am force-stop {package_name}'")
+            RobloxManager.kill_roblox_process(package_name)
             time.sleep(2)
 
             with status_lock:
                 globals()["_uid_"][globals()["_user_"][package_name]] = time.time()
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mIniciando {package_name}...\033[0m"
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mOpening Roblox for {package_name}...\033[0m"
                 UIManager.update_status_table()
 
-            # O COMANDO QUE FUNCIONOU NO SEU TERMINAL:
-            # Adicionamos o '&' no final para o Python não ficar 'preso' esperando o jogo fechar
-            comando_abrir = f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash' &"
-            os.system(comando_abrir)
+            subprocess.run([
+                'am', 'start',
+                '-a', 'android.intent.action.MAIN',
+                '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            # Espera o Splash carregar
             time.sleep(10)
 
-            if server_link:
-                with status_lock:
-                    globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mInjetando Link...\033[0m"
-                    UIManager.update_status_table()
-                
-                # Injeta o link também usando Root e background
-                comando_link = f"su -c 'am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}' &"
-                os.system(comando_link)
+            with status_lock:
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mJoining Roblox for {package_name}...\033[0m"
+                UIManager.update_status_table()
 
-            time.sleep(5)
+            subprocess.run([
+                'am', 'start',
+                '-a', 'android.intent.action.VIEW',
+                '-n', f'{package_name}/com.roblox.client.ActivityProtocolLaunch',
+                '-d', server_link
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            time.sleep(20)
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()
 
         except Exception as e:
-            error_message = f"Erro ao disparar abertura: {e}"
-            print(f"\033[1;31m{error_message}\033[0m")
+            error_message = f"Error launching Roblox for {package_name}: {e}"
+            with status_lock:
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;31m{error_message}\033[0m"
+                UIManager.update_status_table()
+            print(f"\033[1;31m[ Shouko.dev ] - {error_message}\033[0m")
+            Utilities.log_error(error_message)
 
     @staticmethod
     def format_server_link(input_link):
@@ -843,63 +846,44 @@ class UIManager:
     def update_status_table():
         current_time = time.time()
         
-        # Controle de taxa de atualização para não travar o VSPhone
+        # Agora acessamos usando UIManager.
         if current_time - UIManager.last_update_time < UIManager.update_interval:
             return
 
         UIManager.last_update_time = current_time
         
         try:
-            # Pega o uso real da CPU e RAM do sistema (VSPhone)
-            cpu_usage = psutil.cpu_percent()
-            memory = psutil.virtual_memory()
-            ram_percent = memory.percent
-            # RAM em GB para ficar mais claro o quanto sobra
-            ram_used = round(memory.used / (1024**3), 2)
-            ram_total = round(memory.total / (1024**3), 2)
-            
-            title = f"🖥️  SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}% ({ram_used}GB/{ram_total}GB)"
+            cpu_usage = psutil.cpu_percent(interval=None)
+            memory_info = psutil.virtual_memory()
+            ram = round(memory_info.used / memory_info.total * 100, 2)
+            title = f"CPU: {cpu_usage}% | RAM: {ram}%"
         except Exception:
-            title = "⚠️ Erro ao ler recursos da Cloud"
+            title = "CPU: N/A | RAM: N/A (Cloud Mode)"
 
-        # Criando a tabela com as novas informações
         table_packages = PrettyTable(
-            field_names=["Package", "Username", "Status", "Resource"],
+            field_names=["Package", "Username", "Package Status"],
             title=title,
-            border=True
+            border=True,
+            align="l"
         )
-        table_packages.align = "l"
 
-        with status_lock:
-            package_statuses = globals().get("package_statuses", {})
-            for package, info in package_statuses.items():
-                username = str(info.get("Username", "Unknown"))
+        for package, info in globals().get("package_statuses", {}).items():
+            username = str(info.get("Username", "Unknown"))
 
-                if username != "Unknown":
-                    # Ofuscação do nome para segurança em vídeos/prints
-                    obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
-                    username = obfuscated_username
+            if username != "Unknown":
+                obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
+                username = obfuscated_username
 
-                status = str(info.get("Status", "Unknown"))
-                
-                # Coluna extra para você saber a saúde de cada clone individualmente
-                # Se o status for "Running", mostramos como 'OK'
-                resource_indicator = "🟢 OK" if "Running" in status or "Ativo" in status else "🔴 --"
-
-                table_packages.add_row([
-                    str(package),
-                    username,
-                    status,
-                    resource_indicator
-                ])
+            table_packages.add_row([
+                str(package),
+                username,
+                str(info.get("Status", "Unknown"))
+            ])
 
         Utilities.clear_screen()
-        UIManager.print_header(version) # Certifique-se que 'version' está acessível aqui
+        UIManager.print_header(version)
         print(table_packages)
-        
-        # Alerta visual se a Cloud estiver sufocando
-        if cpu_usage > 90 or ram_percent > 85:
-            print("\033[1;31m[!] ALERTA: Uso de recursos crítico! Risco de fechamento forçado.\033[0m")
+
 class ExecutorManager:
     @staticmethod
     def detect_executors():
@@ -1109,56 +1093,45 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        # Este print CONFIRMA que o monitor ligou.
-        print("\n\033[1;34m[ Shouko.dev ] - Monitor Anti-Crash Ativado!\033[0m")
-        
+        # Este print CONFIRMA que o monitor ligou. Se ele não aparecer, o erro é no main.
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) VIVO!\033[0m")
         while not stop_event.is_set():
             try:
                 for item in server_links:
-                    # Extrai pacote e link da lista
+                    # Garante que pegamos o pacote e o link independente do formato da lista
                     try:
                         package_name = item[0]
                         server_link = item[1]
                     except:
                         continue
 
-                    # Verifica se o clone está rodando
+                    # Pergunta ao Android: "Esse clone está rodando?"
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
-                    # SE O JOGO FECHOU (NÃO TEM PID):
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] DETECTADO CRASH: {package_name}\033[0m")
+                        # Se entrar aqui, o Termux VAI avisar no log
+                        print(f"\n\033[1;31m[ ! ] REABRINDO AGORA: {package_name}\033[0m")
                         
-                        # 1. Limpa qualquer processo fantasma
+                        # 1. Mata processos zumbis
                         os.system(f"su -c 'am force-stop {package_name}'")
-                        time.sleep(3)
-
-                        # 2. TENTATIVA 1: Caminho Novo (Splash) - Padrão Android 10+
-                        print(f"[ > ] Tentando abrir via ActivitySplash...")
-                        result = os.system(f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash'")
-            
-                        # 3. SE A TENTATIVA 1 FALHAR:
-                        if result != 0:
-                            print(f"[ ! ] Splash falhou. Tentando ActivityMain...")
-                            result_old = os.system(f"su -c 'am start -n {package_name}/com.roblox.client.ActivityMain'")
-            
-                            # 4. SE A TENTATIVA 2 TAMBÉM FALHAR (Plano C):
-                            if result_old != 0:
-                                print(f"[ ! ] Caminhos fixos falharam. Usando modo Monkey...")
-                                os.system(f"su -c 'monkey -p {package_name} 1'")
-
-                        # 5. INJEÇÃO DO LINK (Somente após reabrir)
+                        time.sleep(2)
+                        
+                        # 2. Choque no App (Monkey) - Isso força a abertura no VSPhone
+                        os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
+                        
+                        # 3. Injeta o Servidor (Aumentei o tempo para 15s para garantir)
                         if server_link:
-                            print(f"[ + ] Aguardando 15s para estabilizar e injetar link...")
                             time.sleep(15)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
                 
-                # Intervalo entre rondas e limpeza de cache
+                # Ronda a cada 20 segundos para não dar lag nos jogos
                 time.sleep(20)
+                # Limpa a memória RAM da Cloud
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 
             except Exception as e:
-                print(f"\033[1;31m[ ERRO NO MONITOR ]: {e}\033[0m")
+                # Se der qualquer erro, o monitor não morre, ele apenas avisa
+                print(f"Erro no Monitor: {e}")
                 time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):
@@ -1264,8 +1237,6 @@ def auto_change_android_id():
         time.sleep(2)  
 
 def main():
-    links = FileManager.load_server_links()
-    print(f"--- [ DEBUG ] LINKS ENCONTRADOS: {links} ---")
     global stop_webhook_thread, webhook_interval, codex_bypass_enabled, codex_bypass_thread, codex_bypass_active
     global auto_android_id_enabled, auto_android_id_thread, auto_android_id_value
 

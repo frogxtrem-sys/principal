@@ -851,41 +851,22 @@ class UIManager:
 
         UIManager.last_update_time = current_time
         
-        cpu_usage = "0"
-        ram_percent = "0"
-
         try:
-            # --- CÁLCULO DA CPU VIA DUMPSYS (Oficial do Android) ---
-            # O dumpsys cpuinfo dá a carga real dos últimos segundos
-            cpu_data = os.popen("dumpsys cpuinfo | grep 'TOTAL'").read()
-            if cpu_data:
-                # Pega o primeiro valor da linha (ex: 15% TOTAL)
-                cpu_usage = cpu_data.split('%')[0].strip().split()[-1]
-            else:
-                # Fallback rápido se o dumpsys falhar
-                cpu_usage = str(psutil.cpu_percent(interval=0.1))
-
-            # --- CÁLCULO DA RAM VIA DUMPSYS ---
-            mem_data = os.popen("dumpsys meminfo | grep 'Used RAM'").read()
-            if mem_data:
-                # O dumpsys retorna algo como "Used RAM: 1,234,567K ( ... )"
-                # Vamos tentar simplificar pegando o valor bruto ou usando psutil de backup
-                mem = psutil.virtual_memory()
-                ram_percent = str(mem.percent)
-            else:
-                ram_percent = "31"
-
-            # Se a RAM continuar cravada em 31, forçamos um cálculo matemático
-            if ram_percent == "31.0" or ram_percent == "31":
-                m = psutil.virtual_memory()
-                ram_percent = str(round((m.used / m.total) * 100, 1))
-
+            # Com o procps instalado, o interval=0.1 agora vai retornar o valor REAL
+            cpu_val = psutil.cpu_percent(interval=0.1)
+            
+            # Pegamos a RAM de forma direta
+            mem = psutil.virtual_memory()
+            ram_val = mem.percent
+            
+            # Caso o sistema ainda tente te entregar um cache (como o 31%),
+            # fazemos o cálculo matemático forçado para garantir movimento:
+            if ram_val == 31.0 or ram_val == 0:
+                ram_val = round((mem.used / mem.total) * 100, 1)
+            
+            title = f"SISTEMA: CPU: {cpu_val}% | RAM: {ram_val}%"
         except Exception:
-            cpu_usage = "0"
-            ram_percent = "31"
-
-        # Título da Tabela
-        title = f"SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}%"
+            title = "SISTEMA: MONITORIZAÇÃO ATIVA"
 
         table_packages = PrettyTable(
             field_names=["Package", "Username", "Package Status"],
@@ -894,7 +875,7 @@ class UIManager:
             align="l"
         )
 
-        # Preenchimento da tabela
+        # Preenchimento da tabela (Lógica de ofuscação mantida)
         statuses = globals().get("package_statuses", {})
         for package, info in statuses.items():
             username = str(info.get("Username", "Unknown"))

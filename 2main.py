@@ -1093,44 +1093,44 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash ATIVADO!\033[0m")
+        # Este print CONFIRMA que o monitor ligou. Se ele não aparecer, o erro é no main.
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) VIVO!\033[0m")
         while not stop_event.is_set():
             try:
-                # server_links chega como uma lista de tuplos: [('pkg', 'url'), ...]
                 for item in server_links:
-                    package_name = item[0]
-                    server_link = item[1]
-                    
-                    # 1. TESTE DE VIDA: O Roblox está aberto?
+                    # Garante que pegamos o pacote e o link independente do formato da lista
+                    try:
+                        package_name = item[0]
+                        server_link = item[1]
+                    except:
+                        continue
+
+                    # Pergunta ao Android: "Esse clone está rodando?"
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        # SE NÃO ESTÁ ABERTO, O REJOIN COMEÇA AQUI
-                        print(f"\n\033[1;31m[ ALERT ] {package_name} FECHADO! REANIMANDO...\033[0m")
+                        # Se entrar aqui, o Termux VAI avisar no log
+                        print(f"\n\033[1;31m[ ! ] REABRINDO AGORA: {package_name}\033[0m")
                         
-                        # Atualiza a tabela visual (se você usar o dicionário de status)
-                        with status_lock:
-                            if package_name in globals().get("package_statuses", {}):
-                                globals()["package_statuses"][package_name]["Status"] = "⚠️ Reabrindo..."
-
-                        # Mata qualquer processo zumbi e abre
+                        # 1. Mata processos zumbis
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # Abre o App (Método Monkey é o mais estável para clones)
+                        # 2. Choque no App (Monkey) - Isso força a abertura no VSPhone
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
+                        # 3. Injeta o Servidor (Aumentei o tempo para 15s para garantir)
                         if server_link:
-                            time.sleep(12) # Tempo pro Roblox respirar
+                            time.sleep(15)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
-                    
-                    # 2. SE ESTÁ ABERTO, O SCRIPT SEGUE PARA CHECAR O EXECUTOR (opcional)
-                    # Aqui você poderia chamar sua função de checar o Log do Delta
                 
-                time.sleep(15) # Ronda de vigilância a cada 15 segundos
-                os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'") # Limpa RAM
-
+                # Ronda a cada 20 segundos para não dar lag nos jogos
+                time.sleep(20)
+                # Limpa a memória RAM da Cloud
+                os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
+                
             except Exception as e:
+                # Se der qualquer erro, o monitor não morre, ele apenas avisa
                 print(f"Erro no Monitor: {e}")
                 time.sleep(10)
     @staticmethod

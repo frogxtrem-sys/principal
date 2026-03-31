@@ -1301,7 +1301,7 @@ def main():
 
                 # Ativa o Monitor e o Rejoin
                 stop_main_event.clear()
-                threading.Thread(target=monitor_presence, args=(server_links, stop_main_event), daemon=True).start()
+                threading.Thread(target=Runner.monitor_presence, args=(server_links, stop_main_event), daemon=True).start()
                 threading.Thread(target=Runner.force_rejoin, args=(server_links, f_interval, stop_main_event), daemon=True).start()
 
                 print("\033[1;32m[ ✓ ] Sistema de Monitoramento Ativo!\033[0m")

@@ -1008,7 +1008,6 @@ print("[Shouko.dev] SINAL DE VIDA ENVIADO: " .. myId)
                     break 
 
                 time.sleep(10)
-
             if executor_loaded:
                 # FASE 2: O Tempo de Farm (30 minutos colhendo frutos)
                 time.sleep(1800) 

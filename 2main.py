@@ -419,9 +419,10 @@ class Utilities:
         return expiry_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
 class FileManager:
+    # Garante que o script ache a pasta Shouko.dev onde quer que ele esteja
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     SERVER_LINKS_FILE = os.path.join(BASE_DIR, "Shouko.dev", "server-link.txt")
-    ACCOUNTS_FILE = "Shouko.dev/account.txt"
-    CONFIG_FILE = "Shouko.dev/config-wh.json"
+    ACCOUNTS_FILE = os.path.join(BASE_DIR, "Shouko.dev", "accounts.txt")
 
     @staticmethod
     def save_server_links(server_links):

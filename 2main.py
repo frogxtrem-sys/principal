@@ -1093,47 +1093,38 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor iniciado. Vigilância ativa...\033[0m")
-    
-        while not stop_event.is_set():
-            try:
-                for package_name, server_link in server_links:
-                    # Checa se o processo existe via PID
-                    cmd = f"su -c 'pidof {package_name}'"
-                    is_running = os.popen(cmd).read().strip()
+    print("\033[1;34m[ DEBUG ] Monitor Anti-Crash Iniciado...\033[0m")
+    while not stop_event.is_set():
+        try:
+            for package_name, server_link in server_links:
+                # Verifica se o processo existe
+                is_running = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                 
-                    if not is_running:
-                        print(f"\n\033[1;31m[ ! ] {package_name} FECHADO! REABRINDO...\033[0m")
+                if not is_running:
+                    print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name} fechou!\033[0m")
+                    # Limpa e abre
+                    os.system(f"su -c 'am force-stop {package_name}'")
+                    time.sleep(2)
+                    os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                     
-                        # 1. Limpa o que restou
-                        os.system(f"su -c 'am force-stop {package_name}'")
-                        time.sleep(2)
+                    if server_link:
+                        time.sleep(12)
+                        os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
                     
-                        # 2. Reabre o app (Método Monkey)
-                        os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
-                    
-                        # 3. Força entrada no servidor após 12 segundos (tempo de carregamento)
-                        if server_link:
-                            time.sleep(12)
-                            cmd_link = f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\""
-                            os.system(cmd_link)
-                    
-                        # Atualiza o status na tabela (se ela existir)
-                        try:
-                            with status_lock:
-                                if package_name in globals()["package_statuses"]:
-                                    globals()["package_statuses"][package_name]["Status"] = "\033[1;31mReabrindo...\033[0m"
-                        except:
-                            pass
-                    
-                        time.sleep(5)
-            
-                # Intervalo entre cada checagem total (Não mude para menos de 15)
-                time.sleep(20)
+                    try:
+                        with status_lock:
+                            if package_name in globals()["package_statuses"]:
+                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mReabrindo...\033[0m"
+                    except: pass
 
-            except Exception as e:
-                print(f"\033[1;31m[ ERRO NO MONITOR ]: {e}\033[0m")
-                time.sleep(10)
+            # Pausa entre rondas de checagem
+            time.sleep(20)
+            # Limpeza de memória física da Cloud
+            os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
+
+        except Exception as e:
+            print(f"Erro Monitor: {e}")
+            time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):
         """

@@ -1098,14 +1098,16 @@ class Runner:
             
         while not stop_event.is_set():
             try:
-                if globals()["check_exec_enable"] == "0":
-                    for package_name, server_link in server_links:
-                        # 1. CHECAGEM DE PROCESSO REAL (Rápida e sem internet)
-                        is_running = os.popen(f"su -c 'pidof {package_name}'").read().strip()
-                        
-                        # Se o processo SUMIU do Android, reabre imediatamente
-                        if not is_running:
-                            print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
+                # REMOVA OU COMENTE A LINHA DO "IF" ABAIXO PARA TESTAR:
+                # if globals().get("check_exec_enable") == "0": 
+                
+                for package_name, server_link in server_links:
+                    # 1. CHECAGEM DE PROCESSO REAL
+                    is_running = os.popen(f"su -c 'pidof {package_name}'").read().strip()
+                    
+                    if not is_running:
+                        print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
+                        # ... resto do código ...
                             with status_lock:
                                 globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
                             

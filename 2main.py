@@ -1107,8 +1107,8 @@ class Runner:
                     if not is_running:
                         print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
                         # ... resto do código ...
-                            with status_lock:
-                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
+                        with status_lock:
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
                             
                             # Limpeza preventiva e Reabertura
                             os.system(f"su -c 'am force-stop {package_name}'")

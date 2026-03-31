@@ -1093,63 +1093,37 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        in_game_status = {package_name: False for package_name, _ in server_links}
-            
+        print("\033[1;34m[ DEBUG ] Monitor iniciado. Vigilância ativa...\033[0m")
+        
         while not stop_event.is_set():
             try:
-                # REMOVA OU COMENTE A LINHA DO "IF" ABAIXO PARA TESTAR:
-                # if globals().get("check_exec_enable") == "0": 
-                
                 for package_name, server_link in server_links:
-                    # 1. CHECAGEM DE PROCESSO REAL
-                    is_running = os.popen(f"su -c 'pidof {package_name}'").read().strip()
+                    # TESTE 1: O Python consegue rodar comandos Root?
+                    # Vamos tentar pegar o PID e imprimir na tela
+                    cmd = f"su -c 'pidof {package_name}'"
+                    is_running = os.popen(cmd).read().strip()
                     
+                    print(f"\033[1;30m[ DEBUG ] Checando {package_name} | PID: '{is_running}'\033[0m")
+
                     if not is_running:
-                        print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
-                        # ... resto do código ...
-                        with status_lock:
-                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
-                            
-                            # Limpeza preventiva e Reabertura
-                            os.system(f"su -c 'am force-stop {package_name}'")
-                            time.sleep(2)
-                            threading.Thread(target=RobloxManager.launch_roblox, args=[package_name, server_link], daemon=True).start()
-                            
-                            in_game_status[package_name] = False 
-                            continue
-
-                        # 2. LÓGICA DE API (Para quando o jogo trava ou volta pro lobby)
-                        user_id = globals()["_user_"][package_name]
-                        ckhuy = FileManager.xuat(f"/data/data/{package_name}/app_webview/Default/Cookies")
-                        presence_type = RobloxManager.check_user_online(user_id, ckhuy)
-
-                        if not in_game_status[package_name]:
-                            if presence_type == 2:
-                                with status_lock:
-                                    globals()["package_statuses"][package_name]["Status"] = "\033[1;32mIn-Game\033[0m"
-                                in_game_status[package_name] = True
-                            continue 
-                            
-                        if presence_type != 2:
-                            with status_lock:
-                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mOffline (API)\033[0m"
-                            
-                            RobloxManager.kill_roblox_process(package_name)
-                            time.sleep(2)
-                            threading.Thread(target=RobloxManager.launch_roblox, args=[package_name, server_link], daemon=True).start()
-                        else:
-                            with status_lock:
-                                globals()["package_statuses"][package_name]["Status"] = "\033[1;32mIn-Game\033[0m"
-
-                # Limpeza de RAM periódica para o VSPhone não sufocar
-                os.system("su -c 'echo 1 > /proc/sys/vm/drop_caches'")
+                        print(f"\033[1;31m[ ! ] ALVO ENCONTRADO: {package_name} está fechado!\033[0m")
+                        
+                        # TESTE 2: Tentar reabrir sem Threads (para ver o erro direto)
+                        print(f"\033[1;33m[ DEBUG ] Tentando comando: am start para {package_name}...\033[0m")
+                        
+                        # Tenta abrir usando o comando direto mais simples possível
+                        os.system(f"su -c 'am start -n {package_name}/com.roblox.client.Activity'")
+                        
+                        # Se você usa link de servidor:
+                        # os.system(f"su -c 'am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}'")
+                        
+                        time.sleep(5) 
                 
-                # TEMPO DE ESPERA ENTRE AS CHECAGENS (Mudei para 15s para ser rápido)
-                time.sleep(15) 
+                time.sleep(10) # Checagem rápida de 10s
 
             except Exception as e:
-                print(f"\033[1;31m[ ! ] Erro no Monitor: {e}\033[0m")
-                time.sleep(15)
+                print(f"\033[1;31m[ ERRO CRÍTICO ]: {e}\033[0m")
+                time.sleep(10)
 
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

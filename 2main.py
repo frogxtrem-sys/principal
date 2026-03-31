@@ -1100,58 +1100,55 @@ class Runner:
             try:
                 if globals()["check_exec_enable"] == "0":
                     for package_name, server_link in server_links:
-                        # --- NOVIDADE: CHECAGEM DE PROCESSO REAL ---
-                        # Verifica se o clone está rodando no Android agora
+                        # 1. CHECAGEM DE PROCESSO REAL (Rápida e sem internet)
                         is_running = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                         
+                        # Se o processo SUMIU do Android, reabre imediatamente
+                        if not is_running:
+                            print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
+                            with status_lock:
+                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
+                            
+                            # Limpeza preventiva e Reabertura
+                            os.system(f"su -c 'am force-stop {package_name}'")
+                            time.sleep(2)
+                            threading.Thread(target=RobloxManager.launch_roblox, args=[package_name, server_link], daemon=True).start()
+                            
+                            in_game_status[package_name] = False 
+                            continue
+
+                        # 2. LÓGICA DE API (Para quando o jogo trava ou volta pro lobby)
                         user_id = globals()["_user_"][package_name]
                         ckhuy = FileManager.xuat(f"/data/data/{package_name}/app_webview/Default/Cookies")
                         presence_type = RobloxManager.check_user_online(user_id, ckhuy)
 
-                        # Se o processo SUMIU do Android, reabre direto
-                        if not is_running:
-                            print(f"\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU NO ANDROID. REABRINDO AGORA...\033[0m")
-                            with status_lock:
-                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mCrashed/Closed\033[0m"
-                            
-                            # Limpa e abre de novo
-                            RobloxManager.kill_roblox_process(package_name)
-                            time.sleep(2)
-                            # Usa a sua função de abrir com o link
-                            threading.Thread(target=RobloxManager.launch_roblox, args=[package_name, server_link], daemon=True).start()
-                            in_game_status[package_name] = False # Reseta o status para monitorar a volta
-                            continue
-
-                        # --- LÓGICA ORIGINAL (VIA API) ---
                         if not in_game_status[package_name]:
                             if presence_type == 2:
                                 with status_lock:
                                     globals()["package_statuses"][package_name]["Status"] = "\033[1;32mIn-Game\033[0m"
-                                    UIManager.update_status_table()
                                 in_game_status[package_name] = True
-                                print(f"\033[1;32m[ Shouko.dev ] - {user_id} is now In-Game.\033[0m")
                             continue 
                             
                         if presence_type != 2:
                             with status_lock:
-                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mOffline (API), Rejoining!\033[0m"
-                                UIManager.update_status_table()
-                            print(f"\033[1;31m[ Shouko.dev ] - {user_id} confirmed offline pela API, rejoining...\033[0m")
+                                globals()["package_statuses"][package_name]["Status"] = "\033[1;31mOffline (API)\033[0m"
+                            
                             RobloxManager.kill_roblox_process(package_name)
-                            RobloxManager.delete_cache_for_package(package_name)
                             time.sleep(2)
                             threading.Thread(target=RobloxManager.launch_roblox, args=[package_name, server_link], daemon=True).start()
                         else:
                             with status_lock:
                                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mIn-Game\033[0m"
-                                UIManager.update_status_table()
+
+                # Limpeza de RAM periódica para o VSPhone não sufocar
+                os.system("su -c 'echo 1 > /proc/sys/vm/drop_caches'")
                 
-                # Diminuí o tempo de 60s para 20s para o monitoramento ser mais "agressivo"
-                time.sleep(60) 
-                
+                # TEMPO DE ESPERA ENTRE AS CHECAGENS (Mudei para 15s para ser rápido)
+                time.sleep(15) 
+
             except Exception as e:
-                Utilities.log_error(f"Error in presence monitor: {e}")
-                time.sleep(30)
+                print(f"\033[1;31m[ ! ] Erro no Monitor: {e}\033[0m")
+                time.sleep(15)
 
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

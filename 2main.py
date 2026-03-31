@@ -217,6 +217,8 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def blindar_termux():
     print("\033[1;33m[ 🛡️ ] Blindando Termux contra fechamento...\033[0m")
     # Tenta dar prioridade máxima (OOM Score)

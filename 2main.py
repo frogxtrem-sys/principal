@@ -1106,20 +1106,28 @@ class Runner:
                     print(f"\033[1;30m[ DEBUG ] Checando {package_name} | PID: '{is_running}'\033[0m")
 
                     if not is_running:
-                        print(f"\033[1;31m[ ! ] ALVO ENCONTRADO: {package_name} está fechado!\033[0m")
+                        print(f"\033[1;31m[ ! ] ALVO ENCONTRADO: {package_name} fechou!\033[0m")
                         
-                        # TESTE 2: Tentar reabrir sem Threads (para ver o erro direto)
-                        print(f"\033[1;33m[ DEBUG ] Tentando comando: am start para {package_name}...\033[0m")
+                        # 1. Mata qualquer resquício travado
+                        os.system(f"su -c 'am force-stop {package_name}'")
+                        time.sleep(2)
                         
-                        # Tenta abrir usando o comando direto mais simples possível
-                        os.system(f"su -c 'am start -n {package_name}/com.roblox.client.Activity'")
+                        # 2. Tenta reabrir pelo método MONKEY (Mais forte para clones)
+                        print(f"\033[1;33m[ DEBUG ] Forçando reabertura via Monkey: {package_name}\033[0m")
+                        os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # Se você usa link de servidor:
-                        # os.system(f"su -c 'am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}'")
+                        # 3. Se você tiver o link do servidor, tente ele logo em seguida como backup
+                        if server_link:
+                            time.sleep(5)
+                            os.system(f"su -c 'am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}'")
                         
-                        time.sleep(5) 
-                
-                time.sleep(10) # Checagem rápida de 10s
+                        with status_lock:
+                            globals()["package_statuses"][package_name]["Status"] = "\033[1;31mReabrindo...\033[0m"
+                        
+                        time.sleep(10)
+                        continue
+                        
+                    time.sleep(15)
 
             except Exception as e:
                 print(f"\033[1;31m[ ERRO CRÍTICO ]: {e}\033[0m")

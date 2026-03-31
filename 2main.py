@@ -846,44 +846,63 @@ class UIManager:
     def update_status_table():
         current_time = time.time()
         
-        # Agora acessamos usando UIManager.
+        # Controle de taxa de atualização para não travar o VSPhone
         if current_time - UIManager.last_update_time < UIManager.update_interval:
             return
 
         UIManager.last_update_time = current_time
         
         try:
-            cpu_usage = psutil.cpu_percent(interval=None)
-            memory_info = psutil.virtual_memory()
-            ram = round(memory_info.used / memory_info.total * 100, 2)
-            title = f"CPU: {cpu_usage}% | RAM: {ram}%"
+            # Pega o uso real da CPU e RAM do sistema (VSPhone)
+            cpu_usage = psutil.cpu_percent()
+            memory = psutil.virtual_memory()
+            ram_percent = memory.percent
+            # RAM em GB para ficar mais claro o quanto sobra
+            ram_used = round(memory.used / (1024**3), 2)
+            ram_total = round(memory.total / (1024**3), 2)
+            
+            title = f"🖥️  SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}% ({ram_used}GB/{ram_total}GB)"
         except Exception:
-            title = "CPU: N/A | RAM: N/A (Cloud Mode)"
+            title = "⚠️ Erro ao ler recursos da Cloud"
 
+        # Criando a tabela com as novas informações
         table_packages = PrettyTable(
-            field_names=["Package", "Username", "Package Status"],
+            field_names=["Package", "Username", "Status", "Resource"],
             title=title,
-            border=True,
-            align="l"
+            border=True
         )
+        table_packages.align = "l"
 
-        for package, info in globals().get("package_statuses", {}).items():
-            username = str(info.get("Username", "Unknown"))
+        with status_lock:
+            package_statuses = globals().get("package_statuses", {})
+            for package, info in package_statuses.items():
+                username = str(info.get("Username", "Unknown"))
 
-            if username != "Unknown":
-                obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
-                username = obfuscated_username
+                if username != "Unknown":
+                    # Ofuscação do nome para segurança em vídeos/prints
+                    obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
+                    username = obfuscated_username
 
-            table_packages.add_row([
-                str(package),
-                username,
-                str(info.get("Status", "Unknown"))
-            ])
+                status = str(info.get("Status", "Unknown"))
+                
+                # Coluna extra para você saber a saúde de cada clone individualmente
+                # Se o status for "Running", mostramos como 'OK'
+                resource_indicator = "🟢 OK" if "Running" in status or "Ativo" in status else "🔴 --"
+
+                table_packages.add_row([
+                    str(package),
+                    username,
+                    status,
+                    resource_indicator
+                ])
 
         Utilities.clear_screen()
-        UIManager.print_header(version)
+        UIManager.print_header(version) # Certifique-se que 'version' está acessível aqui
         print(table_packages)
-
+        
+        # Alerta visual se a Cloud estiver sufocando
+        if cpu_usage > 90 or ram_percent > 85:
+            print("\033[1;31m[!] ALERTA: Uso de recursos crítico! Risco de fechamento forçado.\033[0m")
 class ExecutorManager:
     @staticmethod
     def detect_executors():

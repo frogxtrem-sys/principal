@@ -1093,40 +1093,41 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        # Este print vai aparecer no Termux assim que você escolher a Opção 1
         print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) ATIVADO!\033[0m")
         while not stop_event.is_set():
             try:
-                # COMO É UMA LISTA, NÃO USAMOS .items()
+                # Versão para LISTA (sem .items())
                 for item in server_links:
+                    # No seu código, cada item da lista é (pacote, link)
                     package_name = item[0]
                     server_link = item[1]
                     
-                    # Checa se o processo existe
+                    # Checagem de processo
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] DETECTADO: {package_name} FECHOU. REABRINDO...\033[0m")
+                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name} fechou!\033[0m")
                         
-                        # 1. Mata o que sobrou
+                        # 1. Força a parada (limpeza)
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # 2. Abre o App pelo Monkey
+                        # 2. Abre o app (Monkey)
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # 3. Manda para o servidor
+                        # 3. Entra no servidor (O delay de 12s é vital!)
                         if server_link:
                             time.sleep(12)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
                 
-                # Espera 20 segundos para a próxima ronda
+                # Espera 20 segundos para a próxima ronda de vigilância
                 time.sleep(20)
-                # Limpa a RAM do VSPhone
+                # Limpa a RAM do VSPhone para não dar lag
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 
             except Exception as e:
-                print(f"\033[1;31m[ ERRO NO MONITOR ]: {e}\033[0m")
+                # Se der erro, ele avisa mas NÃO PARA o monitor
+                print(f"\033[1;31m[ ERRO MONITOR ]: {e}\033[0m")
                 time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

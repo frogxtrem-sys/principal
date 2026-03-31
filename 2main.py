@@ -636,41 +636,38 @@ class RobloxManager:
 
     @staticmethod
     def launch_roblox(package_name, server_link):
-        package_name = package_name.strip()
+        package_name = package_name.strip() # Limpeza de segurança
         try:
-            RobloxManager.kill_roblox_process(package_name)
+            # 1. Mata o processo atual (sem esperar)
+            os.system(f"su -c 'am force-stop {package_name}' &")
             time.sleep(2)
 
             with status_lock:
-                globals()["_uid_"][globals()["_user_"][package_name]] = time.time()
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mAbrindo Splash: {package_name}...\033[0m"
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mIniciando Splash...\033[0m"
                 UIManager.update_status_table()
 
-            # --- AQUI ESTÁ O SEGREDO: Adicionamos 'su -c' ---
-            # Abre a Splash Screen (O que o VSPhone exige agora)
-            os.system(f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash'")
+            # 2. ABRE A SPLASH (O '&' impede que o script fique parado aqui)
+            # Usamos o caminho completo do 'am' para não ter erro
+            os.system(f"su -c '/system/bin/am start -n {package_name}/com.roblox.client.startup.ActivitySplash' &")
 
+            # Tempo para o jogo carregar a tela preta
             time.sleep(10)
 
             with status_lock:
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mInjetando Link: {package_name}...\033[0m"
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mInjetando Link...\033[0m"
                 UIManager.update_status_table()
 
-            # --- INJEÇÃO DO LINK COM ROOT ---
-            # Note que usamos a ActivityProtocolLaunch como estava no seu código, mas com 'su -c'
-            os.system(f"su -c \"am start -a android.intent.action.VIEW -n {package_name}/com.roblox.client.ActivityProtocolLaunch -d '{server_link}' {package_name}\"")
+            # 3. INJETA O LINK (Também com '&' para não travar)
+            if server_link:
+                os.system(f"su -c '/system/bin/am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}' &")
 
-            time.sleep(15)
+            time.sleep(5)
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()
 
         except Exception as e:
-            error_message = f"Error launching Roblox for {package_name}: {e}"
-            with status_lock:
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;31m{error_message}\033[0m"
-                UIManager.update_status_table()
-            print(f"\033[1;31m[ Shouko.dev ] - {error_message}\033[0m")
+            print(f"Erro ao disparar: {e}")
 
     @staticmethod
     def format_server_link(input_link):

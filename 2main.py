@@ -217,8 +217,6 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 def blindar_termux():
     print("\033[1;33m[ 🛡️ ] Blindando Termux contra fechamento...\033[0m")
     # Tenta dar prioridade máxima (OOM Score)
@@ -420,9 +418,9 @@ class Utilities:
 
 class FileManager:
     # Garante que o script ache a pasta Shouko.dev onde quer que ele esteja
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    SERVER_LINKS_FILE = os.path.join(BASE_DIR, "Shouko.dev", "server-link.txt")
-    ACCOUNTS_FILE = os.path.join(BASE_DIR, "Shouko.dev", "accounts.txt")
+    SERVER_LINKS_FILE = "Shouko.dev/server-link.txt"
+    ACCOUNTS_FILE = "Shouko.dev/account.txt"
+    CONFIG_FILE = "Shouko.dev/config-wh.json"
 
     @staticmethod
     def save_server_links(server_links):

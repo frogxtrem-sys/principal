@@ -1147,11 +1147,11 @@ class Runner:
                                 UIManager.update_status_table()
                 
                 # Diminuí o tempo de 60s para 20s para o monitoramento ser mais "agressivo"
-                time.sleep(20) 
+                time.sleep(60) 
                 
             except Exception as e:
                 Utilities.log_error(f"Error in presence monitor: {e}")
-                time.sleep(20)
+                time.sleep(30)
 
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

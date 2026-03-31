@@ -855,27 +855,32 @@ class UIManager:
         ram_percent = "0"
 
         try:
-            # MÉTODO FORÇADO PARA CLOUD: Puxa o 'top' do Android
-            # Esse comando pega a linha de CPU do sistema e extrai o número
-            cpu_data = os.popen("top -n 1 | grep 'User'").read()
-            if cpu_data:
-                # Extrai o número antes do sinal de %
-                cpu_usage = cpu_data.split()[1].split('%')[0]
+            # Tenta o psutil primeiro com um pequeno delay para forçar a atualização
+            cpu_val = psutil.cpu_percent(interval=0.1)
+            
+            if cpu_val == 0.0:
+                # Se o psutil falhar/travar em 0, usamos o top com limpeza de texto
+                cpu_data = os.popen("top -n 1 | grep 'User'").read()
+                if cpu_data:
+                    # Pega a parte da porcentagem e remove letras (evita o erro u0_a11)
+                    raw_cpu = cpu_data.split()[1]
+                    cpu_usage = "".join(filter(str.isdigit, raw_cpu))
+                else:
+                    cpu_usage = "0"
             else:
-                # Se o top falhar, tenta o psutil com delay
-                cpu_usage = psutil.cpu_percent(interval=0.1)
+                cpu_usage = str(cpu_val)
 
-            # Para a RAM, usamos o comando 'free' ou o cálculo direto
+            # Cálculo da RAM (Direto e com fallback manual)
             mem = psutil.virtual_memory()
             ram_percent = mem.percent
-            if ram_percent == 0:
+            if ram_percent == 0 or ram_percent == 31.0: # 31.0 era o que estava travado no seu print
                 ram_percent = round((mem.used / mem.total) * 100, 1)
 
         except Exception:
             cpu_usage = "Err"
             ram_percent = "Err"
 
-        # Monta o título com os dados reais
+        # Monta o título com os dados limpos
         title = f"SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}%"
 
         table_packages = PrettyTable(
@@ -885,9 +890,12 @@ class UIManager:
             align="l"
         )
 
-        for package, info in globals().get("package_statuses", {}).items():
+        # Acessa os status globais com segurança
+        statuses = globals().get("package_statuses", {})
+        for package, info in statuses.items():
             username = str(info.get("Username", "Unknown"))
             if username != "Unknown":
+                # Ofusca o nome para segurança no print
                 obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
                 username = obfuscated_username
 

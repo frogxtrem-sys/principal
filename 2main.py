@@ -1093,36 +1093,36 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash ATIVADO e Vigilante!\033[0m")
+        # Este print vai confirmar no seu terminal se o monitor ligou
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) ATIVADO!\033[0m")
         while not stop_event.is_set():
             try:
-                # Corrigido para dicionário .items()
-                for package_name, server_link in server_links.items():
-                    # Checagem ultra-rápida de PID
+                # Se server_links for uma lista de tuplos [('pkg', 'url')], o loop abaixo funciona:
+                for package_name, server_link in server_links:
+                    # Verifica se o processo está ativo no Android
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name} sumiu do sistema!\033[0m")
-                        
-                        # 1. Kill forçado
+                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name} fechou!\033[0m")
+                        # 1. Limpa o processo
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # 2. Abre a "carcaça" do app
+                        # 2. Abre o ícone do App (Monkey)
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # 3. Injeta o servidor (Ajuste de delay para Cloud lenta)
+                        # 3. Injeta o link do servidor (Delay para a Cloud carregar)
                         if server_link:
-                            time.sleep(12) 
+                            time.sleep(12)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
                 
-                # Tempo de espera entre rondas (15s é o ideal para 4 clones)
-                time.sleep(15)
-                # Limpa a RAM para o VSPhone não engasgar
+                # Espera 20 segundos antes da próxima ronda
+                time.sleep(20)
+                # Limpa cache de RAM do VSPhone
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 
             except Exception as e:
-                print(f"Erro no loop do monitor: {e}")
+                print(f"\033[1;31m[ ERRO NO MONITOR ]: {e}\033[0m")
                 time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

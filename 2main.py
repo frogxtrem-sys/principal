@@ -1263,6 +1263,8 @@ def auto_change_android_id():
         time.sleep(2)  
 
 def main():
+    links = FileManager.load_server_links()
+    print(f"--- [ DEBUG ] LINKS ENCONTRADOS: {links} ---")
     global stop_webhook_thread, webhook_interval, codex_bypass_enabled, codex_bypass_thread, codex_bypass_active
     global auto_android_id_enabled, auto_android_id_thread, auto_android_id_value
 

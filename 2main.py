@@ -217,6 +217,20 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
+def blindar_termux():
+    print("\033[1;33m[ 🛡️ ] Blindando Termux contra fechamento...\033[0m")
+    # Tenta dar prioridade máxima (OOM Score)
+    os.system("su -c 'echo -1000 > /proc/$(pgrep com.termux)/oom_score_adj'")
+    
+    # Tenta desativar limites de processos em segundo plano (específico para VMs)
+    os.system("su -c 'settings put global max_phantom_processes 2147483647'")
+    os.system("su -c 'setprop persist.sys.max_processes 100'")
+    
+    # Impede que o sistema hiberne o processo (se suportado)
+    os.system("su -c 'cmd deviceidle whitelist +com.termux'")
+    
+    print("\033[1;32m[ ✓ ] Proteções aplicadas!\033[0m")
+
 def su_cmd(comando):
     os.system(f"su -c '{comando}'")
 
@@ -1295,6 +1309,7 @@ def main():
 
         if setup_type == "1":
             try:
+                blindar_termux()
                 # 1. Carrega os links que salvamos no setup 2 (o link fixo formatado)
                 server_links = FileManager.load_server_links()
                 globals()["accounts"] = FileManager.load_accounts()

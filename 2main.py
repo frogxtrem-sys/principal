@@ -1114,52 +1114,56 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        # Este print CONFIRMA que o monitor ligou. Se ele não aparecer, o erro é no main.
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) VIVO!\033[0m")
+        # Este print CONFIRMA que o monitor ligou.
+        print("\n\033[1;34m[ Shouko.dev ] - Monitor Anti-Crash Ativado!\033[0m")
+        
         while not stop_event.is_set():
             try:
                 for item in server_links:
-                    # Garante que pegamos o pacote e o link independente do formato da lista
+                    # Extrai pacote e link da lista
                     try:
                         package_name = item[0]
                         server_link = item[1]
                     except:
                         continue
 
-                    # Pergunta ao Android: "Esse clone está rodando?"
+                    # Verifica se o clone está rodando
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
+                    # SE O JOGO FECHOU (NÃO TEM PID):
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name}\033[0m")
+                        print(f"\n\033[1;31m[ ! ] DETECTADO CRASH: {package_name}\033[0m")
+                        
+                        # 1. Limpa qualquer processo fantasma
                         os.system(f"su -c 'am force-stop {package_name}'")
-                        time.sleep(2)
+                        time.sleep(3)
 
-                        # --- TENTATIVA 1: Versão Nova (Splash) ---
+                        # 2. TENTATIVA 1: Caminho Novo (Splash) - Padrão Android 10+
+                        print(f"[ > ] Tentando abrir via ActivitySplash...")
                         result = os.system(f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash'")
             
-                        # Se a tentativa 1 falhar (retorno diferente de 0), tenta a antiga
+                        # 3. SE A TENTATIVA 1 FALHAR:
                         if result != 0:
-                            # --- TENTATIVA 2: Versão Antiga (Main) ---
-                            print("[ DEBUG ] Tentando caminho antigo...")
-                            os.system(f"su -c 'am start -n {package_name}/com.roblox.client.ActivityMain'")
+                            print(f"[ ! ] Splash falhou. Tentando ActivityMain...")
+                            result_old = os.system(f"su -c 'am start -n {package_name}/com.roblox.client.ActivityMain'")
             
-                            # --- TENTATIVA 3: O Monkey (Coringa) ---
-                            # O monkey serve como última instância caso as atividades tenham nomes doidos
-                            os.system(f"su -c 'monkey -p {package_name} 1'")
+                            # 4. SE A TENTATIVA 2 TAMBÉM FALHAR (Plano C):
+                            if result_old != 0:
+                                print(f"[ ! ] Caminhos fixos falharam. Usando modo Monkey...")
+                                os.system(f"su -c 'monkey -p {package_name} 1'")
 
-                            # Injeta o servidor depois de tentar abrir
+                        # 5. INJEÇÃO DO LINK (Somente após reabrir)
                         if server_link:
+                            print(f"[ + ] Aguardando 15s para estabilizar e injetar link...")
                             time.sleep(15)
                             os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
                 
-                # Ronda a cada 20 segundos para não dar lag nos jogos
+                # Intervalo entre rondas e limpeza de cache
                 time.sleep(20)
-                # Limpa a memória RAM da Cloud
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 
             except Exception as e:
-                # Se der qualquer erro, o monitor não morre, ele apenas avisa
-                print(f"Erro no Monitor: {e}")
+                print(f"\033[1;31m[ ERRO NO MONITOR ]: {e}\033[0m")
                 time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

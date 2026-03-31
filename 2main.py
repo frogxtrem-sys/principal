@@ -1135,8 +1135,8 @@ class Runner:
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # 2. Choque no App (Monkey) - Isso força a abertura no VSPhone
-                        os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
+                        # Em vez de monkey, use o 'am start' com a classe principal
+                        os.system(f"su -c 'am start -n {package_name}/com.roblox.client.ActivityMain'")
                         
                         # 3. Injeta o Servidor (Aumentei o tempo para 15s para garantir)
                         if server_link:

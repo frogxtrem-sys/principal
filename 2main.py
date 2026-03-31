@@ -845,42 +845,38 @@ class UIManager:
     @staticmethod
     def update_status_table():
         current_time = time.time()
-    
+        
         if current_time - UIManager.last_update_time < UIManager.update_interval:
             return
 
         UIManager.last_update_time = current_time
-    
-        # Valores padrão caso tudo falhe
-        cpu_val = "0"
-        ram_val = "0"
+        
+        cpu_usage = "0"
+        ram_percent = "0"
 
         try:
-            # MÉTODO 1: Tenta ler o ficheiro de sistema diretamente (mais rápido e ignora bloqueios do psutil)
-            with open('/proc/loadavg', 'r') as f:
-                load = f.read().split()[0]
-                # O loadavg não é exatamente %, mas dá uma ideia real de carga (ex: 2.50)
-                cpu_val = str(int(float(load) * 10)) 
-
-            # MÉTODO 2: RAM via comando 'free' do Linux/Android
-            mem_info = os.popen('free').readlines()
-            if len(mem_info) > 1:
-                # Pega a segunda linha (Mem) e faz o cálculo: (usada / total) * 100
-                parts = mem_info[1].split()
-                total = int(parts[1])
-                used = int(parts[2])
-                ram_val = str(round((used / total) * 100, 1))
+            # MÉTODO FORÇADO PARA CLOUD: Puxa o 'top' do Android
+            # Esse comando pega a linha de CPU do sistema e extrai o número
+            cpu_data = os.popen("top -n 1 | grep 'User'").read()
+            if cpu_data:
+                # Extrai o número antes do sinal de %
+                cpu_usage = cpu_data.split()[1].split('%')[0]
             else:
-                # Se o 'free' falhar, tenta o psutil só para a RAM
-                ram_val = str(psutil.virtual_memory().percent)
+                # Se o top falhar, tenta o psutil com delay
+                cpu_usage = psutil.cpu_percent(interval=0.1)
+
+            # Para a RAM, usamos o comando 'free' ou o cálculo direto
+            mem = psutil.virtual_memory()
+            ram_percent = mem.percent
+            if ram_percent == 0:
+                ram_percent = round((mem.used / mem.total) * 100, 1)
 
         except Exception:
-            # Se os ficheiros de sistema estiverem trancados, usa o psutil com um pequeno delay
-            cpu_val = str(psutil.cpu_percent(interval=0.2))
-            ram_val = str(psutil.virtual_memory().percent)
+            cpu_usage = "Err"
+            ram_percent = "Err"
 
-        # Garante que não fica vazio ou N/A
-        title = f"SISTEMA: CPU: {cpu_val}% | RAM: {ram_val}%"
+        # Monta o título com os dados reais
+        title = f"SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}%"
 
         table_packages = PrettyTable(
             field_names=["Package", "Username", "Package Status"],
@@ -889,13 +885,17 @@ class UIManager:
             align="l"
         )
 
-        # (Aqui continua o seu loop de preenchimento da tabela igual ao que já tens)
         for package, info in globals().get("package_statuses", {}).items():
             username = str(info.get("Username", "Unknown"))
             if username != "Unknown":
                 obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
                 username = obfuscated_username
-            table_packages.add_row([str(package), username, str(info.get("Status", "Unknown"))])
+
+            table_packages.add_row([
+                str(package),
+                username,
+                str(info.get("Status", "Unknown"))
+            ])
 
         Utilities.clear_screen()
         UIManager.print_header(version)

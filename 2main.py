@@ -637,30 +637,33 @@ class RobloxManager:
 
     @staticmethod
     def launch_roblox(package_name, server_link):
-        package_name = package_name.strip() # Limpeza de segurança
+        package_name = package_name.strip()
         try:
-            # 1. Mata o processo atual (sem esperar)
-            os.system(f"su -c 'am force-stop {package_name}' &")
+            # Força a parada do clone antes de abrir
+            os.system(f"su -c 'am force-stop {package_name}'")
             time.sleep(2)
 
             with status_lock:
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mIniciando Splash...\033[0m"
+                globals()["_uid_"][globals()["_user_"][package_name]] = time.time()
+                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mIniciando {package_name}...\033[0m"
                 UIManager.update_status_table()
 
-            # 2. ABRE A SPLASH (O '&' impede que o script fique parado aqui)
-            # Usamos o caminho completo do 'am' para não ter erro
-            os.system(f"su -c '/system/bin/am start -n {package_name}/com.roblox.client.startup.ActivitySplash' &")
+            # O COMANDO QUE FUNCIONOU NO SEU TERMINAL:
+            # Adicionamos o '&' no final para o Python não ficar 'preso' esperando o jogo fechar
+            comando_abrir = f"su -c 'am start -n {package_name}/com.roblox.client.startup.ActivitySplash' &"
+            os.system(comando_abrir)
 
-            # Tempo para o jogo carregar a tela preta
+            # Espera o Splash carregar
             time.sleep(10)
 
-            with status_lock:
-                globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mInjetando Link...\033[0m"
-                UIManager.update_status_table()
-
-            # 3. INJETA O LINK (Também com '&' para não travar)
             if server_link:
-                os.system(f"su -c '/system/bin/am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}' &")
+                with status_lock:
+                    globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mInjetando Link...\033[0m"
+                    UIManager.update_status_table()
+                
+                # Injeta o link também usando Root e background
+                comando_link = f"su -c 'am start -a android.intent.action.VIEW -d \"{server_link}\" {package_name}' &"
+                os.system(comando_link)
 
             time.sleep(5)
             with status_lock:
@@ -668,7 +671,8 @@ class RobloxManager:
                 UIManager.update_status_table()
 
         except Exception as e:
-            print(f"Erro ao disparar: {e}")
+            error_message = f"Erro ao disparar abertura: {e}"
+            print(f"\033[1;31m{error_message}\033[0m")
 
     @staticmethod
     def format_server_link(input_link):

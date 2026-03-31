@@ -852,22 +852,27 @@ class UIManager:
         UIManager.last_update_time = current_time
         
         try:
-            # Com o procps instalado, o interval=0.1 agora vai retornar o valor REAL
+            # Tenta o psutil primeiro (Método padrão)
             cpu_val = psutil.cpu_percent(interval=0.1)
+            mem_val = psutil.virtual_memory().percent
             
-            # Pegamos a RAM de forma direta
-            mem = psutil.virtual_memory()
-            ram_val = mem.percent
-            
-            # Caso o sistema ainda tente te entregar um cache (como o 31%),
-            # fazemos o cálculo matemático forçado para garantir movimento:
-            if ram_val == 31.0 or ram_val == 0:
-                ram_val = round((mem.used / mem.total) * 100, 1)
-            
-            title = f"SISTEMA: CPU: {cpu_val}% | RAM: {ram_val}%"
-        except Exception:
-            title = "SISTEMA: MONITORIZAÇÃO ATIVA"
+            # Se o psutil retornar 0.0 (indicando bloqueio ou erro de leitura)
+            if cpu_val == 0.0:
+                # Tenta ler via comando shell direto (mais difícil de bloquear)
+                cpu_shell = os.popen("top -n 1 | grep 'User' | awk '{print $2}'").read().strip().replace('%', '')
+                cpu_val = cpu_shell if cpu_shell else "0.0"
 
+            # Se a RAM estiver cravada ou zerada, tenta o cálculo manual
+            if mem_val == 0 or mem_val == 31.0:
+                m = psutil.virtual_memory()
+                mem_val = round((m.used / m.total) * 100, 1)
+
+            title = f"SISTEMA: CPU: {cpu_val}% | RAM: {mem_val}%"
+
+        except Exception:
+            # Se TUDO falhar, pelo menos mostramos que está tentando
+            title = "SISTEMA: MONITORIZANDO (Aguardando Dados...)"
+            
         table_packages = PrettyTable(
             field_names=["Package", "Username", "Package Status"],
             title=title,

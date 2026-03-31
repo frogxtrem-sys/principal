@@ -853,10 +853,15 @@ class UIManager:
         UIManager.last_update_time = current_time
         
         try:
+            # O interval=None faz o psutil pegar a última leitura rápida
             cpu_usage = psutil.cpu_percent(interval=None)
             memory_info = psutil.virtual_memory()
-            ram = round(memory_info.used / memory_info.total * 100, 2)
-            title = f"CPU: {cpu_usage}% | RAM: {ram}%"
+            
+            # Aqui calculamos a porcentagem da RAM usada
+            ram_percent = memory_info.percent
+            
+            # O título limpo apenas com as porcentagens
+            title = f"SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}%"
         except Exception:
             title = "CPU: N/A | RAM: N/A (Cloud Mode)"
 

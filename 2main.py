@@ -845,25 +845,32 @@ class UIManager:
     @staticmethod
     def update_status_table():
         current_time = time.time()
-        
-        # Agora acessamos usando UIManager.
+    
         if current_time - UIManager.last_update_time < UIManager.update_interval:
             return
 
         UIManager.last_update_time = current_time
-        
+    
+        cpu_percent = "0"
+        ram_percent = "0"
+
         try:
-            # O interval=None faz o psutil pegar a última leitura rápida
-            cpu_usage = psutil.cpu_percent(interval=None)
-            memory_info = psutil.virtual_memory()
-            
-            # Aqui calculamos a porcentagem da RAM usada
-            ram_percent = memory_info.percent
-            
-            # O título limpo apenas com as porcentagens
-            title = f"SISTEMA: CPU: {cpu_usage}% | RAM: {ram_percent}%"
-        except Exception:
-            title = "CPU: N/A | RAM: N/A (Cloud Mode)"
+            # Tenta o método padrão primeiro
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            ram_percent = psutil.virtual_memory().percent
+        
+            # Se retornar 0.0 (comum em Cloud), tentamos o método alternativo via Shell
+            if cpu_percent == 0.0:
+                # Esse comando lê o 'top' do Android direto
+                cmd = "top -n 1 | grep 'User' | awk '{print $2}' | cut -d% -f1"
+                cpu_shell = os.popen(cmd).read().strip()
+                if cpu_shell: cpu_percent = cpu_shell
+
+        except:
+            pass
+
+        # Monta o título garantindo que não seja N/A
+        title = f"SISTEMA: CPU: {cpu_percent}% | RAM: {ram_percent}%"
 
         table_packages = PrettyTable(
             field_names=["Package", "Username", "Package Status"],
@@ -872,18 +879,13 @@ class UIManager:
             align="l"
         )
 
+        # Aqui continua o seu código normal de preencher a tabela...
         for package, info in globals().get("package_statuses", {}).items():
             username = str(info.get("Username", "Unknown"))
-
             if username != "Unknown":
                 obfuscated_username = "******" + username[6:] if len(username) > 6 else "******"
                 username = obfuscated_username
-
-            table_packages.add_row([
-                str(package),
-                username,
-                str(info.get("Status", "Unknown"))
-            ])
+            table_packages.add_row([str(package), username, str(info.get("Status", "Unknown"))])
 
         Utilities.clear_screen()
         UIManager.print_header(version)

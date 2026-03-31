@@ -1096,38 +1096,35 @@ class Runner:
         print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) ATIVADO!\033[0m")
         while not stop_event.is_set():
             try:
-                # Versão para LISTA (sem .items())
+                # Vamos ver o que tem dentro da lista para ter certeza
                 for item in server_links:
-                    # No seu código, cada item da lista é (pacote, link)
+                    # Se for (pacote, link)
                     package_name = item[0]
-                    server_link = item[1]
                     
-                    # Checagem de processo
+                    # LOG DE CHECAGEM: Isso TEM que aparecer no seu termux toda hora
+                    # print(f"[ Monitor ] Verificando: {package_name}") 
+                    
                     check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
                     
                     if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] REABRINDO: {package_name} fechou!\033[0m")
+                        print(f"\n\033[1;31m[ ! ] ALVO IDENTIFICADO: {package_name} não está rodando!\033[0m")
                         
-                        # 1. Força a parada (limpeza)
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(2)
                         
-                        # 2. Abre o app (Monkey)
+                        # Tenta abrir
                         os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
                         
-                        # 3. Entra no servidor (O delay de 12s é vital!)
-                        if server_link:
+                        # Se tiver link, espera e manda
+                        if len(item) > 1 and item[1]:
                             time.sleep(12)
-                            os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
+                            os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{item[1]}' {package_name}\"")
                 
-                # Espera 20 segundos para a próxima ronda de vigilância
-                time.sleep(20)
-                # Limpa a RAM do VSPhone para não dar lag
-                os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
+                # Diminuí para 10s para você ver o teste mais rápido
+                time.sleep(10)
                 
             except Exception as e:
-                # Se der erro, ele avisa mas NÃO PARA o monitor
-                print(f"\033[1;31m[ ERRO MONITOR ]: {e}\033[0m")
+                print(f"\033[1;31m[ ERRO INTERNO ]: {e}\033[0m")
                 time.sleep(10)
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

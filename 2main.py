@@ -1018,6 +1018,7 @@ class Runner:
                     args=(package_name, server_link, next_package_event),
                     daemon=True
                 ).start()
+                next_package_event.wait(45)
             else:
                 next_package_event.set()
             next_package_event.wait()

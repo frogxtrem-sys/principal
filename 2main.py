@@ -1213,7 +1213,8 @@ def main():
 
         menu_options = [
             "Start Auto Rejoin",
-            "Auto Setup User IDs",
+            "Auto login IDs",
+            "Auto IDs",
             "Auto Check User Setup",
             "Configure AutoExecute",
             "Start All Clones"
@@ -1333,7 +1334,48 @@ def main():
             input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
             continue
 
-        elif setup_type == "3":
+        elif setup_type == "3":  # NOVA OPÇÃO: Registro Rápido de IDs
+            print(f"\n\033[1;34m[ Shouko.dev ] - Iniciando Registro Rápido (Sem Login)\033[0m")
+            
+            # Aqui usamos a sua lista que já tem os 6 da Anya + os 3 novos do Arceus
+            # Se você ainda não definiu 'clones_lista' no topo, defina-a aqui:
+            # clones_lista = ["com.roblox.client.cl1", "com.pacote.aleatorio1", ...]
+            
+            accounts = []
+            print(f"\033[93m[ Shouko.dev ] - Escaneando pastas do sistema...\033[0m")
+
+            for package_name in clones_lista:
+                file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
+                try:
+                    # Tenta ler o ID direto do arquivo sem abrir o jogo
+                    user_id = FileManager.find_userid_from_file(file_path)
+                    
+                    if user_id and user_id != "-1":
+                        accounts.append((package_name, user_id))
+                        print(f"\033[96m[ ✓ ] Detectado: {package_name} -> {user_id}\033[0m")
+                    else:
+                        print(f"\033[1;31m[ ✗ ] Vazio: {package_name} (Conta não logada ou pasta inacessível)\033[0m")
+                except Exception as e:
+                    print(f"\033[1;31m[ ! ] Erro em {package_name}: {e}\033[0m")
+
+            if accounts:
+                FileManager.save_accounts(accounts)
+                
+                # Aplica o Link Fixo Automaticamente para não ter que digitar
+                fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
+                formatted_link = RobloxManager.format_server_link(fixed_link)
+                
+                if formatted_link:
+                    server_links = [(pkg, formatted_link) for pkg, _ in accounts]
+                    FileManager.save_server_links(server_links)
+                    print("\033[1;32m[ ✓ ] IDs e Links salvos com sucesso para todas as contas detectadas!\033[0m")
+            else:
+                print("\033[1;31m[ ! ] Nenhuma conta logada encontrada nos clones.\033[0m")
+            
+            input("\n\033[1;32m[ FINALIZADO ] Pressione Enter para voltar...\033[0m")
+            continue
+
+        elif setup_type == "4":
             try:
                 print("\033[1;35m[1]\033[1;32m Executor Check\033[0m \033[1;35m[2]\033[1;36m Online Check\033[0m")
                 config_choice = input("\033[1;93m[ Shouko.dev ] - Select check method (1-2, 'q' to keep default): \033[0m").strip()
@@ -1386,7 +1428,7 @@ def main():
             input("\033[1;32mPress Enter to return...\033[0m")
             continue
 
-        elif setup_type == "4":
+        elif setup_type == "5":
             console = Console()
             console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
         
@@ -1419,7 +1461,7 @@ def main():
             input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
             continue
         
-        elif setup_type == "5":
+        elif setup_type == "6":
             global auto_android_id_enabled, auto_android_id_thread, auto_android_id_value
             if not auto_android_id_enabled:
                 android_id = input("\033[1;93m[ Shouko.dev ] - Enter Android ID to spam set: \033[0m").strip()
@@ -1440,7 +1482,7 @@ def main():
             continue
             
             
-        elif setup_type == "6":
+        elif setup_type == "7":
             console = Console()
             console.print("\n[bold yellow]🚀 INICIANDO TODOS OS CLONES (MODO FORÇADO)...[/bold yellow]")
         

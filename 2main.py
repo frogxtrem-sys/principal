@@ -204,8 +204,8 @@ workspace_paths = [f"{base_path}Workspace" for base_path in executors.values()] 
                   [f"{base_path}workspace" for base_path in executors.values()]
 
 # Adicione os caminhos reais dos dados dos clones
-clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi","jpaclone.anya.lh",
-                   "jpaclone.anya.li", "jpaclone.anya.lj"
+clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
+                   "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj"
 ]
 for pkg in clones_internos:
     workspace_paths.append(f"/data/data/{pkg}/files/workspace")

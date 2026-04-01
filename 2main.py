@@ -1344,7 +1344,7 @@ def main():
             accounts = []
             print(f"\033[93m[ Shouko.dev ] - Escaneando pastas do sistema...\033[0m")
 
-            for package_name in clones_lista:
+            for package_name in clones_internos:
                 file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
                 try:
                     # Tenta ler o ID direto do arquivo sem abrir o jogo

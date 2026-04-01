@@ -591,7 +591,7 @@ class RobloxManager:
 
     @staticmethod
     def get_roblox_packages():
-        return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt"
+        return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
                 "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj"
         ]
 

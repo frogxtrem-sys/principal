@@ -1168,6 +1168,7 @@ def auto_change_android_id():
         time.sleep(2)  
 
 def main():
+    setup_type = "1"
     global stop_webhook_thread, webhook_interval, codex_bypass_enabled, codex_bypass_thread, codex_bypass_active
     global auto_android_id_enabled, auto_android_id_thread, auto_android_id_value
 
@@ -1220,40 +1221,42 @@ def main():
 
         if setup_type == "1":
             try:
-                # Blindagem para VSPhone
-                os.system("su -c 'echo -1000 > /proc/$(pgrep com.termux)/oom_score_adj'")
-                
-                server_links = FileManager.load_server_links()
-                globals()["accounts"] = FileManager.load_accounts()
+            # 1. Blindagem (Evita que o Android mate o Termux)
+            os.system("su -c 'echo -1000 > /proc/$(pgrep com.termux)/oom_score_adj'")
+            server_links = FileManager.load_server_links()
+            globals()["accounts"] = FileManager.load_accounts()
 
-                if not globals().get("accounts") or not server_links:
-                    print("\033[1;31m[ Erro ] Links ou Contas não encontrados!\033[0m")
-                    time.sleep(3); continue
+            if not globals().get("accounts") or not server_links:
+                print("\033[1;31m[ Erro ] Links ou Contas não encontrados!\033[0m")
+                time.sleep(3); exit() # Se não tem conta, não adianta continuar
 
-                force_rejoin_input = input("\033[93m[ Shouko.dev ] - Force Rejoin (min) ou 'q': \033[0m")
-                f_interval = 999999 if force_rejoin_input.lower() == 'q' else int(force_rejoin_input) * 60
+            # 2. AUTO-CONFIG: Em vez de input(), definimos o tempo automático
+            # Aqui você escolhe: 30 minutos (30 * 60)
+            f_interval = 30 * 60 
+            print(f"\033[93m[ AUTO ] Force Rejoin definido para: 30 minutos\033[0m")
 
-                # Inicia os clones
-                RobloxManager.kill_roblox_processes()
-                time.sleep(2)
-                Runner.launch_package_sequentially(server_links)
+            # 3. Inicia os clones (O motor do farm)
+            RobloxManager.kill_roblox_processes()
+            time.sleep(2)
+            Runner.launch_package_sequentially(server_links)
 
-                # Ativa o Monitor e o Rejoin
-                stop_main_event.clear()
-                threading.Thread(target=Runner.monitor_presence, args=(server_links, stop_main_event), daemon=True).start()
-                threading.Thread(target=Runner.force_rejoin, args=(server_links, f_interval, stop_main_event), daemon=True).start()
+            # 4. Ativa as Threads (Monitor e Rejoin)
+            stop_main_event.clear()
+            threading.Thread(target=Runner.monitor_presence, args=(server_links, stop_main_event), daemon=True).start()
+            threading.Thread(target=Runner.force_rejoin, args=(server_links, f_interval, stop_main_event), daemon=True).start()
 
-                print("\033[1;32m[ ✓ ] Sistema de Monitoramento Ativo!\033[0m")
+            print("\033[1;32m[ ✓ ] Sistema de Monitoramento Ativo!\033[0m")
 
-                while not stop_main_event.is_set():
-                    time.sleep(30)
-                    with status_lock:
-                        UIManager.update_status_table()
-                    gc.collect()
+            # 5. Loop Infinito da Tabela (O que mantém o script vivo)
+            while not stop_main_event.is_set():
+                time.sleep(30)
+                with status_lock:
+                    UIManager.update_status_table()
+                gc.collect()
 
-            except Exception as e:
-                print(f"Erro Setup 1: {e}")
-                time.sleep(3); continue
+        except Exception as e:
+            print(f"Erro Setup 1: {e}")
+            time.sleep(10); # Espera um pouco antes de tentar de novo se der erro
 
         elif setup_type == "2":
             try:

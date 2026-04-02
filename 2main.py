@@ -1266,15 +1266,30 @@ def main():
                 threading.Thread(target=Runner.monitor_presence, args=(server_links, stop_main_event), daemon=True).start()
                 threading.Thread(target=Runner.force_rejoin, args=(server_links, f_interval, stop_main_event), daemon=True).start()
 
-                print("\033[1;32m[ ✓ ] Sistema de Monitoramento Ativo!\033[0m")
-  
-                # 5. Loop Infinito da Tabela (O que mantém o script vivo)
+                # 5. Loop Infinito da Tabela + Watchdog (O que mantém o script vivo)
+                print("\033[1;32m[ ✓ ] Monitoramento de Processos Ativado!\033[0m")
+                
                 while not stop_main_event.is_set():
+                    # --- NOVO: Lógica de Watchdog ---
+                    # server_links contém a lista de pacotes que devem estar abertos
+                    for package_name in server_links.keys():
+                        if not is_roblox_running(package_name):
+                            print(f"\n\033[1;31m[ ! ] Detectado: {package_name} fechou! Reiniciando...\033[0m")
+                            # Chama a sua função de abrir novamente
+                            # O link do servidor é pego do dicionário server_links
+                            link = server_links[package_name]
+                            launch_roblox(package_name, link)
+                            
+                            # Dá um tempo de segurança de 60s antes de checar o próximo 
+                            # para o VSPhone não engasgar no reboot
+                            time.sleep(60) 
+
+                    # --- Atualização Visual ---
                     time.sleep(30)
                     with status_lock:
                         UIManager.update_status_table()
                     gc.collect()
-
+                    
             except Exception as e:
                 print(f"Erro Setup 1: {e}")
                 time.sleep(10); # Espera um pouco antes de tentar de novo se der erro

@@ -1054,46 +1054,52 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        # Este print CONFIRMA que o monitor ligou. Se ele não aparecer, o erro é no main.
+        # Este print CONFIRMA que o monitor ligou.
         print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) VIVO!\033[0m")
+    
         while not stop_event.is_set():
             try:
-                for item in server_links:
-                    # Garante que pegamos o pacote e o link independente do formato da lista
-                    try:
-                        package_name = item[0]
-                        server_link = item[1]
-                    except:
-                        continue
+                # Pegamos as chaves do dicionário para iterar com segurança
+                packages = list(server_links.keys()) if isinstance(server_links, dict) else [item[0] for item in server_links]
 
-                    # Pergunta ao Android: "Esse clone está rodando?"
-                    check_pid = os.popen(f"su -c 'pidof {package_name}'").read().strip()
-                    
+                for package_name in packages:
+                    # 1. Pergunta ao Android de forma leve: "Esse clone está rodando?"
+                    # Usamos check_output por ser mais rápido que o popen para o Termux
+                    try:
+                        check_pid = subprocess.check_output(['su', '-c', f'pidof {package_name}']).decode().strip()
+                    except:
+                        check_pid = ""
+
                     if not check_pid:
-                        # Se entrar aqui, o Termux VAI avisar no log
-                        print(f"\n\033[1;31m[ ! ] REABRINDO AGORA: {package_name}\033[0m")
-                        
-                        # 1. Mata processos zumbis
-                        os.system(f"su -c 'am force-stop {package_name}'")
-                        time.sleep(2)
-                        
-                        # 2. Choque no App (Monkey) - Isso força a abertura no VSPhone
-                        os.system(f"su -c 'monkey -p {package_name} -c android.intent.category.LAUNCHER 1'")
-                        
-                        # 3. Injeta o Servidor (Aumentei o tempo para 15s para garantir)
+                        # Se entrar aqui, significa que o processo REALMENTE sumiu
+                        print(f"\n\033[1;31m[ Watchdog ] DETECTADO DOWN: {package_name}\033[0m")
+                    
+                        # 2. Resgate do Link
+                        # Garante que pegamos o link correto independente do formato da lista/dict
+                        server_link = server_links[package_name] if isinstance(server_links, dict) else next((item[1] for item in server_links if item[0] == package_name), None)
+
+                        # 3. Executa a reabertura usando a função mestre (launch_roblox)
+                        # NÃO usamos 'monkey' aqui, pois ele ignora as flags de isolamento de tarefas
                         if server_link:
-                            time.sleep(15)
-                            os.system(f"su -c \"am start -a android.intent.action.VIEW -d '{server_link}' {package_name}\"")
-                
-                # Ronda a cada 20 segundos para não dar lag nos jogos
-                time.sleep(20)
-                # Limpa a memória RAM da Cloud
+                            print(f"\033[1;33m[ Watchdog ] Reiniciando {package_name} com isolamento...\033[0m")
+                            launch_roblox(package_name, server_link)
+                        
+                            # 4. PAUSA CRÍTICA (O segredo contra o looping)
+                            # Após reabrir UM clone, o monitor dorme por 2 minutos.
+                            # Isso dá tempo do clone injetar o script e estabilizar a CPU 
+                            # antes de checar se o PRÓXIMO clone caiu.
+                            time.sleep(120)
+
+                # Ronda a cada 45 segundos (Mais lento = Menos lag no farm)
+                time.sleep(45)
+            
+                # Limpeza leve de Cache da Cloud (echo 1 em vez de 3 para não dar freeze)
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
-                
+            
             except Exception as e:
-                # Se der qualquer erro, o monitor não morre, ele apenas avisa
-                print(f"Erro no Monitor: {e}")
-                time.sleep(10)
+                print(f"\033[1;31m[ Erro Monitor ] {e}\033[0m")
+                time.sleep(20)
+            
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):
         """

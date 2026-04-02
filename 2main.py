@@ -1276,8 +1276,8 @@ def main():
                 while not stop_main_event.is_set():
                     for package_name in server_links.keys():
                         if not is_roblox_running(package_name):
-                        # ESPERA DE CONFIRMAÇÃO (O segredo!)
-                        time.sleep(5) 
+                            # ESPERA DE CONFIRMAÇÃO (O segredo!)
+                            time.sleep(5) 
                             if not is_roblox_running(package_name):
                                 print(f"\n[ ! ] Confirmado: {package_name} fechou. Reiniciando...")
                 

@@ -219,13 +219,6 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
-def is_roblox_running(package_name):
-    try:
-        # O comando 'pidof' é muito mais preciso para pacotes Android
-        output = subprocess.check_output(['su', '-c', f'pidof {package_name}'])
-        return len(output.strip()) > 0
-    except:
-        return False
 
 def blindar_termux():
     print("\033[1;33m[ 🛡️ ] Blindando Termux contra fechamento...\033[0m")
@@ -647,51 +640,34 @@ class RobloxManager:
     @staticmethod
     def launch_roblox(package_name, server_link):
         try:
-            # 1. Limpeza total do processo anterior para evitar conflito de memória
             RobloxManager.kill_roblox_process(package_name)
-            time.sleep(3) 
+            time.sleep(2)
 
             with status_lock:
                 globals()["_uid_"][globals()["_user_"][package_name]] = time.time()
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mOpening Roblox for {package_name}...\033[0m"
                 UIManager.update_status_table()
 
-            # 2. Abrir o Splash (Início do Processo)
-            # Usamos a FLAG 0x10008000 para forçar o Android a criar uma tarefa separada para cada clone
             subprocess.run([
                 'am', 'start',
-                '--user', '0',
                 '-a', 'android.intent.action.MAIN',
-                '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash',
-                '-f', '0x10008000',
-                '--activity-no-animation'
+                '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash'
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            # Tempo crucial: O Splash é onde o executor (Delta/Arceus) começa a carregar
-            time.sleep(15) 
+            time.sleep(10)
 
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mJoining Roblox for {package_name}...\033[0m"
                 UIManager.update_status_table()
 
-            # 3. Entrar no Servidor (O "Teleporte")
-            # Aqui usamos o ActivityProtocolLaunch que é quem processa o link VIP/Server
             subprocess.run([
                 'am', 'start',
-                '--user', '0',
                 '-a', 'android.intent.action.VIEW',
-                '-d', server_link,
                 '-n', f'{package_name}/com.roblox.client.ActivityProtocolLaunch',
-                '-f', '0x10008000',
-                '--activity-clear-task',
-                '--activity-no-user-action'
+                '-d', server_link
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            # 4. Janela de Estabilização
-            # Aumentamos para 60s para que o Watchdog não tente intervir enquanto
-            # o jogo ainda está carregando os assets e injetando o script Lua.
-            time.sleep(60) 
-        
+            time.sleep(20)
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()

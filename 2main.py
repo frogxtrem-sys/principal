@@ -653,7 +653,7 @@ class RobloxManager:
                 '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash'
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            time.sleep(10)
+            time.sleep(15)
 
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mJoining Roblox for {package_name}...\033[0m"
@@ -666,7 +666,7 @@ class RobloxManager:
                 '-d', server_link
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            time.sleep(20)
+            time.sleep(60)
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()

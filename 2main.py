@@ -1244,76 +1244,42 @@ def main():
 
         if setup_type == "1":
             try:
-                # 1. Blindagem (Evita que o Android mate o Termux por falta de RAM)
+                # 1. Blindagem (Evita que o Android mate o Termux)
                 os.system("su -c 'echo -1000 > /proc/$(pgrep com.termux)/oom_score_adj'")
-                
                 server_links = FileManager.load_server_links()
                 globals()["accounts"] = FileManager.load_accounts()
 
                 if not globals().get("accounts") or not server_links:
                     print("\033[1;31m[ Erro ] Links ou Contas não encontrados!\033[0m")
-                    time.sleep(3)
-                    return # Volta ao menu em vez de fechar tudo
+                    time.sleep(3); exit() # Se não tem conta, não adianta continuar
 
-                # 2. Configurações Automáticas
-                f_interval = 30 * 60  # Force Rejoin a cada 30 min
+                # 2. AUTO-CONFIG: Em vez de input(), definimos o tempo automático
+                # Aqui você escolhe: 30 minutos (30 * 60)
+                f_interval = 30 * 60 
                 print(f"\033[93m[ AUTO ] Force Rejoin definido para: 30 minutos\033[0m")
 
-                # 3. Limpeza e Início Sequencial (O motor do farm)
-                print("\033[1;33m[ Shouko.dev ] - Limpando processos antigos...\033[0m")
+                # 3. Inicia os clones (O motor do farm)
                 RobloxManager.kill_roblox_processes()
                 time.sleep(2)
-                
-                # Abre um por um com o tempo de espera que definimos no launch_package
                 Runner.launch_package_sequentially(server_links)
 
-                # 4. Ativa apenas a Thread de Force Rejoin por enquanto
+                # 4. Ativa as Threads (Monitor e Rejoin)
                 stop_main_event.clear()
+                threading.Thread(target=Runner.monitor_presence, args=(server_links, stop_main_event), daemon=True).start()
                 threading.Thread(target=Runner.force_rejoin, args=(server_links, f_interval, stop_main_event), daemon=True).start()
 
-                # 5. Janela de Descanso Inicial (A "Cura" para o Looping)
-                # Esperamos 3 minutos antes de ligar o Watchdog para que todos os clones 
-                # terminem de injetar o script e estabilizem a CPU.
-                print("\033[1;33m[ ! ] Aguardando 180s para estabilização total antes de ligar o Vigia...\033[0m")
-                time.sleep(180) 
-
-                print("\033[1;32m[ ✓ ] Monitoramento de Processos Ativado agora!\033[0m")
-                
-                # 6. Loop Infinito: Tabela + Watchdog Inteligente
+                print("\033[1;32m[ ✓ ] Sistema de Monitoramento Ativo!\033[0m")
+  
+                # 5. Loop Infinito da Tabela (O que mantém o script vivo)
                 while not stop_main_event.is_set():
-                    for package_name in list(server_links.keys()):
-                        # Checagem rigorosa
-                        if not is_roblox_running(package_name):
-                            # Pequena pausa para confirmar se não é apenas um lag do pgrep
-                            time.sleep(10)
-                            
-                            if not is_roblox_running(package_name):
-                                print(f"\n\033[1;31m[ Watchdog ] Detectado: {package_name} fechou!\033[0m")
-                                
-                                # Limpa qualquer resquício do processo "zumbi"
-                                os.system(f"su -c 'am force-stop {package_name}'")
-                                time.sleep(2)
-                                
-                                # Reabre usando o link salvo
-                                link = server_links[package_name]
-                                launch_roblox(package_name, link)
-                                
-                                # Pausa o loop do Watchdog por 120s para este clone carregar em paz
-                                # Isso impede que ele tente checar o próximo clone enquanto a CPU está em 100%
-                                print(f"\033[1;33m[ ! ] Aguardando 2 min para {package_name} estabilizar...\033[0m")
-                                time.sleep(120)
-
-                    # Atualização da Tabela Visual
+                    time.sleep(30)
                     with status_lock:
                         UIManager.update_status_table()
-                    
-                    # Limpeza de memória do Python e espera curta entre rodadas de vigia
                     gc.collect()
-                    time.sleep(30) 
-                    
+
             except Exception as e:
-                print(f"\033[1;31mErro Crítico Setup 1: {e}\033[0m")
-                time.sleep(10)
+                print(f"Erro Setup 1: {e}")
+                time.sleep(10);
 
         elif setup_type == "2":
             try:

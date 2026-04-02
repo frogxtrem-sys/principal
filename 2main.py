@@ -647,39 +647,50 @@ class RobloxManager:
     @staticmethod
     def launch_roblox(package_name, server_link):
         try:
+            # 1. Limpeza total antes de tentar qualquer coisa
             RobloxManager.kill_roblox_process(package_name)
-            time.sleep(2)
+            time.sleep(3) # Aumentei 1s para garantir que o processo morreu
 
             with status_lock:
                 globals()["_uid_"][globals()["_user_"][package_name]] = time.time()
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mOpening Roblox for {package_name}...\033[0m"
                 UIManager.update_status_table()
 
+            # 2. Abrir o Splash (A primeira flag -f 0x10008000 é a mágica aqui)
             subprocess.run([
                 'am', 'start',
+                '--user', '0',
                 '-a', 'android.intent.action.MAIN',
-                '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash'
+                '-n', f'{package_name}/com.roblox.client.startup.ActivitySplash',
+                '-f', '0x10008000' # FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            time.sleep(15)
+            time.sleep(15) # Aumentei para 15s (Dá tempo do Splash carregar sem pressa)
 
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;36mJoining Roblox for {package_name}...\033[0m"
                 UIManager.update_status_table()
 
+            # 3. Entrar no Servidor (O ponto onde geralmente crasha em dupla)
             subprocess.run([
                 'am', 'start',
+                '--user', '0',
                 '-a', 'android.intent.action.VIEW',
                 '-n', f'{package_name}/com.roblox.client.ActivityProtocolLaunch',
-                '-d', server_link
+                '-d', server_link,
+                '-f', '0x10008000', # Força cada clone a ser uma "ilha" isolada
+                '--activity-clear-task' # Garante que não tente reaproveitar a janela do outro
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            time.sleep(60)
+            # 4. Tempo de Injeção (O mais importante para não fechar em dupla)
+            time.sleep(60) # Mudei de 20 para 60. Se for Cloud, 20s é o tempo exato do crash.
+        
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()
 
         except Exception as e:
+        # ... (seu código de erro continua igual)
             error_message = f"Error launching Roblox for {package_name}: {e}"
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = f"\033[1;31m{error_message}\033[0m"

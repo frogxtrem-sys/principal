@@ -219,6 +219,11 @@ CONFIG_FILE = "Shouko.dev/config.json"
 
 version = "2.2.5 | Customized by Shouko.dev"
 
+def is_roblox_running(package_name):
+    # Verifica se o processo do pacote ainda está rodando na lista de processos
+    output = subprocess.check_output(['pgrep', '-f', package_name]).decode()
+    return len(output) > 0
+
 def blindar_termux():
     print("\033[1;33m[ 🛡️ ] Blindando Termux contra fechamento...\033[0m")
     # Tenta dar prioridade máxima (OOM Score)

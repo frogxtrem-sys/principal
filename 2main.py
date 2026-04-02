@@ -1272,20 +1272,24 @@ def main():
                 # 5. Loop Infinito da Tabela + Watchdog (O que mantém o script vivo)
                 print("\033[1;32m[ ✓ ] Monitoramento de Processos Ativado!\033[0m")
                 
+                # No seu loop do Watchdog:
                 while not stop_main_event.is_set():
-                    # --- NOVO: Lógica de Watchdog ---
-                    # server_links contém a lista de pacotes que devem estar abertos
                     for package_name in server_links.keys():
                         if not is_roblox_running(package_name):
-                            print(f"\n\033[1;31m[ ! ] Detectado: {package_name} fechou! Reiniciando...\033[0m")
-                            # Chama a sua função de abrir novamente
-                            # O link do servidor é pego do dicionário server_links
-                            link = server_links[package_name]
-                            launch_roblox(package_name, link)
-                            
-                            # Dá um tempo de segurança de 60s antes de checar o próximo 
-                            # para o VSPhone não engasgar no reboot
-                            time.sleep(60) 
+                        # ESPERA DE CONFIRMAÇÃO (O segredo!)
+                        time.sleep(5) 
+                            if not is_roblox_running(package_name):
+                                print(f"\n[ ! ] Confirmado: {package_name} fechou. Reiniciando...")
+                
+                                # LIMPEZA TOTAL antes de reabrir (Evita o conflito de instâncias)
+                                os.system(f"su -c 'am force-stop {package_name}'")
+                                time.sleep(2)
+                
+                                link = server_links[package_name]
+                                launch_roblox(package_name, link)
+                
+                                # ESPERA DE ESTABILIZAÇÃO (Não cheque as outras enquanto esta abre)
+                                time.sleep(90)
 
                     # --- Atualização Visual ---
                     time.sleep(30)

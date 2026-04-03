@@ -1030,51 +1030,49 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        # Este print CONFIRMA que o monitor ligou.
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Runner) VIVO!\033[0m")
+    print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Reabertura Automática) VIVO!\033[0m")
     
-        while not stop_event.is_set():
-            try:
-                # Pegamos as chaves do dicionário para iterar com segurança
-                packages = list(server_links.keys()) if isinstance(server_links, dict) else [item[0] for item in server_links]
+    while not stop_event.is_set():
+        try:
+            # 1. Lista de pacotes para verificar
+            packages = list(server_links.keys()) if isinstance(server_links, dict) else [item[0] for item in server_links]
 
-                for package_name in packages:
-                    # 1. Pergunta ao Android de forma leve: "Esse clone está rodando?"
-                    # Usamos check_output por ser mais rápido que o popen para o Termux
-                    try:
-                        check_pid = subprocess.check_output(['su', '-c', f'pidof {package_name}']).decode().strip()
-                    except:
-                        check_pid = ""
-
-                    if not check_pid:
-                        # Se entrar aqui, significa que o processo REALMENTE sumiu
-                        print(f"\n\033[1;31m[ Watchdog ] DETECTADO DOWN: {package_name}\033[0m")
+            for package_name in packages:
+                # Pergunta ao sistema se o clone está vivo
+                check_pid = subprocess.getoutput(f"su -c 'pidof {package_name}'").strip()
+                
+                if not check_pid:
+                    print(f"\n\033[1;31m[ ! ] {package_name} caiu. Iniciando resgate...\033[0m")
                     
-                        # 2. Resgate do Link
-                        # Garante que pegamos o link correto independente do formato da lista/dict
-                        server_link = server_links[package_name] if isinstance(server_links, dict) else next((item[1] for item in server_links if item[0] == package_name), None)
+                    # Pega o link do servidor para esse pacote
+                    server_link = server_links[package_name] if isinstance(server_links, dict) else next((item[1] for item in server_links if item[0] == package_name), None)
 
-                        # 3. Executa a reabertura usando a função mestre (launch_roblox)
-                        # NÃO usamos 'monkey' aqui, pois ele ignora as flags de isolamento de tarefas
-                        if server_link:
-                            print(f"\033[1;33m[ Watchdog ] Reiniciando {package_name} com isolamento...\033[0m")
-                            launch_roblox(package_name, server_link)
+                    if server_link:
+                        # 2. LIMPEZA: Mata qualquer processo "zumbi" antes de abrir
+                        os.system(f"su -c 'am force-stop {package_name}'")
+                        time.sleep(2)
                         
-                            # 4. PAUSA CRÍTICA (O segredo contra o looping)
-                            # Após reabrir UM clone, o monitor dorme por 2 minutos.
-                            # Isso dá tempo do clone injetar o script e estabilizar a CPU 
-                            # antes de checar se o PRÓXIMO clone caiu.
-                            time.sleep(120)
+                        # 3. REABERTURA: Usamos a função launch_roblox que já tem as flags de isolamento
+                        # Isso evita que o Clone 2 mate o Clone 1 ao abrir.
+                        launch_roblox(package_name, server_link)
+                        
+                        # 4. PAUSA DE SEGURANÇA (O SEGREDO):
+                        # Após reabrir UM, o monitor espera 2 minutos.
+                        # Isso impede o looping porque dá tempo do Android estabilizar 
+                        # antes de o monitor tentar checar o próximo clone.
+                        print(f"\033[1;33m[ Watchdog ] Aguardando 60s para estabilização de {package_name}...\033[0m")
+                        time.sleep(60)
 
-                # Ronda a cada 45 segundos (Mais lento = Menos lag no farm)
-                time.sleep(45)
+            # Ronda a cada 60 segundos (Mais leve para o Termux não desconectar)
+            time.sleep(60)
             
-                # Limpeza leve de Cache da Cloud (echo 1 em vez de 3 para não dar freeze)
-                os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
+            # Limpa lixo da RAM para evitar que o Android mate o Termux
+            os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
+            gc.collect()
             
-            except Exception as e:
-                print(f"\033[1;31m[ Erro Monitor ] {e}\033[0m")
-                time.sleep(20)
+        except Exception as e:
+            print(f"Erro no Monitor: {e}")
+            time.sleep(30)
             
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

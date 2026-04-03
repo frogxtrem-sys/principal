@@ -312,12 +312,14 @@ def login_gboard_estavel(lista_de_contas, nome_set):
     # --- ETAPA 3: ABRIR O PRIMEIRO CLONE E PEGAR KEY ---
     print(f"\n\033[1;36m[ Passo 3 ] Indo para o primeiro clone pegar a Key...\033[0m")
     primeiro_pkg = lista_de_contas[0]['pkg']
-    
-    # Abre o jogo no primeiro clone (que já está aberto no lobby)
-    su_cmd(f"am start -a android.intent.action.VIEW -d '{LINK_FIXO}' {primeiro_pkg}")
-    
+
+    # FORÇA o Android a abrir o link usando APENAS o primeiro clone
+    # Adicionamos o nome do pacote no final do comando para travar a escolha
+    su_cmd(f"am start -n {primeiro_pkg}/com.roblox.client.Activity -a android.intent.action.VIEW -d '{LINK_FIXO}'")
+
+    print(f"   -> Abrindo link diretamente no {primeiro_pkg}...")
     print("   -> Aguardando o mapa carregar (40s)...")
-    time.sleep(40) 
+    time.sleep(40)
 
     # Sequência de 2 cliques no Get Key
     print("   -> 1º Clique no Get Key (Checkpoint)...")

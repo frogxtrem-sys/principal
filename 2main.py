@@ -1054,7 +1054,7 @@ class Runner:
                         
                             # 3. REABERTURA: Usamos a função launch_roblox que já tem as flags de isolamento
                             # Isso evita que o Clone 2 mate o Clone 1 ao abrir.
-                            launch_roblox(package_name, server_link)
+                            RobloxManager.launch_roblox(package_name, server_link)
                         
                             # 4. PAUSA DE SEGURANÇA (O SEGREDO):
                             # Após reabrir UM, o monitor espera 2 minutos.

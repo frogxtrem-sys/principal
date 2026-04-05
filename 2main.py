@@ -1352,15 +1352,17 @@ def main():
         elif setup_type == "3":  # NOVA OPÇÃO: Registro Rápido de IDs
             print(f"\n\033[1;34m[ Shouko.dev ] - Iniciando Registro Rápido (Sem Login)\033[0m")
             
-            # Aqui usamos a sua lista que já tem os 6 da Anya + os 3 novos do Arceus
-            # Se você ainda não definiu 'clones_lista' no topo, defina-a aqui:
-            # clones_lista = ["com.roblox.client.cl1", "com.pacote.aleatorio1", ...]
+            # --- CORREÇÃO AQUI: Chamando através da classe RobloxManager ---
+            clones_internos = RobloxManager.get_roblox_packages()
+            # ---------------------------------------------------------------
             
             accounts = []
-            print(f"\033[93m[ Shouko.dev ] - Escaneando pastas do sistema...\033[0m")
+            print(f"\033[93m[ Shouko.dev ] - Escaneando {len(clones_internos)} pastas do sistema...\033[0m")
 
-            for package_name in RobloxManager.get_roblox_packages.clones_internos:
+            for package_name in clones_internos:
+                # Caminho padrão para buscar o ID da conta no LocalStorage
                 file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
+                
                 try:
                     # Tenta ler o ID direto do arquivo sem abrir o jogo
                     user_id = FileManager.find_userid_from_file(file_path)
@@ -1369,21 +1371,30 @@ def main():
                         accounts.append((package_name, user_id))
                         print(f"\033[96m[ ✓ ] Detectado: {package_name} -> {user_id}\033[0m")
                     else:
-                        print(f"\033[1;31m[ ✗ ] Vazio: {package_name} (Conta não logada ou pasta inacessível)\033[0m")
+                        # Se não achar em appData (comum no Delta Lite), tenta o caminho alternativo
+                        alt_path = f'/data/data/{package_name}/files/LocalStorage/appStorage.json'
+                        user_id = FileManager.find_userid_from_file(alt_path)
+                        
+                        if user_id and user_id != "-1":
+                            accounts.append((package_name, user_id))
+                            print(f"\033[96m[ ✓ ] Detectado (Alt): {package_name} -> {user_id}\033[0m")
+                        else:
+                            print(f"\033[1;31m[ ✗ ] Vazio: {package_name} (Logue no Roblox primeiro)\033[0m")
+                            
                 except Exception as e:
                     print(f"\033[1;31m[ ! ] Erro em {package_name}: {e}\033[0m")
 
             if accounts:
                 FileManager.save_accounts(accounts)
                 
-                # Aplica o Link Fixo Automaticamente para não ter que digitar
+                # Link Fixo do seu Servidor VIP / Farm
                 fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
                 formatted_link = RobloxManager.format_server_link(fixed_link)
                 
                 if formatted_link:
                     server_links = [(pkg, formatted_link) for pkg, _ in accounts]
                     FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ ✓ ] IDs e Links salvos com sucesso para todas as contas detectadas!\033[0m")
+                    print("\033[1;32m[ ✓ ] IDs e Links salvos com sucesso!")
             else:
                 print("\033[1;31m[ ! ] Nenhuma conta logada encontrada nos clones.\033[0m")
             

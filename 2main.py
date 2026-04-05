@@ -583,22 +583,29 @@ class RobloxManager:
         base_path = "/data/data/"
         packages = []
         try:
-            # Lista todas as pastas em /data/data/
-            all_folders = os.listdir(base_path)
-            # Filtra apenas as que começam com o padrão do Delta Lite
-            packages = [f for f in all_folders if f.startswith("com.roblox")]
-        except Exception as e:
-            print(f"Erro ao acessar /data/data/: {e}")
+            # Tenta primeiro pelo método do sistema (mais chance de ignorar bloqueio de permissão)
+            import subprocess
+            output = subprocess.check_output("ls /data/data/", shell=True).decode().split()
+            packages = [f for f in output if f.startswith("com.roblox")]
+        except:
+            try:
+                # Se o de cima falhar, tenta o método padrão do Python
+                all_folders = os.listdir(base_path)
+                packages = [f for f in all_folders if f.startswith("com.roblox")]
+            except Exception as e:
+                print(f"\033[1;31m[ ! ] Erro crítico de permissão ao acessar /data/data/: {e}\033[0m")
         return packages
+
+    # --- Execução da Lógica ---
     clones_internos = get_roblox_packages()
     workspace_paths = []
 
     for pkg in clones_internos:
-        # Adiciona as duas variações de pasta (minúscula e maiúscula)
+        # Adiciona as duas variações de pasta (minúscula e maiúscula para o Delta Lite)
         workspace_paths.append(f"/data/data/{pkg}/files/workspace")
         workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
 
-    # Configurações de arquivos (Shouko.dev)
+    # Configurações de diretórios do Shouko.dev
     if not os.path.exists("Shouko.dev"):
         os.makedirs("Shouko.dev", exist_ok=True)
 
@@ -606,6 +613,11 @@ class RobloxManager:
     ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
     CONFIG_FILE = "Shouko.dev/config.json"
 
+    # Print de confirmação para você ver se ele achou os clones
+    if clones_internos:
+        print(f"\033[1;32m[ ✓ ] {len(clones_internos)} Clones Delta identificados com sucesso!\033[0m")
+    else:
+        print("\033[1;33m[ ! ] Nenhum pacote 'com.roblox' encontrado. Verifique o Root.\033[0m")
     @staticmethod
     def kill_roblox_processes():
         # Usamos a função de cima para garantir que a lista é a mesma!

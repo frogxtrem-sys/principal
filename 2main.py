@@ -203,20 +203,6 @@ executors = {
 workspace_paths = [f"{base_path}Workspace" for base_path in executors.values()] + \
                   [f"{base_path}workspace" for base_path in executors.values()]
 
-# Adicione os caminhos reais dos dados dos clones
-clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
-                   "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj"
-]
-for pkg in clones_internos:
-    workspace_paths.append(f"/data/data/{pkg}/files/workspace")
-    workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
-
-if not os.path.exists("Shouko.dev"):
-    os.makedirs("Shouko.dev", exist_ok=True)
-SERVER_LINKS_FILE = "Shouko.dev/server-links.txt"
-ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
-CONFIG_FILE = "Shouko.dev/config.json"
-
 version = "2.2.5 | Customized by Shouko.dev"
 
 
@@ -604,6 +590,21 @@ class RobloxManager:
         except Exception as e:
             print(f"Erro ao acessar /data/data/: {e}")
         return packages
+    clones_internos = get_roblox_packages()
+    workspace_paths = []
+
+    for pkg in clones_internos:
+        # Adiciona as duas variações de pasta (minúscula e maiúscula)
+        workspace_paths.append(f"/data/data/{pkg}/files/workspace")
+        workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
+
+    # Configurações de arquivos (Shouko.dev)
+    if not os.path.exists("Shouko.dev"):
+        os.makedirs("Shouko.dev", exist_ok=True)
+
+    SERVER_LINKS_FILE = "Shouko.dev/server-links.txt"
+    ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
+    CONFIG_FILE = "Shouko.dev/config.json"
 
     @staticmethod
     def kill_roblox_processes():

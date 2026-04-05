@@ -594,9 +594,16 @@ class RobloxManager:
 
     @staticmethod
     def get_roblox_packages():
-        return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
-                "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj"
-        ]
+        base_path = "/data/data/"
+        packages = []
+        try:
+            # Lista todas as pastas em /data/data/
+            all_folders = os.listdir(base_path)
+            # Filtra apenas as que começam com o padrão do Delta Lite
+            packages = [f for f in all_folders if f.startswith("com.roblox")]
+        except Exception as e:
+            print(f"Erro ao acessar /data/data/: {e}")
+        return packages
 
     @staticmethod
     def kill_roblox_processes():

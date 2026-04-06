@@ -1361,13 +1361,13 @@ def main():
             print(f"\n\033[1;34m[ Shouko.dev ] - Iniciando Registro Rápido (Sem Login)\033[0m")
             
             # --- CORREÇÃO AQUI: Chamando através da classe RobloxManager ---
-            clones_detectados = RobloxManager.get_roblox_packages()
+            clones_internos = RobloxManager.get_roblox_packages()
             # ---------------------------------------------------------------
             
             accounts = []
             print(f"\033[93m[ Shouko.dev ] - Escaneando {len(clones_internos)} pastas do sistema...\033[0m")
 
-            for package_name in clones_detectados:
+            for package_name in clones_internos:
                 # Caminho padrão para buscar o ID da conta no LocalStorage
                 file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
                 

@@ -460,28 +460,27 @@ class FileManager:
 
     @staticmethod
     def find_userid_from_file(file_path):
+        import re
         try:
-            # 1. Tenta ler usando o Root (único jeito garantido no /data/data/)
-            comando = f"su -c 'cat {file_path}'"
-            content = subprocess.check_output(comando, shell=True, stderr=subprocess.DEVNULL).decode(errors='ignore')
+            # USAMOS SUBPROCESS.RUN COM TIMEOUT
+            # Se o comando 'su' travar, o Python mata ele em 1 segundo e te devolve o teclado
+            result = subprocess.run(
+                f"su -c 'cat {file_path}'",
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=1, # <--- ISSO AQUI É O QUE IMPEDE O TRAVAMENTO
+                errors='ignore'
+            )
             
-            if '"UserId":' in content:
-                import re
-                # Usa busca avançada (Regex) para achar o número do ID
+            content = result.stdout
+            if content and '"UserId":' in content:
                 match = re.search(r'"UserId":\s*"?(\d+)"?', content)
                 if match:
                     return match.group(1)
         except Exception:
-            # 2. Fallback: Se o root falhar, tenta o método normal (apenas para arquivos locais)
-            try:
-                if os.path.exists(file_path):
-                    with open(file_path, 'r') as file:
-                        content = file.read()
-                        import re
-                        match = re.search(r'"UserId":\s*"?(\d+)"?', content)
-                        return match.group(1) if match else None
-            except:
-                pass
+            # Se der erro ou tempo esgotado, ele sai da função e o script continua
+            return None
         return None
 
     @staticmethod

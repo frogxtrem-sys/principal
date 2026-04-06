@@ -461,17 +461,28 @@ class FileManager:
     @staticmethod
     def find_userid_from_file(file_path):
         try:
-            if not os.path.exists(file_path):
-                return None
-            with open(file_path, 'r') as file:
-                content = file.read()
-                userid_start = content.find('"UserId":"')
-                if userid_start == -1: return None
-                userid_start += len('"UserId":"')
-                userid_end = content.find('"', userid_start)
-                return content[userid_start:userid_end]
+            # 1. Tenta ler usando o Root (único jeito garantido no /data/data/)
+            comando = f"su -c 'cat {file_path}'"
+            content = subprocess.check_output(comando, shell=True, stderr=subprocess.DEVNULL).decode(errors='ignore')
+            
+            if '"UserId":' in content:
+                import re
+                # Usa busca avançada (Regex) para achar o número do ID
+                match = re.search(r'"UserId":\s*"?(\d+)"?', content)
+                if match:
+                    return match.group(1)
         except Exception:
-            return None
+            # 2. Fallback: Se o root falhar, tenta o método normal (apenas para arquivos locais)
+            try:
+                if os.path.exists(file_path):
+                    with open(file_path, 'r') as file:
+                        content = file.read()
+                        import re
+                        match = re.search(r'"UserId":\s*"?(\d+)"?', content)
+                        return match.group(1) if match else None
+            except:
+                pass
+        return None
 
     @staticmethod
     def get_username(user_id):

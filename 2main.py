@@ -205,7 +205,7 @@ workspace_paths = [f"{base_path}Workspace" for base_path in executors.values()] 
 
 # Adicione os caminhos reais dos dados dos clones
 clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
-                   "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj, "com.roblox.clienu", "com.roblox.clienv",
+                   "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
                    "com.roblox.clienw", "com.roblox.clienx"
 ]
 for pkg in clones_internos:
@@ -596,7 +596,7 @@ class RobloxManager:
     @staticmethod
     def get_roblox_packages():
         return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
-                "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj, "com.roblox.clienu", "com.roblox.clienv",
+                "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
                 "com.roblox.clienw", "com.roblox.clienx"
         ]
 

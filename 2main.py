@@ -1368,56 +1368,52 @@ def main():
             input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
             continue
 
-        elif setup_type == "3":  # NOVA OPÇÃO: Registro Rápido de IDs
-            print(f"\n\033[1;34m[ Shouko.dev ] - Iniciando Registro Rápido (Sem Login)\033[0m")
+        elif setup_type == "3":  # Registro Rápido de IDs
+            print(f"\n\033[1;34m[ Shouko.dev ] - Iniciando Registro Rápido (Modo Delta/Root)\033[0m")
             
-            # --- CORREÇÃO AQUI: Chamando através da classe RobloxManager ---
+            # Testa o Root antes de começar para não travar no meio
+            try:
+                subprocess.run("su -c 'id'", shell=True, timeout=3, capture_output=True)
+            except:
+                print("\033[1;31m[ ! ] Erro: O Root não respondeu. Aceite a permissão na tela!\033[0m")
+                input("Pressione Enter para voltar...")
+                continue
+
             clones_internos = RobloxManager.get_roblox_packages()
-            # ---------------------------------------------------------------
-            
             accounts = []
-            print(f"\033[93m[ Shouko.dev ] - Escaneando {len(clones_internos)} pastas do sistema...\033[0m")
+            
+            print(f"\033[93m[ Shouko.dev ] - Escaneando {len(clones_internos)} clones ativos...\033[0m")
 
             for package_name in clones_internos:
-                # Caminho padrão para buscar o ID da conta no LocalStorage
-                file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
+                # Lista de caminhos possíveis no Delta Lite
+                caminhos = [
+                    f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json',
+                    f'/data/data/{package_name}/files/LocalStorage/appStorage.json',
+                    f'/data/data/{package_name}/files/appStorage.json' # Caminho extra por segurança
+                ]
                 
-                try:
-                    # Tenta ler o ID direto do arquivo sem abrir o jogo
-                    user_id = FileManager.find_userid_from_file(file_path)
-                    
+                user_id = None
+                for path in caminhos:
+                    user_id = FileManager.find_userid_from_file(path)
                     if user_id and user_id != "-1":
-                        accounts.append((package_name, user_id))
-                        print(f"\033[96m[ ✓ ] Detectado: {package_name} -> {user_id}\033[0m")
-                    else:
-                        # Se não achar em appData (comum no Delta Lite), tenta o caminho alternativo
-                        alt_path = f'/data/data/{package_name}/files/LocalStorage/appStorage.json'
-                        user_id = FileManager.find_userid_from_file(alt_path)
-                        
-                        if user_id and user_id != "-1":
-                            accounts.append((package_name, user_id))
-                            print(f"\033[96m[ ✓ ] Detectado (Alt): {package_name} -> {user_id}\033[0m")
-                        else:
-                            print(f"\033[1;31m[ ✗ ] Vazio: {package_name} (Logue no Roblox primeiro)\033[0m")
-                            
-                except Exception as e:
-                    print(f"\033[1;31m[ ! ] Erro em {package_name}: {e}\033[0m")
+                        break
+                
+                if user_id:
+                    accounts.append((package_name, user_id))
+                    print(f"\033[96m[ ✓ ] Detectado: {package_name} -> {user_id}\033[0m")
+                else:
+                    print(f"\033[1;31m[ ✗ ] Inacessível ou Deslogado: {package_name}\033[0m")
 
             if accounts:
                 FileManager.save_accounts(accounts)
-                
-                # Link Fixo do seu Servidor VIP / Farm
                 fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
-                formatted_link = RobloxManager.format_server_link(fixed_link)
-                
-                if formatted_link:
-                    server_links = [(pkg, formatted_link) for pkg, _ in accounts]
-                    FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ ✓ ] IDs e Links salvos com sucesso!")
+                server_links = [(pkg, fixed_link) for pkg, _ in accounts]
+                FileManager.save_server_links(server_links)
+                print("\033[1;32m[ ✓ ] Sucesso! IDs e Links configurados.\033[0m")
             else:
-                print("\033[1;31m[ ! ] Nenhuma conta logada encontrada nos clones.\033[0m")
+                print("\033[1;31m[ ! ] Nenhuma conta encontrada. Abra o Roblox no clone e logue primeiro.\033[0m")
             
-            input("\n\033[1;32m[ FINALIZADO ] Pressione Enter para voltar...\033[0m")
+            input("\n\033[1;32m[ FINALIZADO ] Pressione Enter...\033[0m")
             continue
 
         elif setup_type == "4":

@@ -579,27 +579,32 @@ class RobloxManager:
             return None
 
     @staticmethod
+    
+    # 1. Função de busca (deve estar no topo ou dentro da sua classe RobloxManager)
     def get_roblox_packages():
         packages = []
         try:
-            # O 'su -c' executa o comando como superusuário direto
+            # Comando ROOT para listar sem erro de permissão
             cmd = "su -c 'ls /data/data/'"
             output = subprocess.check_output(cmd, shell=True).decode().split()
+            # Filtra apenas os clones do Delta Lite
             packages = [f for f in output if f.startswith("com.roblox")]
         except Exception as e:
-            print(f"\033[1;31m[ ! ] Erro mesmo com Root: {e}\033[0m")
+            print(f"\033[1;31m[ ! ] Erro ao listar pacotes: {e}\033[0m")
+            # Fallback caso o comando su falhe
+            packages = []
         return packages
 
-    # --- Execução da Lógica ---
+    # 2. Execução das Variáveis (CUIDADO COM A INDENTAÇÃO AQUI)
     clones_internos = get_roblox_packages()
     workspace_paths = []
 
     for pkg in clones_internos:
-        # Adiciona as duas variações de pasta (minúscula e maiúscula para o Delta Lite)
+        # Adiciona caminhos para o Delta Lite (Minúsculo e Maiúsculo)
         workspace_paths.append(f"/data/data/{pkg}/files/workspace")
         workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
 
-    # Configurações de diretórios do Shouko.dev
+    # 3. Configurações de Arquivos do Shouko.dev
     if not os.path.exists("Shouko.dev"):
         os.makedirs("Shouko.dev", exist_ok=True)
 
@@ -607,11 +612,8 @@ class RobloxManager:
     ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
     CONFIG_FILE = "Shouko.dev/config.json"
 
-    # Print de confirmação para você ver se ele achou os clones
-    if clones_internos:
-        print(f"\033[1;32m[ ✓ ] {len(clones_internos)} Clones Delta identificados com sucesso!\033[0m")
-    else:
-        print("\033[1;33m[ ! ] Nenhum pacote 'com.roblox' encontrado. Verifique o Root.\033[0m")
+    print(f"\033[1;32m[ ✓ ] Sistema pronto. {len(clones_internos)} clones detectados.\033[0m")
+
     @staticmethod
     def kill_roblox_processes():
         # Usamos a função de cima para garantir que a lista é a mesma!

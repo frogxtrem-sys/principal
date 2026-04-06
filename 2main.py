@@ -580,20 +580,14 @@ class RobloxManager:
 
     @staticmethod
     def get_roblox_packages():
-        base_path = "/data/data/"
         packages = []
         try:
-            # Tenta primeiro pelo método do sistema (mais chance de ignorar bloqueio de permissão)
-            import subprocess
-            output = subprocess.check_output("ls /data/data/", shell=True).decode().split()
+            # O 'su -c' executa o comando como superusuário direto
+            cmd = "su -c 'ls /data/data/'"
+            output = subprocess.check_output(cmd, shell=True).decode().split()
             packages = [f for f in output if f.startswith("com.roblox")]
-        except:
-            try:
-                # Se o de cima falhar, tenta o método padrão do Python
-                all_folders = os.listdir(base_path)
-                packages = [f for f in all_folders if f.startswith("com.roblox")]
-            except Exception as e:
-                print(f"\033[1;31m[ ! ] Erro crítico de permissão ao acessar /data/data/: {e}\033[0m")
+        except Exception as e:
+            print(f"\033[1;31m[ ! ] Erro mesmo com Root: {e}\033[0m")
         return packages
 
     # --- Execução da Lógica ---

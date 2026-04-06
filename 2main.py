@@ -595,24 +595,24 @@ class RobloxManager:
             packages = []
         return packages
 
-    # 2. Execução das Variáveis (CUIDADO COM A INDENTAÇÃO AQUI)
-    clones_internos = get_roblox_packages()
-    workspace_paths = []
+        # 2. Execução das Variáveis (CUIDADO COM A INDENTAÇÃO AQUI)
+        clones_internos = get_roblox_packages()
+        workspace_paths = []
 
-    for pkg in clones_internos:
-        # Adiciona caminhos para o Delta Lite (Minúsculo e Maiúsculo)
-        workspace_paths.append(f"/data/data/{pkg}/files/workspace")
-        workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
+        for pkg in clones_internos:
+            # Adiciona caminhos para o Delta Lite (Minúsculo e Maiúsculo)
+            workspace_paths.append(f"/data/data/{pkg}/files/workspace")
+            workspace_paths.append(f"/data/data/{pkg}/files/Workspace")
 
-    # 3. Configurações de Arquivos do Shouko.dev
-    if not os.path.exists("Shouko.dev"):
-        os.makedirs("Shouko.dev", exist_ok=True)
+        # 3. Configurações de Arquivos do Shouko.dev
+        if not os.path.exists("Shouko.dev"):
+            os.makedirs("Shouko.dev", exist_ok=True)
 
-    SERVER_LINKS_FILE = "Shouko.dev/server-links.txt"
-    ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
-    CONFIG_FILE = "Shouko.dev/config.json"
+        SERVER_LINKS_FILE = "Shouko.dev/server-links.txt"
+        ACCOUNTS_FILE = "Shouko.dev/accounts.txt"
+        CONFIG_FILE = "Shouko.dev/config.json"
 
-    print(f"\033[1;32m[ ✓ ] Sistema pronto. {len(clones_internos)} clones detectados.\033[0m")
+        print(f"\033[1;32m[ ✓ ] Sistema pronto. {len(clones_internos)} clones detectados.\033[0m")
 
     @staticmethod
     def kill_roblox_processes():

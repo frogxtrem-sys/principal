@@ -347,10 +347,10 @@ def menu_login_opcoes():
     """
     # GRUPO 01 (Suas contas da Cloud principal)
     contas_set_1 = [
-        {"user": "saitama0000454", "pass": "saitama54", "pkg": "ywcw.lnu.exhl"},
-        {"user": "saitama0000456", "pass": "saitama56", "pkg": "ub.wnjb.bzz"},
-        {"user": "saitama0000457", "pass": "saitama57", "pkg": "ixq.vf.jlr"},
-        {"user": "saitama0000458", "pass": "saitama58", "pkg": "srl.mvn.gv"}
+        {"user": "saitama0000454", "pass": "saitama54", "pkg": "xtv.popp.kls"},
+        {"user": "saitama0000456", "pass": "saitama56", "pkg": "kpl.mlst.nkl"},
+        {"user": "saitama0000457", "pass": "saitama57", "pkg": "ply.oudj.tys"},
+        {"user": "saitama0000458", "pass": "saitama58", "pkg": "lpo.mksr.wer"}
     ]
 
     # GRUPO 02 (Suas contas da segunda Cloud / Novos Clones)

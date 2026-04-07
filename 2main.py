@@ -1344,44 +1344,51 @@ def main():
             continue
 
         elif setup_type == "3":
-            console.print("\n[bold yellow]🔍 ESCANEANDO CLONES NO VMOS...[/bold yellow]")
+            print("\n\033[1;33m[ Shouko.dev ] - Escaneando clones no VMOS (Modo Root)...\033[0m")
             clones_internos = RobloxManager.get_roblox_packages()
             accounts = []
 
             for pkg in clones_internos:
-                # Lista de possíveis locais do arquivo de login
-                possiveis_caminhos = [
+                # Caminhos possíveis no VMOS/Anya/Delta
+                caminhos = [
                     f"/data/data/{pkg}/files/appData/LocalStorage/appStorage.json",
                     f"/data/data/{pkg}/files/LocalStorage/appStorage.json",
                     f"/data/user/0/{pkg}/files/appData/LocalStorage/appStorage.json"
                 ]
                 
                 user_id = None
-                temp_file = f"{os.getcwd()}/check.json"
+                temp_file = f"{os.getcwd()}/check_id.json"
 
-                for path in possiveis_caminhos:
-                    # Tenta copiar o arquivo usando ROOT (su)
+                for path in caminhos:
+                    # Tenta copiar o arquivo usando ROOT (su) para a pasta do Termux
                     os.system(f"su -c 'cp {path} {temp_file} && chmod 777 {temp_file}' > /dev/null 2>&1")
                     
                     if os.path.exists(temp_file) and os.path.getsize(temp_file) > 0:
-                        with open(temp_file, 'r', errors='ignore') as f:
-                            content = f.read()
-                            import re
-                            match = re.search(r'"UserId":\s*"?(\d+)"?', content)
-                            if match:
-                                user_id = match.group(1)
-                                break
-                        os.remove(temp_file)
+                        try:
+                            with open(temp_file, 'r', errors='ignore') as f:
+                                data = f.read()
+                                import re
+                                match = re.search(r'"UserId":\s*"?(\d+)"?', data)
+                                if match:
+                                    user_id = match.group(1)
+                                    break
+                        except:
+                            pass
+                        finally:
+                            if os.path.exists(temp_file): os.remove(temp_file)
                 
                 if user_id:
                     accounts.append((pkg, user_id))
-                    console.print(f"[green][✓] {pkg} -> {user_id}[/green]")
+                    print(f"\033[1;32m[ ✓ ] {pkg} -> {user_id}\033[0m")
                 else:
-                    console.print(f"[red][✗] {pkg} -> Vazio ou Inacessível[/red]")
+                    print(f"\033[1;31m[ ✗ ] {pkg} -> Vazio (Logue no Roblox primeiro)\033[0m")
 
             if accounts:
                 FileManager.save_accounts(accounts)
-                console.print("\n[bold green]✅ IDs registrados com sucesso![/bold green]")
+                # Link do seu VIP do Adopt Me
+                link_vip = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
+                FileManager.save_server_links([(p, link_vip) for p, _ in accounts])
+                print("\033[1;32m\n[✓] IDs e Links salvos! Pode usar a Opção 1 agora.\033[0m")
             
             input("\nPressione Enter para voltar...")
             continue

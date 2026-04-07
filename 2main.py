@@ -1343,45 +1343,47 @@ def main():
             input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
             continue
 
-        elif setup_type == "3":  # NOVA OPÇÃO: Registro Rápido de IDs
-            print(f"\n\033[1;34m[ Shouko.dev ] - Iniciando Registro Rápido (Sem Login)\033[0m")
-            
-            # Aqui usamos a sua lista que já tem os 6 da Anya + os 3 novos do Arceus
-            # Se você ainda não definiu 'clones_lista' no topo, defina-a aqui:
-            # clones_lista = ["com.roblox.client.cl1", "com.pacote.aleatorio1", ...]
-            
+        elif setup_type == "3":
+            console.print("\n[bold yellow]🔍 ESCANEANDO CLONES NO VMOS...[/bold yellow]")
+            clones_internos = RobloxManager.get_roblox_packages()
             accounts = []
-            print(f"\033[93m[ Shouko.dev ] - Escaneando pastas do sistema...\033[0m")
 
-            for package_name in clones_internos:
-                file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
-                try:
-                    # Tenta ler o ID direto do arquivo sem abrir o jogo
-                    user_id = FileManager.find_userid_from_file(file_path)
+            for pkg in clones_internos:
+                # Lista de possíveis locais do arquivo de login
+                possiveis_caminhos = [
+                    f"/data/data/{pkg}/files/appData/LocalStorage/appStorage.json",
+                    f"/data/data/{pkg}/files/LocalStorage/appStorage.json",
+                    f"/data/user/0/{pkg}/files/appData/LocalStorage/appStorage.json"
+                ]
+                
+                user_id = None
+                temp_file = f"{os.getcwd()}/check.json"
+
+                for path in possiveis_caminhos:
+                    # Tenta copiar o arquivo usando ROOT (su)
+                    os.system(f"su -c 'cp {path} {temp_file} && chmod 777 {temp_file}' > /dev/null 2>&1")
                     
-                    if user_id and user_id != "-1":
-                        accounts.append((package_name, user_id))
-                        print(f"\033[96m[ ✓ ] Detectado: {package_name} -> {user_id}\033[0m")
-                    else:
-                        print(f"\033[1;31m[ ✗ ] Vazio: {package_name} (Conta não logada ou pasta inacessível)\033[0m")
-                except Exception as e:
-                    print(f"\033[1;31m[ ! ] Erro em {package_name}: {e}\033[0m")
+                    if os.path.exists(temp_file) and os.path.getsize(temp_file) > 0:
+                        with open(temp_file, 'r', errors='ignore') as f:
+                            content = f.read()
+                            import re
+                            match = re.search(r'"UserId":\s*"?(\d+)"?', content)
+                            if match:
+                                user_id = match.group(1)
+                                break
+                        os.remove(temp_file)
+                
+                if user_id:
+                    accounts.append((pkg, user_id))
+                    console.print(f"[green][✓] {pkg} -> {user_id}[/green]")
+                else:
+                    console.print(f"[red][✗] {pkg} -> Vazio ou Inacessível[/red]")
 
             if accounts:
                 FileManager.save_accounts(accounts)
-                
-                # Aplica o Link Fixo Automaticamente para não ter que digitar
-                fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
-                formatted_link = RobloxManager.format_server_link(fixed_link)
-                
-                if formatted_link:
-                    server_links = [(pkg, formatted_link) for pkg, _ in accounts]
-                    FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ ✓ ] IDs e Links salvos com sucesso para todas as contas detectadas!\033[0m")
-            else:
-                print("\033[1;31m[ ! ] Nenhuma conta logada encontrada nos clones.\033[0m")
+                console.print("\n[bold green]✅ IDs registrados com sucesso![/bold green]")
             
-            input("\n\033[1;32m[ FINALIZADO ] Pressione Enter para voltar...\033[0m")
+            input("\nPressione Enter para voltar...")
             continue
 
         elif setup_type == "4":

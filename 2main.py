@@ -1059,45 +1059,48 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash INICIADO...\033[0m")
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (ROOT PS) ATIVO!\033[0m")
     
         while not stop_event.is_set():
             try:
-                # Converte para lista para garantir a leitura correta
-                items = list(server_links.items()) if isinstance(server_links, dict) else server_links
+                # Garante que temos a lista correta para iterar
+                if isinstance(server_links, dict):
+                    items = list(server_links.items())
+                else:
+                    items = server_links
   
                 for package_name, server_link in items:
-                    # DEBUG: Mostra que está verificando
-                    # print(f"Verificando {package_name}...") 
-
-                    # 1. Checagem de Processo usando Root Total
-                    # -c 1 faz o grep parar no primeiro que achar (mais rápido)
+                    # 1. Checagem via PS (Exatamente o comando que você testou)
+                    # Usamos o strip() para limpar espaços e garantir que a comparação seja real
                     check = subprocess.getoutput(f"su -c 'ps -e | grep {package_name}'").strip()
                     
-                    is_running = len(check) > 5 # Se retornar algo real, está rodando
-                    
-                    game_disconnected = False
-                    if is_running:
-                        game_disconnected = RobloxManager.check_game_crash_via_log(package_name)
-
-                    if not is_running or game_disconnected:
-                        motivo = "FECHADO" if not is_running else "LOG_DROP"
-                        print(f"\n\033[1;31m[ ALERTA ] {package_name} {motivo}! Resgatando...\033[0m")
-                    
+                    # Se o pacote NÃO aparecer no texto retornado pelo PS
+                    if package_name not in check:
+                        print(f"\n\033[1;31m[ ! ] {package_name} NÃO ENCONTRADO. Reiniciando...\033[0m")
+                        
                         os.system(f"su -c 'am force-stop {package_name}'")
-                        time.sleep(1)
+                        time.sleep(2)
                         RobloxManager.launch_roblox(package_name, server_link)
                         
-                        # Espera pequena para não bugar o próximo clone
-                        time.sleep(5)
+                        # Pausa para o Android não engasgar ao abrir o próximo
+                        time.sleep(10)
+                        continue # Pula para o próximo pacote
 
-                # Ronda mais curta (30s) dividida para responder ao stop_event rápido
+                    # 2. Se o processo existe, checamos o Logcat (conforme combinamos)
+                    if RobloxManager.check_game_crash_via_log(package_name):
+                        print(f"\n\033[1;33m[ ! ] {package_name} travado no Log. Reiniciando...\033[0m")
+                        os.system(f"su -c 'am force-stop {package_name}'")
+                        time.sleep(2)
+                        RobloxManager.launch_roblox(package_name, server_link)
+                        time.sleep(10)
+
+                # Ronda a cada 30 segundos
                 for _ in range(30):
                     if stop_event.is_set(): break
                     time.sleep(1)
             
             except Exception as e:
-                print(f"Erro Crítico no Monitor: {e}")
+                print(f"Erro no Monitor: {e}")
                 time.sleep(10)
             
     @staticmethod

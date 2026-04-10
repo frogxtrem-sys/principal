@@ -1061,43 +1061,41 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (Reabertura Automática) VIVO!\033[0m")
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (LOG + PID) VIVO!\033[0m")
     
         while not stop_event.is_set():
             try:
-                # 1. Lista de pacotes para verificar
                 packages = list(server_links.keys()) if isinstance(server_links, dict) else [item[0] for item in server_links]
   
                 for package_name in packages:
-                    # Pergunta ao sistema se o clone está vivo
+                    # 1. Checagem de Processo (App fechou/crashou totalmente)
                     check_pid = subprocess.getoutput(f"su -c 'pidof {package_name}'").strip()
-                
-                    if not check_pid:
-                        print(f"\n\033[1;31m[ ! ] {package_name} caiu. Iniciando resgate...\033[0m")
                     
-                        # Pega o link do servidor para esse pacote
+                    # 2. Checagem de Log (App aberto, mas na tela de erro/disconnect)
+                    # Só checa o log se o app ainda estiver com o PID vivo
+                    game_disconnected = False
+                    if check_pid:
+                        game_disconnected = RobloxManager.check_game_crash_via_log(package_name)
+
+                    # Se o PID sumiu OU o log detectou erro, reinicia
+                    if not check_pid or game_disconnected:
+                        motivo = "fechado" if not check_pid else "desconectado (LOG)"
+                        print(f"\n\033[1;31m[ ! ] {package_name} {motivo}. Iniciando resgate...\033[0m")
+                    
                         server_link = server_links[package_name] if isinstance(server_links, dict) else next((item[1] for item in server_links if item[0] == package_name), None)
 
                         if server_link:
-                            # 2. LIMPEZA: Mata qualquer processo "zumbi" antes de abrir
                             os.system(f"su -c 'am force-stop {package_name}'")
                             time.sleep(2)
-                        
-                            # 3. REABERTURA: Usamos a função launch_roblox que já tem as flags de isolamento
-                            # Isso evita que o Clone 2 mate o Clone 1 ao abrir.
                             RobloxManager.launch_roblox(package_name, server_link)
                         
-                            # 4. PAUSA DE SEGURANÇA (O SEGREDO):
-                            # Após reabrir UM, o monitor espera 2 minutos.
-                            # Isso impede o looping porque dá tempo do Android estabilizar 
-                            # antes de o monitor tentar checar o próximo clone.
-                            print(f"\033[1;33m[ Watchdog ] Aguardando 60s para estabilização de {package_name}...\033[0m")
+                            print(f"\033[1;33m[ Watchdog ] Aguardando 70s para estabilização de {package_name}...\033[0m")
                             time.sleep(70)
 
-                # Ronda a cada 60 segundos (Mais leve para o Termux não desconectar)
+                # Ronda a cada 60 segundos
                 time.sleep(60)
             
-                # Limpa lixo da RAM para evitar que o Android mate o Termux
+                # Manutenção de RAM
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 gc.collect()
             

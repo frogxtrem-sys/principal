@@ -1059,47 +1059,48 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (LOG + PID) VIVO!\033[0m")
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (DUMPSYS + LOG) ATIVO!\033[0m")
     
         while not stop_event.is_set():
             try:
-                packages = list(server_links.keys()) if isinstance(server_links, dict) else [item[0] for item in server_links]
+                # Pega a lista de pacotes
+                items = server_links.items() if isinstance(server_links, dict) else server_links
   
-                for package_name in packages:
-                    # 1. Checagem de Processo (App fechou/crashou totalmente)
-                    check_pid = subprocess.getoutput(f"su -c 'pidof {package_name}'").strip()
+                for package_name, server_link in items:
+                    # 1. Checagem de Atividade Real (Melhor que PID)
+                    # Verifica se o processo existe na lista de processos ativos do sistema
+                    is_running = subprocess.getoutput(f"su -c 'ps -A | grep {package_name}'").strip()
                     
-                    # 2. Checagem de Log (App aberto, mas na tela de erro/disconnect)
-                    # Só checa o log se o app ainda estiver com o PID vivo
+                    # 2. Checagem de Logcat (O que a gente configurou antes)
                     game_disconnected = False
-                    if check_pid:
+                    if is_running:
                         game_disconnected = RobloxManager.check_game_crash_via_log(package_name)
 
-                    # Se o PID sumiu OU o log detectou erro, reinicia
-                    if not check_pid or game_disconnected:
-                        motivo = "fechado" if not check_pid else "desconectado (LOG)"
-                        print(f"\n\033[1;31m[ ! ] {package_name} {motivo}. Iniciando resgate...\033[0m")
+                    # Se NÃO está rodando OU o log detectou erro
+                    if not is_running or game_disconnected:
+                        motivo = "FECHADO/CRASHOU" if not is_running else "DESCONECTADO (LOG)"
+                        print(f"\n\033[1;31m[ ! ] {package_name} {motivo}. Reiniciando...\033[0m")
                     
-                        server_link = server_links[package_name] if isinstance(server_links, dict) else next((item[1] for item in server_links if item[0] == package_name), None)
-
-                        if server_link:
-                            os.system(f"su -c 'am force-stop {package_name}'")
-                            time.sleep(2)
-                            RobloxManager.launch_roblox(package_name, server_link)
+                        # Resgate
+                        os.system(f"su -c 'am force-stop {package_name}'")
+                        time.sleep(1)
+                        RobloxManager.launch_roblox(package_name, server_link)
                         
-                            print(f"\033[1;33m[ Watchdog ] Aguardando 70s para estabilização de {package_name}...\033[0m")
-                            time.sleep(70)
+                        # Espera curta só para não sobrecarregar a CPU no arranque
+                        time.sleep(5) 
 
-                # Ronda a cada 60 segundos
-                time.sleep(60)
+                # Ronda a cada 30 segundos (diminuímos de 60 para ser mais rápido)
+                for _ in range(30):
+                    if stop_event.is_set(): break
+                    time.sleep(1)
             
-                # Manutenção de RAM
+                # Manutenção leve de memória
                 os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
                 gc.collect()
             
             except Exception as e:
-                print(f"Erro no Monitor: {e}")
-                time.sleep(30)
+                print(f"\033[1;31mErro no Monitor: {e}\033[0m")
+                time.sleep(10)
             
     @staticmethod
     def force_rejoin(server_links, interval_minutes, stop_event):

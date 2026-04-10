@@ -1059,47 +1059,45 @@ class Runner:
 
     @staticmethod
     def monitor_presence(server_links, stop_event):
-        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash (DUMPSYS + LOG) ATIVO!\033[0m")
+        print("\033[1;34m[ DEBUG ] Monitor Anti-Crash INICIADO...\033[0m")
     
         while not stop_event.is_set():
             try:
-                # Pega a lista de pacotes
-                items = server_links.items() if isinstance(server_links, dict) else server_links
+                # Converte para lista para garantir a leitura correta
+                items = list(server_links.items()) if isinstance(server_links, dict) else server_links
   
                 for package_name, server_link in items:
-                    # 1. Checagem de Atividade Real (Melhor que PID)
-                    # Verifica se o processo existe na lista de processos ativos do sistema
-                    is_running = subprocess.getoutput(f"su -c 'ps -A | grep {package_name}'").strip()
+                    # DEBUG: Mostra que está verificando
+                    # print(f"Verificando {package_name}...") 
+
+                    # 1. Checagem de Processo usando Root Total
+                    # -c 1 faz o grep parar no primeiro que achar (mais rápido)
+                    check = subprocess.getoutput(f"su -c 'ps -e | grep {package_name}'").strip()
                     
-                    # 2. Checagem de Logcat (O que a gente configurou antes)
+                    is_running = len(check) > 5 # Se retornar algo real, está rodando
+                    
                     game_disconnected = False
                     if is_running:
                         game_disconnected = RobloxManager.check_game_crash_via_log(package_name)
 
-                    # Se NÃO está rodando OU o log detectou erro
                     if not is_running or game_disconnected:
-                        motivo = "FECHADO/CRASHOU" if not is_running else "DESCONECTADO (LOG)"
-                        print(f"\n\033[1;31m[ ! ] {package_name} {motivo}. Reiniciando...\033[0m")
+                        motivo = "FECHADO" if not is_running else "LOG_DROP"
+                        print(f"\n\033[1;31m[ ALERTA ] {package_name} {motivo}! Resgatando...\033[0m")
                     
-                        # Resgate
                         os.system(f"su -c 'am force-stop {package_name}'")
                         time.sleep(1)
                         RobloxManager.launch_roblox(package_name, server_link)
                         
-                        # Espera curta só para não sobrecarregar a CPU no arranque
-                        time.sleep(5) 
+                        # Espera pequena para não bugar o próximo clone
+                        time.sleep(5)
 
-                # Ronda a cada 30 segundos (diminuímos de 60 para ser mais rápido)
+                # Ronda mais curta (30s) dividida para responder ao stop_event rápido
                 for _ in range(30):
                     if stop_event.is_set(): break
                     time.sleep(1)
             
-                # Manutenção leve de memória
-                os.system("su -c 'sync; echo 1 > /proc/sys/vm/drop_caches'")
-                gc.collect()
-            
             except Exception as e:
-                print(f"\033[1;31mErro no Monitor: {e}\033[0m")
+                print(f"Erro Crítico no Monitor: {e}")
                 time.sleep(10)
             
     @staticmethod

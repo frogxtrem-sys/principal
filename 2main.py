@@ -570,6 +570,33 @@ class FileManager:
     
 class RobloxManager:
     @staticmethod
+    def check_game_crash_via_log(package_name):
+        """Verifica queda ou erro através dos logs reais do Android/Roblox."""
+        try:
+            path_logs = f"/data/data/{package_name}/cache/logs"
+            # Pega o arquivo de log mais recente
+            cmd_find_log = f"su -c 'ls -t {path_logs} | grep .log | head -n 1'"
+            last_log = os.popen(cmd_find_log).read().strip()
+
+            if not last_log:
+                return False
+
+            full_path = f"{path_logs}/{last_log}"
+            # Lê as últimas 15 linhas para detectar erros
+            cmd_read_log = f"su -c 'tail -n 15 {full_path}'"
+            log_content = os.popen(cmd_read_log).read().lower()
+
+            # Lista de erros que indicam que o jogo não está mais farmando
+            errors = ["connection lost", "disconnected", "game ended", "kick", "security timeout"]
+            
+            for error in errors:
+                if error in log_content:
+                    return True # Queda detectada!
+            return False
+        except:
+            return False
+    
+    @staticmethod
     def check_user_online(user_id):
         url = "https://presence.roblox.com/v1/presence/last-online"
         body = {"userIds": [int(user_id)]}

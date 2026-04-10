@@ -571,40 +571,27 @@ class FileManager:
 class RobloxManager:
     @staticmethod
     def check_game_crash_via_log(package_name):
-        """Verifica erro no novo caminho de cache do executor."""
+        """Monitora o sistema em busca de quedas do clone específico."""
         try:
-            # O NOVO CAMINHO QUE VOCÊ ACHOU:
-            path_logs = f"/storage/emulated/0/Android/data/{package_name}/files/gloop/external/Internal/Cache"
-            
-            # 1. Tenta listar o arquivo mais recente dentro da pasta Cache ou da subpasta data
-            # Geralmente o log tem extensão .txt ou .log
-            cmd_find_log = f"ls -t {path_logs} | grep -E '.txt|.log' | head -n 1"
-            last_log = os.popen(cmd_find_log).read().strip()
+            # Pega as últimas 50 mensagens de erro ou aviso do pacote
+            cmd = f"su -c 'logcat -d -t 50 *:W | grep {package_name}'"
+            log_output = os.popen(cmd).read().lower()
 
-            if not last_log:
-                # Se não achou na Cache, tenta olhar dentro da subpasta 'data' que você mencionou
-                cmd_find_log_data = f"ls -t {path_logs}/data | grep -E '.txt|.log' | head -n 1"
-                last_log = os.popen(cmd_find_log_data).read().strip()
-                if last_log:
-                    full_path = f"{path_logs}/data/{last_log}"
-                else:
-                    return False
-            else:
-                full_path = f"{path_logs}/{last_log}"
-
-            # 2. Lê o conteúdo (aqui não precisa de 'su -c' porque storage/emulated é aberto)
-            with open(full_path, 'r', errors='ignore') as f:
-                log_content = f.read().lower()
-
-            # 3. Termos de erro comuns nesses executores
-            errors = ["connection lost", "disconnected", "kick", "auth fail", "error"]
+            # Palavras-chave que o Android dispara quando o Roblox desconecta ou fecha
+            errors = [
+                "connection lost", 
+                "disconnected", 
+                "win death", 
+                "force finishing",
+                "has died",
+                "kick"
+            ]
             
             for error in errors:
-                if error in log_content:
-                    return True 
+                if error in log_output:
+                    return True # Se achar qualquer uma, manda reiniciar
             return False
-        except Exception as e:
-            # print(f"Erro ao ler log: {e}") # Debug se precisar
+        except:
             return False
     
     @staticmethod

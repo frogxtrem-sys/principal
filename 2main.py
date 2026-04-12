@@ -356,7 +356,7 @@ def menu_login_opcoes():
     # GRUPO 02 (Suas contas da segunda Cloud / Novos Clones)
     # SUBSTITUA PELOS SEUS DADOS REAIS ABAIXO:
     contas_set_2 = [
-        {"user": "saitama0000428", "pass": "saitama028", "pkg": "ywcw.lnu.exhl"},
+        {"user": "saitama0000428", "pass": "saitama028", "pkg": "xtv.popp.kls"},
         {"user": "saitama0000443", "pass": "saitama43", "pkg": "kpl.mlst.nkl"},
         {"user": "saitama0000448", "pass": "saitama48", "pkg": "ply.oudj.tys"},
         {"user": "saitama0000449", "pass": "saitama49", "pkg": "lpo.mksr.wer"}

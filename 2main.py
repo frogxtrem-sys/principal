@@ -376,12 +376,12 @@ def menu_login_opcoes():
         if opcao == '1':
             login_gboard_estavel(contas_set_1, "SET 01")
             # Retorna a lista de pacotes do SET 01 para o setup automático de IDs
-            return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"], "SET 01"
+            return ["xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"], "SET 01"
 
         elif opcao == '2':
             login_gboard_estavel(contas_set_2, "SET 02")
             # Retorna a lista de pacotes do SET 02 (Troque pelos nomes reais dos pacotes)
-            return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv"], "SET 02"
+            return ["xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"], "SET 02"
 
         elif opcao == 'b':
             return None, None

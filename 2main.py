@@ -347,10 +347,10 @@ def menu_login_opcoes():
     """
     # GRUPO 01 (Suas contas da Cloud principal)
     contas_set_1 = [
-        {"user": "saitama0000454", "pass": "saitama54", "pkg": "xtv.popp.kls"},
-        {"user": "saitama0000456", "pass": "saitama56", "pkg": "kpl.mlst.nkl"},
-        {"user": "saitama0000457", "pass": "saitama57", "pkg": "ply.oudj.tys"},
-        {"user": "saitama0000458", "pass": "saitama58", "pkg": "lpo.mksr.wer"}
+        {"user": "saitama0000454", "pass": "saitama54", "pkg": "com.roblox.clienu"},
+        {"user": "saitama0000456", "pass": "saitama56", "pkg": "com.roblox.clienv"},
+        {"user": "saitama0000457", "pass": "saitama57", "pkg": "com.roblox.clienw"},
+        {"user": "saitama0000458", "pass": "saitama58", "pkg": "com.roblox.clienx"}
     ]
 
     # GRUPO 02 (Suas contas da segunda Cloud / Novos Clones)

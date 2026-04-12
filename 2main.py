@@ -1319,41 +1319,59 @@ def main():
                 print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Buscando IDs do {current_set_name}...\033[0m")
                 time.sleep(2.0)
 
-                # 2. Extração de User IDs (Necessário para o Farm)
-                print(f"\033[93m[ Shouko.dev ] - Extraindo IDs do sistema...\033[0m")
+                # Caminho do arquivo baixado do seu GitHub no início do script
+                temp_rfld = "/sdcard/Download/Configuration.rfld"
+
+                # 2. Extração de User IDs e Configuração de Pastas/Arquivos
+                print(f"\033[93m[ Shouko.dev ] - Extraindo IDs e configurando Workspaces...\033[0m")
                 accounts = []
 
                 for package_name in packages:
+                    # --- CRIAÇÃO DA ESTRUTURA RAGESPLOIT ---
+                    # Caminho exato que você pediu
+                    ragesploit_dir = f"/storage/emulated/0/Android/data/{package_name}/files/gloop/external/Workspace/Ragesploit/Auto Farm"
+                    
+                    # Cria as pastas via Root
+                    os.system(f"su -c 'mkdir -p \"{ragesploit_dir}\"'")
+                    
+                    # Instala o arquivo de configuração baixado do GitHub
+                    if os.path.exists(temp_rfld):
+                        os.system(f"su -c 'cp \"{temp_rfld}\" \"{ragesploit_dir}/Configuration.rfld\"'")
+                        os.system(f"su -c 'chmod 777 \"{ragesploit_dir}/Configuration.rfld\"'")
+                        print(f"\033[90m[ ✓ ] Configuração Ragesploit aplicada em {package_name}\033[0m")
+                    else:
+                        print(f"\033[1;33m[ ! ] Aviso: Configuration.rfld não encontrado em {temp_rfld}\033[0m")
+
+                    # --- EXTRAÇÃO DE USER ID ---
                     file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
                     try:
                         user_id = FileManager.find_userid_from_file(file_path)
                         if user_id and user_id != "-1":
                             accounts.append((package_name, user_id))
-                            print(f"\033[96m[ ✓ ] Sucesso: {package_name} -> {user_id}\033[0m")
+                            print(f"\033[96m[ ✓ ] ID Extraído: {package_name} -> {user_id}\033[0m")
                         else:
                             print(f"\033[1;31m[ ✗ ] Falha: UserId não encontrado em {package_name}\033[0m")
                     except Exception as e:
                         print(f"\033[1;31m[ ! ] Erro ao ler {package_name}: {e}\033[0m")
 
-                # 3. Salva os IDs e aplica o Link Fixo Automaticamente
+                # 3. Salva os IDs e aplica o Link de Servidor Privado (Deep Link)
                 if accounts:
                     FileManager.save_accounts(accounts)
                     
-                    # --- CONFIGURAÇÃO AUTOMÁTICA DO LINK ---
-                    fixed_link = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
+                    # CONFIGURAÇÃO DO LINK PRIVADO (ENTRA DIRETO)
+                    # PlaceID do Adopt Me e o código final do seu link de share
+                    place_id = "920587237"
+                    link_code = "90856ea1bf5ed54785ce8c39ee168245"
                     
-                    print(f"\n\033[1;35m[ Shouko.dev ] - Aplicando Link Fixo do Servidor...\033[0m")
+                    # Formato nativo roblox:// pula o navegador e entra direto no servidor privado
+                    direct_link = f"roblox://placeId={place_id}&linkCode={link_code}"
                     
-                    # Usa a função de formatação para garantir que o link seja aceito pelo Android
-                    formatted_link = RobloxManager.format_server_link(fixed_link)
+                    print(f"\n\033[1;35m[ Shouko.dev ] - Aplicando Link Direto ao Servidor Privado...\033[0m")
                     
-                    if formatted_link:
-                        # Associa o link formatado a todos os pacotes das contas encontradas
-                        server_links = [(pkg, formatted_link) for pkg, _ in accounts]
-                        FileManager.save_server_links(server_links)
-                        print("\033[1;32m[ ✓ ] Link configurado e salvo com sucesso para o Farm!\033[0m")
-                    else:
-                        print("\033[1;31m[ ! ] Erro ao formatar o link padrão.\033[0m")
+                    # Associa o link direto a todos os pacotes das contas encontradas
+                    server_links = [(pkg, direct_link) for pkg, _ in accounts]
+                    FileManager.save_server_links(server_links)
+                    print("\033[1;32m[ ✓ ] Servidor Privado e Workspaces configurados com sucesso!\033[0m")
                     
                 else:
                     print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada. Verifique o login.\033[0m")
@@ -1367,7 +1385,6 @@ def main():
             
             input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
             continue
-
         elif setup_type == "3":
             print("\n\033[1;33m[ Shouko.dev ] - Escaneando clones no VMOS (Modo Root)...\033[0m")
             clones_internos = RobloxManager.get_roblox_packages()

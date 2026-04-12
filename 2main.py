@@ -1315,21 +1315,11 @@ def main():
                 if not packages: 
                     continue
 
-                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Configurando ambiente...\033[0m")
-                
-                temp_rfld = "/sdcard/Download/Configuration.rfld"
+                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Extraindo IDs...\033[0m")
                 accounts = []
 
-                # 2. Configura Workspaces e IDs em TODOS os clones
-                print(f"\033[93m[ Shouko.dev ] - Configurando Workspaces e Extraindo IDs...\033[0m")
+                # 2. Extração de IDs (Sem copiar o .rfld aqui, pois agora é centralizado no Setup 5)
                 for package_name in packages:
-                    ragesploit_dir = f"/storage/emulated/0/Android/data/{package_name}/files/gloop/external/Workspace/Ragesploit/Auto Farm"
-                    os.system(f"su -c 'mkdir -p \"{ragesploit_dir}\"'")
-                    
-                    if os.path.exists(temp_rfld):
-                        os.system(f"su -c 'cp \"{temp_rfld}\" \"{ragesploit_dir}/Configuration.rfld\"'")
-                        os.system(f"su -c 'chmod 777 \"{ragesploit_dir}/Configuration.rfld\"'")
-
                     file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
                     try:
                         user_id = FileManager.find_userid_from_file(file_path)
@@ -1338,11 +1328,9 @@ def main():
                     except Exception:
                         pass
 
-                # 3. Processo de Captura de Key (Apenas no primeiro clone)
+                # 3. Captura de Key para o Discord
                 if accounts:
                     FileManager.save_accounts(accounts)
-                    
-                    # Link de Servidor Privado (Deep Link Direto)
                     place_id = "920587237"
                     link_code = "90856ea1bf5ed54785ce8c39ee168245"
                     direct_link = f"roblox://placeId={place_id}&linkCode={link_code}"
@@ -1351,44 +1339,28 @@ def main():
                     FileManager.save_server_links([(main_package, direct_link)])
                     
                     print(f"\n\033[1;36m[ Shouko.dev ] - Abrindo {main_package} para pegar Key...\033[0m")
-                    
-                    # CORREÇÃO DO ERRO DO PRINT:
-                    # Mata o processo e limpa buffers
                     os.system(f"su -c 'am force-stop {main_package}'")
                     time.sleep(2)
-
-                    # Passo 1: Acorda o App via MAIN (Garante que o app inicie)
                     os.system(f"su -c 'am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -p {main_package}'")
-                    
-                    print("\033[1;33m[ ⏳ ] Aguardando Splash (15s)...\033[0m")
                     time.sleep(15)
-
-                    # Passo 2: Injeta o Deep Link usando a flag -p (Evita o Error type 3)
-                    # Usamos aspas duplas no link para evitar erro de string
                     os.system(f"su -c 'am start -a android.intent.action.VIEW -d \"{direct_link}\" -p {main_package}'")
                     
-                    # 4. CAPTURA DO DISCORD (Link da PlatoRelay)
                     print("\033[93m[ ⏳ ] Aguardando Delta copiar o link da key (60s)...\033[0m")
                     time.sleep(60)
                     
                     link_copiado = pegar_link_delta()
-                    
-                    # Aceita PlatoRelay e novos domínios de bypass
                     valid_domains = ["delta", "linkvertise", "platorelay", "auth.plato"]
                     
                     if any(domain in link_copiado.lower() for domain in valid_domains):
-                        print(f"\033[1;32m[ ✓ ] Link Capturado e Enviado: {link_copiado[:50]}...\033[0m")
+                        print(f"\033[1;32m[ ✓ ] Link Capturado e Enviado!\033[0m")
                         enviar_para_discord(link_copiado)
                     else:
-                        print("\033[1;31m[ ✗ ] Link inválido no clipboard ou tempo esgotado.\033[0m")
-                    
-                    print("\033[1;32m[ ✓ ] Setup Finalizado!\033[0m")
+                        print("\033[1;31m[ ✗ ] Link não capturado.\033[0m")
                 else:
                     print("\033[1;31m[ ! ] Nenhuma conta logada encontrada.\033[0m")
 
             except Exception as e:
-                print(f"\033[1;31m[ ! ] Erro Crítico: {e}\033[0m")
-            
+                print(f"\033[1;31m[ ! ] Erro: {e}\033[0m")
             input("\n\033[1;32mPressione Enter para voltar...\033[0m")
             continue
         elif setup_type == "3":
@@ -1496,33 +1468,41 @@ def main():
 
         elif setup_type == "5":
             console = Console()
-            console.print("\n[bold yellow]📝 CONFIGURADOR DE AUTO-EXECUTE (DELTA)[/bold yellow]")
+            console.print("\n[bold yellow]📝 CONFIGURADOR CENTRALIZADO (WORKSPACE & AUTO-EXEC)[/bold yellow]")
         
-            # Pergunta a Key específica
-            key_usuario = input("[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
-        
-            # Monta o conteúdo do arquivo com quebra de linha real
-            conteudo = f'script_key = "{key_usuario}"\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
-        
-            caminho_pasta = "/storage/emulated/0/Delta/Autoexecute"
-            arquivo_final = f"{caminho_pasta}/script.txt"
-        
-            try:
-                # 1. Cria a pasta e dá permissão total via sistema
-                os.system(f"mkdir -p {caminho_pasta} && chmod 777 {caminho_pasta}")
+            # 1. Configuração do Workspace Central (Ragesploit)
+            temp_rfld = "/sdcard/Download/Configuration.rfld"
+            # Novo endereço centralizado que você passou
+            workspace_central = "/storage/emulated/0/Delta/Workspace/Ragesploit/Auto Farm"
             
-                # 2. Escreve o arquivo txt
+            try:
+                print(f"\033[93m[ Shouko.dev ] - Configurando Workspace Central...\033[0m")
+                os.system(f"mkdir -p \"{workspace_central}\" && chmod 777 \"{workspace_central}\"")
+                
+                if os.path.exists(temp_rfld):
+                    os.system(f"cp \"{temp_rfld}\" \"{workspace_central}/Configuration.rfld\"")
+                    os.system(f"chmod 777 \"{workspace_central}/Configuration.rfld\"")
+                    console.print(f"[bold green][✓][/bold green] Workspace configurado em: [cyan]{workspace_central}[/cyan]")
+                else:
+                    console.print("[bold red][!][/bold red] Arquivo Configuration.rfld não encontrado em /sdcard/Download")
+
+                # 2. Configuração do Autoexecute
+                key_usuario = input("\n[ Shouko.dev ] - Cole a KEY do seu script: ").strip()
+                conteudo = f'_G.script_key = "{key_usuario}"\nloadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/875033288c5e99d576622aced60a0c44.lua"))()'
+            
+                pasta_auto = "/storage/emulated/0/Delta/Autoexecute"
+                arquivo_final = f"{pasta_auto}/script.txt"
+            
+                os.system(f"mkdir -p {pasta_auto} && chmod 777 {pasta_auto}")
                 with open(arquivo_final, "w") as f:
                     f.write(conteudo)
-            
-                # 3. Garante que o arquivo também tenha permissão para o Delta ler
                 os.system(f"chmod 777 {arquivo_final}")
                 
-                console.print(f"\n[bold green][✓][/bold green] Arquivo [white]script.txt[/white] configurado!")
-                console.print(f"[bold green][✓][/bold green] Local: [cyan]{arquivo_final}[/cyan]")
-                console.print("[yellow]DICA: Agora é só abrir os Clones e o farm iniciará sozinho.[/yellow]")
+                console.print(f"[bold green][✓][/bold green] Auto-execute configurado em: [cyan]{arquivo_final}[/cyan]")
+                console.print("\n[bold yellow]TUDO PRONTO![/bold yellow] Agora todos os clones usarão esta mesma configuração.")
+                
             except Exception as e:
-                console.print(f"\n[bold red][!] Erro ao criar arquivo: {e}[/bold red]")
+                console.print(f"\n[bold red][!] Erro no Setup 5: {e}[/bold red]")
             
             input("\n[bold cyan]Pressione ENTER para voltar ao menu...[/bold cyan]")
             continue

@@ -47,7 +47,7 @@ close_and_rejoin_delay = None
 codex_bypass_enabled = False
 codex_bypass_thread = None
 try:
-    # Tenta ler o tempo real, se falhar (Permission Denied), usa o tempo atual
+    # Tenta ler o tempo real, se falhar (Permission Denied), usa o tempo atuali
     BOOT_TIME = psutil.boot_time()
 except Exception:
     BOOT_TIME = time.time()
@@ -1310,64 +1310,91 @@ def main():
 
         elif setup_type == "2":
             try:
-                # 1. Login e obtenção dos pacotes
+                # 1. Login e obtenção dos pacotes através do menu
                 packages, current_set_name = menu_login_opcoes()
-                if not packages: continue
+                if not packages: 
+                    continue
 
                 print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Configurando ambiente...\033[0m")
+                
+                # Caminho do arquivo baixado pelo script Bash
                 temp_rfld = "/sdcard/Download/Configuration.rfld"
                 accounts = []
 
-                # 2. Configura Workspaces e IDs
+                # 2. Preparação de TODOS os clones (Pastas e Configurações)
+                print(f"\033[93m[ Shouko.dev ] - Configurando Workspaces e Extraindo IDs...\033[0m")
                 for package_name in packages:
+                    # Cria a árvore de pastas exata: gloop/external/Workspace/Ragesploit/Auto Farm
                     ragesploit_dir = f"/storage/emulated/0/Android/data/{package_name}/files/gloop/external/Workspace/Ragesploit/Auto Farm"
                     os.system(f"su -c 'mkdir -p \"{ragesploit_dir}\"'")
+                    
+                    # Se o arquivo baixado do GitHub existir, instala em cada clone
                     if os.path.exists(temp_rfld):
                         os.system(f"su -c 'cp \"{temp_rfld}\" \"{ragesploit_dir}/Configuration.rfld\"'")
                         os.system(f"su -c 'chmod 777 \"{ragesploit_dir}/Configuration.rfld\"'")
 
+                    # Extração do UserID para o banco de dados do farm
                     file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
-                    user_id = FileManager.find_userid_from_file(file_path)
-                    if user_id and user_id != "-1":
-                        accounts.append((package_name, user_id))
+                    try:
+                        user_id = FileManager.find_userid_from_file(file_path)
+                        if user_id and user_id != "-1":
+                            accounts.append((package_name, user_id))
+                            print(f"\033[96m[ ✓ ] Configurado: {package_name}\033[0m")
+                    except Exception:
+                        pass
 
-                # 3. Processo de captura da Key (Apenas para o primeiro Clone)
+                # 3. Processo de Captura de Key (Apenas para o primeiro clone da lista)
                 if accounts:
                     FileManager.save_accounts(accounts)
                     
-                    place_id = "920587237"
+                    # Definição do Servidor Privado (Deep Link Direto)
+                    place_id = "920587237" # Adopt Me
                     link_code = "90856ea1bf5ed54785ce8c39ee168245"
                     direct_link = f"roblox://placeId={place_id}&linkCode={link_code}"
                     
+                    # Seleciona o primeiro clone para entrar e pegar a key
                     main_package = accounts[0][0]
                     FileManager.save_server_links([(main_package, direct_link)])
                     
-                    print(f"\n\033[1;35m[ Shouko.dev ] - Iniciando {main_package} para capturar Key...\033[0m")
+                    print(f"\n\033[1;35m[ Shouko.dev ] - Abrindo {main_package} para capturar link da Key...\033[0m")
                     
-                    # Chama a função de launch que já discutimos
-                    launch_roblox(main_package, direct_link)
+                    # Mata o processo para garantir um login limpo
+                    os.system(f"su -c 'am force-stop {main_package}'")
+                    time.sleep(2)
+
+                    # ETAPA 1: Lança a Activity Splash (Acorda o App)
+                    os.system(f"su -c 'am start -a android.intent.action.MAIN -n {main_package}/com.roblox.client.startup.ActivitySplash'")
                     
-                    # Espera um tempo para o jogo carregar e o Delta copiar o link
-                    print("\033[93m[ ⏳ ] Aguardando link do Delta ser copiado para o Clipboard (60s)...\033[0m")
-                    time.sleep(60) 
+                    print("\033[1;33m[ ⏳ ] Aguardando carregamento inicial (15s)...\033[0m")
+                    time.sleep(15)
+
+                    # ETAPA 2: Lança o Deep Link (Entra no Servidor Privado)
+                    # O uso do '-p' evita o erro 'Activity class does not exist'
+                    os.system(f"su -c 'am start -a android.intent.action.VIEW -d \"{direct_link}\" -p {main_package}'")
                     
-                    # 4. CAPTURA E ENVIO PARA DISCORD
+                    # 4. Monitoramento do Clipboard e Envio para Discord
+                    print("\033[93m[ ⏳ ] Aguardando Delta copiar o link da key (60s)...\033[0m")
+                    time.sleep(60)
+                    
                     link_copiado = pegar_link_delta()
                     
-                    if "delta" in link_copiado.lower() or "linkvertise" in link_copiado.lower():
-                        print(f"\033[1;32m[ ✓ ] Link detectado: {link_copiado}\033[0m")
+                    # Lista de domínios válidos incluindo o novo PlatoRelay
+                    valid_domains = ["delta", "linkvertise", "platorelay", "auth.plato"]
+                    
+                    if any(domain in link_copiado.lower() for domain in valid_domains):
+                        print(f"\033[1;32m[ ✓ ] Link Detectado e Enviado: {link_copiado[:60]}...\033[0m")
                         enviar_para_discord(link_copiado)
                     else:
-                        print("\033[1;31m[ ✗ ] Nenhum link válido encontrado no Clipboard.\033[0m")
+                        print("\033[1;31m[ ✗ ] Falha na captura: Link não encontrado ou inválido no clipboard.\033[0m")
                     
-                    print("\033[1;32m[ ✓ ] Setup concluído e Key enviada!\033[0m")
+                    print("\033[1;32m[ ✓ ] Setup do SET finalizado com sucesso!\033[0m")
                 else:
-                    print("\033[1;31m[ ! ] Nenhuma conta detectada.\033[0m")
+                    print("\033[1;31m[ ! ] Nenhuma conta logada foi detectada.\033[0m")
 
             except Exception as e:
                 print(f"\033[1;31m[ Shouko.dev ] - Erro Crítico: {e}\033[0m")
             
-            input("\n\033[1;32mPressione Enter para voltar...\033[0m")
+            input("\n\033[1;32mPressione Enter para voltar ao menu...\033[0m")
             continue
         elif setup_type == "3":
             print("\n\033[1;33m[ Shouko.dev ] - Escaneando clones no VMOS (Modo Root)...\033[0m")

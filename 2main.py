@@ -1310,80 +1310,64 @@ def main():
 
         elif setup_type == "2":
             try:
-                # 1. Chama o menu de login e recebe os pacotes e o nome do SET
+                # 1. Login e obtenção dos pacotes
                 packages, current_set_name = menu_login_opcoes()
-                
-                if not packages:
-                    continue
+                if not packages: continue
 
-                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Buscando IDs do {current_set_name}...\033[0m")
-                time.sleep(2.0)
-
-                # Caminho do arquivo baixado do seu GitHub no início do script
+                print(f"\n\033[1;32m[ Shouko.dev ] - Login concluído. Configurando ambiente...\033[0m")
                 temp_rfld = "/sdcard/Download/Configuration.rfld"
-
-                # 2. Extração de User IDs e Configuração de Pastas/Arquivos
-                print(f"\033[93m[ Shouko.dev ] - Extraindo IDs e configurando Workspaces...\033[0m")
                 accounts = []
 
+                # 2. Configura Workspaces e IDs
                 for package_name in packages:
-                    # --- CRIAÇÃO DA ESTRUTURA RAGESPLOIT ---
-                    # Caminho exato que você pediu
                     ragesploit_dir = f"/storage/emulated/0/Android/data/{package_name}/files/gloop/external/Workspace/Ragesploit/Auto Farm"
-                    
-                    # Cria as pastas via Root
                     os.system(f"su -c 'mkdir -p \"{ragesploit_dir}\"'")
-                    
-                    # Instala o arquivo de configuração baixado do GitHub
                     if os.path.exists(temp_rfld):
                         os.system(f"su -c 'cp \"{temp_rfld}\" \"{ragesploit_dir}/Configuration.rfld\"'")
                         os.system(f"su -c 'chmod 777 \"{ragesploit_dir}/Configuration.rfld\"'")
-                        print(f"\033[90m[ ✓ ] Configuração Ragesploit aplicada em {package_name}\033[0m")
-                    else:
-                        print(f"\033[1;33m[ ! ] Aviso: Configuration.rfld não encontrado em {temp_rfld}\033[0m")
 
-                    # --- EXTRAÇÃO DE USER ID ---
                     file_path = f'/data/data/{package_name}/files/appData/LocalStorage/appStorage.json'
-                    try:
-                        user_id = FileManager.find_userid_from_file(file_path)
-                        if user_id and user_id != "-1":
-                            accounts.append((package_name, user_id))
-                            print(f"\033[96m[ ✓ ] ID Extraído: {package_name} -> {user_id}\033[0m")
-                        else:
-                            print(f"\033[1;31m[ ✗ ] Falha: UserId não encontrado em {package_name}\033[0m")
-                    except Exception as e:
-                        print(f"\033[1;31m[ ! ] Erro ao ler {package_name}: {e}\033[0m")
+                    user_id = FileManager.find_userid_from_file(file_path)
+                    if user_id and user_id != "-1":
+                        accounts.append((package_name, user_id))
 
-                # 3. Salva os IDs e aplica o Link de Servidor Privado (Deep Link)
+                # 3. Processo de captura da Key (Apenas para o primeiro Clone)
                 if accounts:
                     FileManager.save_accounts(accounts)
                     
-                    # CONFIGURAÇÃO DO LINK PRIVADO (ENTRA DIRETO)
-                    # PlaceID do Adopt Me e o código final do seu link de share
                     place_id = "920587237"
                     link_code = "90856ea1bf5ed54785ce8c39ee168245"
-                    
-                    # Formato nativo roblox:// pula o navegador e entra direto no servidor privado
                     direct_link = f"roblox://placeId={place_id}&linkCode={link_code}"
                     
-                    print(f"\n\033[1;35m[ Shouko.dev ] - Aplicando Link Direto ao Servidor Privado...\033[0m")
+                    main_package = accounts[0][0]
+                    FileManager.save_server_links([(main_package, direct_link)])
                     
-                    # Associa o link direto a todos os pacotes das contas encontradas
-                    server_links = [(pkg, direct_link) for pkg, _ in accounts]
-                    FileManager.save_server_links(server_links)
-                    print("\033[1;32m[ ✓ ] Servidor Privado e Workspaces configurados com sucesso!\033[0m")
+                    print(f"\n\033[1;35m[ Shouko.dev ] - Iniciando {main_package} para capturar Key...\033[0m")
                     
+                    # Chama a função de launch que já discutimos
+                    launch_roblox(main_package, direct_link)
+                    
+                    # Espera um tempo para o jogo carregar e o Delta copiar o link
+                    print("\033[93m[ ⏳ ] Aguardando link do Delta ser copiado para o Clipboard (60s)...\033[0m")
+                    time.sleep(60) 
+                    
+                    # 4. CAPTURA E ENVIO PARA DISCORD
+                    link_copiado = pegar_link_delta()
+                    
+                    if "delta" in link_copiado.lower() or "linkvertise" in link_copiado.lower():
+                        print(f"\033[1;32m[ ✓ ] Link detectado: {link_copiado}\033[0m")
+                        enviar_para_discord(link_copiado)
+                    else:
+                        print("\033[1;31m[ ✗ ] Nenhum link válido encontrado no Clipboard.\033[0m")
+                    
+                    print("\033[1;32m[ ✓ ] Setup concluído e Key enviada!\033[0m")
                 else:
-                    print("\033[1;31m[ Shouko.dev ] - Nenhuma conta detectada. Verifique o login.\033[0m")
-                    input("\033[1;32mPressione Enter para voltar...\033[0m")
-                    continue
+                    print("\033[1;31m[ ! ] Nenhuma conta detectada.\033[0m")
 
             except Exception as e:
                 print(f"\033[1;31m[ Shouko.dev ] - Erro Crítico: {e}\033[0m")
-                input("\033[1;32mPressione Enter para voltar...\033[0m")
-                continue
             
-            input("\n\033[1;32m[ FINALIZADO ] Tudo pronto. Pressione Enter para voltar ao menu principal...\033[0m")
+            input("\n\033[1;32mPressione Enter para voltar...\033[0m")
             continue
         elif setup_type == "3":
             print("\n\033[1;33m[ Shouko.dev ] - Escaneando clones no VMOS (Modo Root)...\033[0m")

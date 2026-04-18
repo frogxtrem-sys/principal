@@ -1403,7 +1403,7 @@ def main():
                     accounts.append((pkg, user_id))
                     print(f"\033[1;32m[ ✓ ] {pkg} -> {user_id}\033[0m")
                 else:
-                    # print(f"\033[1;31m[ ✗ ] {pkg} -> Vazio (Logue no Roblox primeiro)\033[0m")
+                    print(f"\033[1;31m[ ✗ ] {pkg} -> Vazio (Logue no Roblox primeiro)\033[0m")
 
             if accounts:
                 FileManager.save_accounts(accounts)

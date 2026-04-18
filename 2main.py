@@ -698,7 +698,7 @@ class RobloxManager:
                 '-d', server_link
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-            time.sleep(20)
+            time.sleep(45)
             with status_lock:
                 globals()["package_statuses"][package_name]["Status"] = "\033[1;32mJoined Roblox\033[0m"
                 UIManager.update_status_table()

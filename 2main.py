@@ -205,9 +205,9 @@ workspace_paths = [f"{base_path}Workspace" for base_path in executors.values()] 
 
 # Adicione os caminhos reais dos dados dos clones
 clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
-                   "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
-                   "com.roblox.clienw", "com.roblox.clienx", "com.roblox.clienr", "com.roblox.cliens", "com.roblox.clieny",
-                   "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"
+                "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
+                "com.roblox.clienw", "com.roblox.clienx", "com.roblox.clienr", "com.roblox.cliens", "com.roblox.clieny",
+                "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"
 ]
 for pkg in clones_internos:
     workspace_paths.append(f"/data/data/{pkg}/files/workspace")
@@ -622,9 +622,9 @@ class RobloxManager:
     @staticmethod
     def get_roblox_packages():
         return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
-                "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
-                "com.roblox.clienw", "com.roblox.clienx", "com.roblox.clienr", "com.roblox.cliens", "com.roblox.clieny",
-                "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"
+            "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
+            "com.roblox.clienw", "com.roblox.clienx", "com.roblox.clienr", "com.roblox.cliens", "com.roblox.clieny",
+            "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"
         ]
 
     @staticmethod
@@ -1403,7 +1403,7 @@ def main():
                     accounts.append((pkg, user_id))
                     print(f"\033[1;32m[ ✓ ] {pkg} -> {user_id}\033[0m")
                 else:
-                    print(f"\033[1;31m[ ✗ ] {pkg} -> Vazio (Logue no Roblox primeiro)\033[0m")
+                    # print(f"\033[1;31m[ ✗ ] {pkg} -> Vazio (Logue no Roblox primeiro)\033[0m")
 
             if accounts:
                 FileManager.save_accounts(accounts)

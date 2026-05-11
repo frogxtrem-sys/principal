@@ -207,7 +207,8 @@ workspace_paths = [f"{base_path}Workspace" for base_path in executors.values()] 
 clones_internos = ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
                 "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
                 "com.roblox.clienw", "com.roblox.clienx", "com.roblox.clienr", "com.roblox.cliens", "com.roblox.clieny",
-                "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"
+                "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer", "com.roblox.cliena",
+                "com.roblox.clienb", "com.roblox.clienc", "com.roblox.cliend"
 ]
 for pkg in clones_internos:
     workspace_paths.append(f"/data/data/{pkg}/files/workspace")
@@ -624,7 +625,8 @@ class RobloxManager:
         return ["ywcw.lnu.exhl", "ub.wnjb.bzz", "ixq.vf.jlr", "srl.mvn.gv", "kxm.ak.qyfi", "tk.lisa.cqt", 
             "jpaclone.anya.lh", "jpaclone.anya.li", "jpaclone.anya.lj", "com.roblox.clienu", "com.roblox.clienv",
             "com.roblox.clienw", "com.roblox.clienx", "com.roblox.clienr", "com.roblox.cliens", "com.roblox.clieny",
-            "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer"
+            "com.roblox.clienz", "xtv.popp.kls", "kpl.mlst.nkl", "ply.oudj.tys", "lpo.mksr.wer", "com.roblox.cliena",
+            "com.roblox.clienb", "com.roblox.clienc", "com.roblox.cliend"
         ]
 
     @staticmethod

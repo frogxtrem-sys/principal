@@ -1410,7 +1410,7 @@ def main():
             if accounts:
                 FileManager.save_accounts(accounts)
                 # Link do seu VIP do Adopt Me
-                link_vip = "https://www.roblox.com/share?code=90856ea1bf5ed54785ce8c39ee168245&type=Server"
+                link_vip = "https://www.roblox.com/share?code=b264dd6c517dfb448bd73236811b677e&type=Server"
                 FileManager.save_server_links([(p, link_vip) for p, _ in accounts])
                 print("\033[1;32m\n[✓] IDs e Links salvos! Pode usar a Opção 1 agora.\033[0m")
             

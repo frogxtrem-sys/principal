@@ -1286,7 +1286,7 @@ def main():
 
                 # 2. AUTO-CONFIG: Em vez de input(), definimos o tempo automático
                 # Aqui você escolhe: 30 minutos (30 * 60)
-                f_interval = 30 * 60 
+                f_interval = 60 * 60 
                 print(f"\033[93m[ AUTO ] Force Rejoin definido para: 30 minutos\033[0m")
 
                 # 3. Inicia os clones (O motor do farm)
